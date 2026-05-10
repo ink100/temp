@@ -11,9 +11,6 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
     /// </summary>
     public class PaymentVoiceService : IPaymentVoiceService
     {
-        private const int RepeatIntervalMilliseconds = 1000;
-        private const int BeforeNotPayRepeatCount = 2;
-        private const int CancelRepeatCount = 2;
 
         private static readonly TimeSpan DuplicateWindow = TimeSpan.FromSeconds(2);
         private static readonly TimeSpan CompletedOrderRetention = TimeSpan.FromMinutes(10);
@@ -68,7 +65,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     await SpeakNicknameAsync(nickname);
                     await _speechService.PlaySoundAsync(channelVoice);
                     await _speechService.PlaySoundAsync("before_not_pay");
-                }, BeforeNotPayRepeatCount);
+                }, GetPriorUnpaidRepeatCount());
             }, "播放支付开始语音（带上次未付款）失败");
         }
 
@@ -88,7 +85,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 {
                     await SpeakNicknameAsync(nickname);
                     await _speechService.PlaySoundAsync("cancel_pay");
-                }, CancelRepeatCount);
+                }, GetPaymentCancelledRepeatCount());
             }, "播放支付取消语音失败");
         }
 
@@ -148,29 +145,65 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             }
         }
 
-        private static async Task PlayRepeatedAsync(Func<Task> playOneRound, int repeatCount)
+        private async Task PlayRepeatedAsync(Func<Task> playOneRound, int repeatCount)
         {
-            var safeRepeatCount = Math.Max(1, repeatCount);
+            var safeRepeatCount = Math.Clamp(repeatCount, 1, 20);
+            var intervalMilliseconds = GetRepeatIntervalMilliseconds();
+
             for (var i = 0; i < safeRepeatCount; i++)
             {
                 await playOneRound();
 
                 if (i < safeRepeatCount - 1)
-                    await Task.Delay(RepeatIntervalMilliseconds);
+                    await Task.Delay(intervalMilliseconds);
             }
         }
 
-        private Task SpeakNicknameAsync(string? nickname)
+        private int GetRepeatIntervalMilliseconds()
+        {
+            var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
+            var seconds = settings.VoiceRepeatIntervalSeconds <= 0 ? 1 : settings.VoiceRepeatIntervalSeconds;
+            return Math.Clamp(seconds, 1, 30) * 1000;
+        }
+
+        private int GetPriorUnpaidRepeatCount()
+        {
+            var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
+            var count = settings.PriorUnpaidVoiceRepeatCount <= 0 ? 1 : settings.PriorUnpaidVoiceRepeatCount;
+            return Math.Clamp(count, 1, 20);
+        }
+
+        private int GetPaymentCancelledRepeatCount()
+        {
+            var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
+            var count = settings.PaymentCancelledVoiceRepeatCount <= 0 ? 1 : settings.PaymentCancelledVoiceRepeatCount;
+            return Math.Clamp(count, 1, 20);
+        }
+
+        private async Task SpeakNicknameAsync(string? nickname)
         {
             if (string.IsNullOrWhiteSpace(nickname))
-            {
-                return Task.CompletedTask;
-            }
+                return;
 
-            return _ttsService.SpeakAsync(nickname.Trim());
+            try
+            {
+                // Edge TTS 是在线 TTS，网络慢时不能阻塞核心收款提示音。
+                // 2 秒内没有播出来，就跳过昵称，继续播放本地提示音。
+                await _ttsService
+                    .SpeakAsync(nickname.Trim())
+                    .WaitAsync(TimeSpan.FromSeconds(2));
+            }
+            catch (TimeoutException)
+            {
+                _log.Info($"昵称 TTS 播报超时，已跳过昵称: {nickname}");
+            }
+            catch (Exception ex)
+            {
+                _log.Info($"昵称 TTS 播报失败，已跳过昵称: {ex.Message}");
+            }
         }
 
-        private void MarkOrderCompleted(string? orderNumber)
+        public void MarkOrderCompleted(string? orderNumber)
         {
             if (string.IsNullOrWhiteSpace(orderNumber))
                 return;

@@ -97,11 +97,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     var elapsedSeconds = (currentTime - order.CreatedAt).TotalSeconds;
 
                     var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
-                    var timeoutSeconds = Math.Clamp(settings.ScanTimeoutSeconds <= 0 ? 10 : settings.ScanTimeoutSeconds, 1, 3600);
+                    var timeoutSeconds = Math.Clamp(settings.ScanTimeoutSeconds <= 0 ? 120 : settings.ScanTimeoutSeconds, 1, 3600);
                     var notifyIntervalSeconds = Math.Clamp(settings.ScanNotPayNotifyIntervalSeconds <= 0 ? 10 : settings.ScanNotPayNotifyIntervalSeconds, 1, timeoutSeconds);
 
                     // 按设置的间隔提醒“扫码未支付”，到达超时时间后停止提醒并进入超时取消。
-                    if (settings.IsScanNotPayVoiceEnabled && elapsedSeconds >= notifyIntervalSeconds && elapsedSeconds <= timeoutSeconds)
+                    if (settings.IsScanNotPayVoiceEnabled && elapsedSeconds >= notifyIntervalSeconds && elapsedSeconds < timeoutSeconds)
                     {
                         var maxNotifyCount = Math.Clamp(settings.ScanNotPayVoiceRepeatCount <= 0 ? 1 : settings.ScanNotPayVoiceRepeatCount, 1, 20);
                         CheckAndNotify(order, elapsedSeconds, notifyIntervalSeconds, maxNotifyCount);

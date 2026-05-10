@@ -44,5 +44,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         /// <param name="orderNumber">订单号（用于在订单已成功/取消后跳过过期提示，可选）</param>
         Task PlayScanNotPayAsync(string? orderNumber = null);
+
+        /// <summary>
+        /// 标记订单已经完成，用于跳过队列中尚未播放的过期“扫码未支付”提示。
+        /// </summary>
+        /// <param name="orderNumber">订单号</param>
+        void MarkOrderCompleted(string? orderNumber);
     }
 }

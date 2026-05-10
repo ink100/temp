@@ -281,7 +281,14 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             return transaction.TransactionTime == default ? transaction.CreatedAt : transaction.TransactionTime;
         }
 
-        private static bool IsPriorUnpaid(TransactionRecord transaction, DateTime currentTime)
+        private int GetScanTimeoutSeconds()
+        {
+            var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
+            var seconds = settings.ScanTimeoutSeconds <= 0 ? 120 : settings.ScanTimeoutSeconds;
+            return Math.Clamp(seconds, 1, 3600);
+        }
+
+        private bool IsPriorUnpaid(TransactionRecord transaction, DateTime currentTime)
         {
             if (transaction.Status == PaymentStatus.Success)
                 return false;
@@ -290,15 +297,15 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 ? transaction.CreatedAt
                 : GetTransactionSortTime(transaction);
 
-            return (currentTime - baseTime).TotalSeconds >= 120;
+            return (currentTime - baseTime).TotalSeconds >= GetScanTimeoutSeconds();
         }
 
-        private static bool IsPriorUnpaid(TransactionRecordDbo transaction, DateTime currentTime)
+        private bool IsPriorUnpaid(TransactionRecordDbo transaction, DateTime currentTime)
         {
             if (transaction.Status == PaymentStatus.Success)
                 return false;
 
-            return (currentTime - transaction.TransactionTime).TotalSeconds >= 120;
+            return (currentTime - transaction.TransactionTime).TotalSeconds >= GetScanTimeoutSeconds();
         }
 
         private static PaymentEventArgs BuildPaymentEventArgs(

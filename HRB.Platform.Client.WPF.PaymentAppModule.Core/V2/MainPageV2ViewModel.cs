@@ -242,8 +242,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             _ = _httpNotificationService.SendPaymentNotificationAsync(args);
 
             var nickname = ShouldPlayNickname(args) ? args.DisplayName : null;
+            var settings = _appContext.CurrentSettings;
 
-            if (result.HasPriorUnpaid)
+            if (result.HasPriorUnpaid && settings.IsPriorUnpaidVoiceEnabled)
                 _ = _voiceService.PlayPaymentStartedWithBeforeNotPayAsync(args.PaymentChannel, nickname, args.OrderNumber);
             else
                 _ = _voiceService.PlayPaymentStartedAsync(args.PaymentChannel, nickname, args.OrderNumber);
@@ -253,12 +254,18 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
         private async void OnPaymentCancelled(PaymentEventArgs args)
         {
             var result = await _transactionService.HandlePaymentCancelledAsync(args);
+
+            // 不管是否静默取消，都要标记订单完成。
+            // 这样可以跳过队列里还没来得及播放的“扫码未支付”旧提示。
+            _voiceService.MarkOrderCompleted(args.OrderNumber);
+
             if (!result.StateChanged)
                 return;
 
             _ = _httpNotificationService.SendPaymentNotificationAsync(args);
 
-            if (!result.IsSilentCancel)
+            var settings = _appContext.CurrentSettings;
+            if (!result.IsSilentCancel && settings.IsPaymentCancelledVoiceEnabled)
             {
                 var nickname = ShouldPlayNickname(args) ? args.DisplayName : null;
                 _ = _voiceService.PlayPaymentCancelledAsync(nickname, args.OrderNumber);
@@ -268,11 +275,18 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
         private async void OnPaymentSuccess(PaymentEventArgs args)
         {
             var result = await _transactionService.HandlePaymentSuccessAsync(args);
+
+            // 先标记订单完成，防止旧的扫码未支付语音排队后误播。
+            _voiceService.MarkOrderCompleted(args.OrderNumber);
+
             if (!result.StateChanged)
                 return;
 
             _ = _httpNotificationService.SendPaymentNotificationAsync(args);
-            _ = _voiceService.PlayPaymentSuccessAsync(args.Amount, args.PaymentChannel, args.OrderNumber);
+
+            var settings = _appContext.CurrentSettings;
+            if (settings.IsPaymentSuccessVoiceEnabled)
+                _ = _voiceService.PlayPaymentSuccessAsync(args.Amount, args.PaymentChannel, args.OrderNumber);
         }
 
         private bool ShouldPlayNickname(PaymentEventArgs args)
@@ -292,11 +306,19 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
 
         private void OnOrderNotification(object? sender, OrderNotificationEventArgs e)
         {
+            var settings = _appContext.CurrentSettings;
+            if (!settings.IsScanNotPayVoiceEnabled)
+                return;
+
             _ = _voiceService.PlayScanNotPayAsync(e.OrderNumber);
         }
 
         private void OnOrderTimeout(object? sender, OrderTimeoutEventArgs e)
         {
+            // 超时取消是静默取消，也要先标记订单完成。
+            // 否则如果“扫码未支付”语音已经进入播放队列，后面仍可能误播。
+            _voiceService.MarkOrderCompleted(e.OrderNumber);
+
             _eventPublisher.PublishPaymentCancelled(new PaymentEventArgs
             {
                 OrderNumber = e.OrderNumber,

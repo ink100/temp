@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../Build/MsBuildFiles/Common.Header.props" />
+
+  <PropertyGroup>
+    <TargetFramework>$(CurrentWpfFrameworkTargetFramework)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MsBuildFiles/Common.Footer.props" />
+  <Import Project="../../Build/MsBuildFiles/Common.Imports.targets" />
+  <ItemGroup>
+    <None Remove="Assets\Sound\alipay_pay.mp3" />
+    <None Remove="Assets\Sound\before_not_pay.mp3" />
+    <None Remove="Assets\Sound\scan_not_pay.mp3" />
+    <None Remove="Assets\Sound\vx_pay.mp3" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="HRB.Platform.Client.WPF.Core.Packages" Version="$(PlatformCorePackageReleaseNumbers)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <!--<PackageReference Include="Prism.Core" Version="9.0.537" />
+    <PackageReference Include="System.Management" Version="10.0.0" />
+    <PackageReference Include="Lanymy.Common.All" Version="0.17.5" />-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Sound\alipay_pay.mp3" />
+    <Resource Include="Assets\Sound\before_not_pay.mp3" />
+    <Resource Include="Assets\Sound\cancel_pay.mp3" />
+    <Resource Include="Assets\Sound\dot.mp3" />
+    <Resource Include="Assets\Sound\eight.mp3" />
+    <Resource Include="Assets\Sound\five.mp3" />
+    <Resource Include="Assets\Sound\four.mp3" />
+    <Resource Include="Assets\Sound\hundred.mp3" />
+    <Resource Include="Assets\Sound\nine.mp3" />
+    <Resource Include="Assets\Sound\one.mp3" />
+    <Resource Include="Assets\Sound\one_bilion.mp3" />
+    <Resource Include="Assets\Sound\pay.mp3" />
+    <Resource Include="Assets\Sound\scan_not_pay.mp3" />
+    <Resource Include="Assets\Sound\seven.mp3" />
+    <Resource Include="Assets\Sound\six.mp3" />
+    <Resource Include="Assets\Sound\ten.mp3" />
+    <Resource Include="Assets\Sound\ten_thousand.mp3" />
+    <Resource Include="Assets\Sound\thousand.mp3" />
+    <Resource Include="Assets\Sound\three.mp3" />
+    <Resource Include="Assets\Sound\two.mp3" />
+    <Resource Include="Assets\Sound\vx_pay.mp3" />
+    <Resource Include="Assets\Sound\wechat_pay.mp3" />
+    <Resource Include="Assets\Sound\yuan.mp3" />
+    <Resource Include="Assets\Sound\zero.mp3" />
+    <Resource Include="Assets\Sound\zfb_pay.mp3" />
+  </ItemGroup>
+
+</Project>

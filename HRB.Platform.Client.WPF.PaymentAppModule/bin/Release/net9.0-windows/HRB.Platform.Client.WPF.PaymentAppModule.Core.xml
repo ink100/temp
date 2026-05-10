@@ -1,0 +1,3298 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HRB.Platform.Client.WPF.PaymentAppModule.Core</name>
+    </assembly>
+    <members>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.ChannelStatusChangedEventArgs">
+            <summary>
+            渠道状态变化事件参数
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.ChannelStatus">
+            <summary>
+            渠道运行状态
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.ChannelStatus.Unavailable">
+            <summary>插件进程未就绪</summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.ChannelStatus.Available">
+            <summary>插件进程就绪，业务未启用</summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.ChannelStatus.Enabling">
+            <summary>业务启用中（正在配置/连接）</summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.ChannelStatus.Running">
+            <summary>业务已启用，正常工作</summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.ChannelStatus.Disabled">
+            <summary>业务已禁用</summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.ChannelStatus.Faulted">
+            <summary>出错</summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.ChannelSettingItem">
+            <summary>
+            渠道设置项定义
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.ChannelSettingItem.IsToggleOn">
+            <summary>
+            Toggle 类型的便捷布尔访问（供 XAML DataTrigger 绑定，避免 object? 装箱问题）
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.SettingType">
+            <summary>
+            设置项类型
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.PaymentStartedResult">
+            <summary>
+            支付开始处理结果 — 供 ViewModel 决定语音/通知行为
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.PaymentStartedResult.AlreadyExists">
+            <summary>订单已存在（重复推送），无需新处理</summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.PaymentStartedResult.HasPriorUnpaid">
+            <summary>该用户有上一笔未支付订单</summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.PaymentStartedResult.PriorCancelledPayment">
+            <summary>因重复扫码被静默取消的上一笔订单，调用方可用于补发通知</summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.PaymentStartedResult.Transaction">
+            <summary>新创建的交易记录（AlreadyExists=true 时为 null）</summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.PaymentCompletedResult">
+            <summary>
+            支付完成处理结果 — 供 ViewModel 决定语音/通知行为
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.PaymentCompletedResult.IsSilentCancel">
+            <summary>是否为静默取消（超时/重复扫码），不播报</summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.PaymentCompletedResult.StateChanged">
+            <summary>状态是否实际发生了变更</summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.IChannelSettingsContributor">
+            <summary>
+            插件向设置页贡献配置项。
+            设置页通过此接口动态收集各渠道的设置项，无需硬编码。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.IChannelSettingsContributor.GetSettings">
+            <summary>
+            返回该渠道的设置项列表
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.IChannelSettingsContributor.OnSettingChangedAsync(System.String,System.Object)">
+            <summary>
+            设置项变更回调
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.IPaymentChannelPlugin">
+            <summary>
+            支付渠道插件契约。
+            每个支付渠道（支付宝、微信）实现此接口，通过 DI 注册到主程序。
+            主程序不感知具体渠道逻辑，只通过此接口交互。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.IPaymentChannelPlugin.IsAvailable">
+            <summary>
+            插件进程是否就绪（由看门狗管理，主程序只读）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.IPaymentChannelPlugin.IsEnabled">
+            <summary>
+            业务是否已启用（用户在设置中开启）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.IPaymentChannelPlugin.InitializeAsync(System.Threading.CancellationToken)">
+            <summary>
+            消息中心连接就绪后调用，订阅事件总线、发送初始命令等
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.IPaymentChannelPlugin.EnableAsync">
+            <summary>
+            启用渠道业务（用户在设置页开启）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.IPaymentChannelPlugin.DisableAsync">
+            <summary>
+            禁用渠道业务（用户在设置页关闭）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions.IPaymentChannelPlugin.ShutdownAsync">
+            <summary>
+            主程序退出时调用，发送业务停止命令（不杀进程）
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration.CustomAlipayConfig.GatewayUrl">
+            <summary>
+            支付宝网关
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration.PluginSettings">
+            <summary>
+            插件配置
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration.PluginSettings.PluginRootPath">
+            <summary>
+            插件根目录
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration.PluginSettings.MessageServicePath">
+            <summary>
+            总服务路径（必须最先启动）
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration.PluginSettings.AlipayShellPath">
+            <summary>
+            支付宝通知插件路径
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration.PluginSettings.WeChatShellPath">
+            <summary>
+            微信通知插件路径
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration.PluginSettings.MessageServiceExe">
+            <summary>
+            消息中心插件执行exe
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration.PluginSettings.WeChatShellExe">
+            <summary>
+            微信模块执行exe
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration.PluginSettings.AlipayShellExe">
+            <summary>
+            支付宝模块执行exe
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration.PluginSettings.WeChatExe">
+            <summary>
+            微信Exe
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration.PluginSettings.ValidatePlugins">
+            <summary>
+            验证所有插件文件是否存在
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls.LoadingOverlayContainer">
+            <summary>
+            全局加载遮罩层容器控件
+            </summary>
+            <summary>
+            LoadingOverlayContainer
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls.LoadingOverlayContainer.Show(System.String)">
+            <summary>
+            显示遮罩层
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls.LoadingOverlayContainer.Hide">
+            <summary>
+            隐藏遮罩层
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls.LoadingOverlayContainer.UpdateMessage(System.String)">
+            <summary>
+            更新消息
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls.LoadingOverlayContainer.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls.MarkdownViewer">
+            <summary>
+            Markdown查看器控件
+            支持基本的Markdown语法渲染
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls.NotificationContainer">
+            <summary>
+            NotificationContainer
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls.NotificationContainer.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls.NotificationControl">
+            <summary>
+            NotificationControl
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls.NotificationControl.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Converters.BooleanToVisibilityConverter">
+            <summary>
+            布尔值转可见性转换器
+            将 true 转换为 Visible，false 转换为 Collapsed
+            支持 Inverse 参数进行反向转换
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Converters.BooleanToVisibilityConverter.Convert(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            正向转换：布尔值转可见性
+            </summary>
+            <param name="value">输入的布尔值</param>
+            <param name="targetType">目标类型</param>
+            <param name="parameter">转换参数（"Inverse" 表示反向转换）</param>
+            <param name="culture">区域信息</param>
+            <returns>Visibility 枚举值</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Converters.BooleanToVisibilityConverter.ConvertBack(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            反向转换：可见性转布尔值
+            </summary>
+            <param name="value">输入的 Visibility 值</param>
+            <param name="targetType">目标类型</param>
+            <param name="parameter">转换参数（"Inverse" 表示反向转换）</param>
+            <param name="culture">区域信息</param>
+            <returns>布尔值</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Converters.InverseBooleanConverter">
+            <summary>
+            布尔值取反转换器
+            将 true 转换为 false，false 转换为 true
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Converters.InverseBooleanConverter.Convert(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            正向转换：布尔值取反
+            </summary>
+            <param name="value">输入的布尔值</param>
+            <param name="targetType">目标类型</param>
+            <param name="parameter">转换参数</param>
+            <param name="culture">区域信息</param>
+            <returns>取反后的布尔值</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Converters.InverseBooleanConverter.ConvertBack(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            反向转换：布尔值取反
+            </summary>
+            <param name="value">输入的布尔值</param>
+            <param name="targetType">目标类型</param>
+            <param name="parameter">转换参数</param>
+            <param name="culture">区域信息</param>
+            <returns>取反后的布尔值</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.AlipayAppInfoModel">
+            <summary>
+            支付宝App信息（数据库实体，存储加密数据）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.AlipayAppInfoModel.Id">
+            <summary>
+            主键ID
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.AlipayAppInfoModel.LoginAccount">
+            <summary>
+            登录账号（明文存储，用作唯一标识）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.AlipayAppInfoModel.AppId">
+            <summary>
+            应用ID（加密存储）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.AlipayAppInfoModel.AlipayPublicKey">
+            <summary>
+            支付宝公钥（加密存储）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.AlipayAppInfoModel.AppPublicKey">
+            <summary>
+            APP公钥（加密存储）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.AlipayAppInfoModel.AppPrivateKey">
+            <summary>
+            APP私钥（加密存储）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.AlipayAppInfoModel.CreateDateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.AlipayAppInfoModel.LastUpdateDateTime">
+            <summary>
+            最后更新时间
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConfigDbo">
+            <summary>
+            消息通知配置数据库模型
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConfigDbo.Id">
+            <summary>
+            主键ID
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConfigDbo.IsEnabled">
+            <summary>
+            是否启用通知
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConfigDbo.NotificationUrl">
+            <summary>
+            通知接口URL
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConfigDbo.CreatedAt">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConfigDbo.LastUpdatedAt">
+            <summary>
+            最后更新时间
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConfigDbo.Remarks">
+            <summary>
+            备注
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConsentDbo">
+            <summary>
+            消息通知知情同意书记录数据库模型
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConsentDbo.Id">
+            <summary>
+            主键ID
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConsentDbo.ConsentTime">
+            <summary>
+            同意时间
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConsentDbo.IsAgreed">
+            <summary>
+            是否同意
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConsentDbo.MachineId">
+            <summary>
+            机器标识
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConsentDbo.Remarks">
+            <summary>
+            备注信息
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.PluginLogModel">
+            <summary>
+            插件日志实体
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.PluginLogModel.Id">
+            <summary>
+            主键ID
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.PluginLogModel.PluginName">
+            <summary>
+            插件名称
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.PluginLogModel.OperationType">
+            <summary>
+            操作类型（Start, Stop, Error, Info）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.PluginLogModel.Message">
+            <summary>
+            日志消息
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.PluginLogModel.ProcessId">
+            <summary>
+            进程ID
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.PluginLogModel.IsSuccess">
+            <summary>
+            是否成功
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.PluginLogModel.ExceptionMessage">
+            <summary>
+            异常信息
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.PluginLogModel.CreateDateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo">
+            <summary>
+            交易记录数据库模型（LiteDB）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo.Id">
+            <summary>
+            主键ID
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo.TransactionTime">
+            <summary>
+            交易时间
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo.OrderNumber">
+            <summary>
+            订单号
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo.DisplayName">
+            <summary>
+            用户昵称
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo.PaymentChannel">
+            <summary>
+            支付渠道（存储为整数）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo.Amount">
+            <summary>
+            金额
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo.Remarks">
+            <summary>
+            备注
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo.CreatedAt">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo.Status">
+            <summary>
+            支付状态（存储为整数）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo.FromModel(HRB.Payment.Core.Models.TransactionRecord)">
+            <summary>
+            从业务模型转换为数据库模型
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo.ToModel">
+            <summary>
+            转换为业务模型
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.UserAgreementDbo">
+            <summary>
+            用户同意条款记录数据库模型
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.UserAgreementDbo.Id">
+            <summary>
+            主键ID
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.UserAgreementDbo.FirstUseTime">
+            <summary>
+            首次使用时间
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.UserAgreementDbo.AgreementTime">
+            <summary>
+            确认时间
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.UserAgreementDbo.IsAgreed">
+            <summary>
+            是否同意条款
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.UserAgreementDbo.Version">
+            <summary>
+            条款版本号
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.UserAgreementDbo.MachineId">
+            <summary>
+            机器标识(用于识别不同设备)
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.UserAgreementDbo.Remarks">
+            <summary>
+            备注信息
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsAlipayEnabled">
+            <summary>
+            是否启用支付宝支付
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsWeChatEnabled">
+            <summary>
+            是否启用微信支付
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.UseNewPluginLifecycleMode">
+            <summary>
+            插件生命周期是否启用新模式（看门狗协同模式）
+            false: 旧模式（主程序主导）
+            true: 新模式（逐步切换）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.FontSize">
+            <summary>
+            字体大小
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsAlipayNicknameReminderEnabled">
+            <summary>
+            支付宝未支付昵称提醒播报
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsWeChatNicknameReminderEnabled">
+            <summary>
+            微信未支付昵称提醒播报
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsAutoStartEnabled">
+            <summary>
+            是否启用开机自启动
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.StoreName">
+            <summary>
+            店铺名称
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.MaintenanceContact">
+            <summary>
+            维护人员联系方式
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.EnvironmentSettings.USER_AGREEMENT_VERSION">
+            <summary>
+            用户协议版本号 - 更新此版本号将要求用户重新同意条款
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Extensions.DialogServiceExtensions">
+            <summary>
+            DialogService 扩展方法
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Extensions.DialogServiceExtensions.ShowInfo(Prism.Dialogs.IDialogService,System.String,System.String,System.Action{Prism.Dialogs.IDialogResult})">
+            <summary>
+            显示信息对话框
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Extensions.DialogServiceExtensions.ShowWarning(Prism.Dialogs.IDialogService,System.String,System.String,System.Action{Prism.Dialogs.IDialogResult})">
+            <summary>
+            显示警告对话框
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Extensions.DialogServiceExtensions.ShowError(Prism.Dialogs.IDialogService,System.String,System.String,System.Action{Prism.Dialogs.IDialogResult})">
+            <summary>
+            显示错误对话框
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Extensions.DialogServiceExtensions.ShowConfirm(Prism.Dialogs.IDialogService,System.String,System.String,System.Action{Prism.Dialogs.IDialogResult})">
+            <summary>
+            显示确认对话框
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Extensions.DialogServiceExtensions.ShowSuccess(Prism.Dialogs.IDialogService,System.String,System.String,System.Action{Prism.Dialogs.IDialogResult})">
+            <summary>
+            显示成功对话框
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.GlobalSettings.IsAlipayShellStarted">
+            <summary>
+            支付宝插件壳是否已启动的标志
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.GlobalSettings.IsAlipayPoolingStarted">
+            <summary>
+            支付宝轮询是否已启动的标志
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.DataMaskingHelper">
+            <summary>
+            数据脱敏工具类
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.DataMaskingHelper.MaskOrderNumber(System.String)">
+            <summary>
+            脱敏订单号
+            使用MD5哈希值完全替代真实订单号
+            </summary>
+            <param name="orderNumber">原始订单号</param>
+            <returns>脱敏后的订单号（MD5哈希值）</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.DataMaskingHelper.MaskNickname(System.String)">
+            <summary>
+            脱敏用户昵称
+            中文：保留首尾各1个字符，中间用星号替代
+            英文/数字：保留前2位和后2位，中间用星号替代
+            </summary>
+            <param name="nickname">原始昵称</param>
+            <returns>脱敏后的昵称</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.DataMaskingHelper.MaskUserId(System.String)">
+            <summary>
+            脱敏用户ID
+            使用MD5哈希值完全替代真实ID
+            </summary>
+            <param name="userId">原始用户ID</param>
+            <returns>脱敏后的用户ID（MD5哈希值）</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin">
+             <summary>
+             支付宝渠道插件。
+             封装所有支付宝插件的业务命令和事件处理，主程序通过 IPaymentChannelPlugin 接口与之交互。
+            
+             命令（主程序 -> 插件进程，通过 UIToAPModuleEvent）：
+               "AppStarted"        — 握手：通知插件主程序已就绪
+               "StartAlipayPolling" — 开始收款轮询
+               "StopAlipayPolling"  — 停止收款轮询
+               "Enable"             — 启用（触发插件端配置/授权流程）
+               "Disable"            — 禁用
+            
+             事件（插件进程 -> 主程序，通过 APModuleToUIEvent）：
+               "AppStarted"      — 握手响应：插件已就绪
+               "PollingStarted"  — 轮询已启动
+               "PollingStoped"   — 轮询已停止（原始拼写）
+               "Success"         — 启用/配置成功
+               "GetInfoSuccess"  — 获取配置成功
+               "GetInfo"         — 正在获取配置
+               "GetInfoFail"     — 获取配置失败
+               "Disable"         — 已禁用
+               "CanceledLogin"   — 用户取消登录
+               "NeedConfig"      — 需要先配置支付宝
+             </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin.IsAvailable">
+            <summary>
+            插件进程是否就绪（来自 IPluginRuntimeStatusService，只读）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin.IsEnabled">
+            <summary>
+            业务是否已启用（由插件事件驱动）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin.IsPolling">
+            <summary>
+            轮询是否正在运行
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin.InitializeAsync(System.Threading.CancellationToken)">
+            <summary>
+            初始化插件：订阅事件总线，监听插件进程状态变化。
+            如果插件进程已就绪，立即发送握手命令。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin.EnableAsync">
+            <summary>
+            启用支付宝（发送 Enable 命令，触发插件端配置/授权流程）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin.DisableAsync">
+            <summary>
+            禁用支付宝（发送停止轮询 + 禁用命令）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin.ShutdownAsync">
+            <summary>
+            主程序退出时调用，停止轮询。不杀进程。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin.OnPluginEvent(System.String)">
+            <summary>
+            处理支付宝插件发来的事件
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin.OnRuntimeStatusChanged(System.Object,System.EventArgs)">
+            <summary>
+            插件进程状态变化回调（由 IPluginRuntimeStatusService 触发）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin.SendAppStartWithRetry">
+            <summary>
+            发送握手命令（AppStarted），每 3 秒重试直到插件响应或进程消失
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipaySettingsContributor">
+             <summary>
+             支付宝渠道设置项贡献者。
+             向设置页提供支付宝相关的配置项，设置页通过 IChannelSettingsContributor 动态收集并渲染。
+            
+             贡献的设置项：
+               - alipay_enabled           : 支付宝启用开关（Toggle）
+               - alipay_nickname_reminder : 未支付昵称提醒播报开关（Toggle）
+             </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipaySettingsContributor.Keys">
+            <summary>
+            设置项 Key 常量，供 ViewModel 和插件内部引用
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipaySettingsContributor.GetSettings">
+            <summary>
+            返回支付宝渠道的设置项列表
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipaySettingsContributor.OnSettingChangedAsync(System.String,System.Object)">
+            <summary>
+            设置项变更回调。由设置页 ViewModel 在用户操作时调用。
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatChannelPlugin">
+             <summary>
+             微信渠道插件。
+             封装所有微信插件的业务状态和事件处理，主程序通过 IPaymentChannelPlugin 接口与之交互。
+            
+             事件交互（通过消息中心）：
+               发送 GetVXStatusRequestEvent     — 查询 VXModule 插件工作状态
+               发送 StartVXModuleEvent(pid)     — 命令 VXModule 注入指定微信进程
+               接收 GetVXStatusAnswerEvent      — VXModule 回报工作状态 (VXStatusEto.IsWork)
+            
+             内部委托 WeChatMonitor 执行 2 秒轮询循环（进程检测/登录检测/注入）。
+             不启动/杀任何进程 — 进程管理完全由看门狗负责。
+             </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatChannelPlugin.IsAvailable">
+            <summary>
+            VXModule.Shell 进程是否就绪（来自 IPluginRuntimeStatusService，只读）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatChannelPlugin.IsEnabled">
+            <summary>
+            业务是否已启用（监控循环运行中且插件已确认工作）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatChannelPlugin.InitializeAsync(System.Threading.CancellationToken)">
+            <summary>
+            初始化插件：订阅事件，监听进程状态变化。
+            如果设置中微信已启用，自动启动监控循环。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatChannelPlugin.EnableAsync">
+            <summary>
+            启用微信渠道：启动监控循环
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatChannelPlugin.DisableAsync">
+            <summary>
+            禁用微信渠道：停止监控循环
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatChannelPlugin.ShutdownAsync">
+            <summary>
+            主程序退出时调用，停止监控。不杀进程。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatChannelPlugin.OnVXStatusAnswer(HRB.Payment.Message.Core.BusEvents.VXStatusEto)">
+            <summary>
+            VXModule 插件回报工作状态
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatChannelPlugin.OnRuntimeStatusChanged(System.Object,System.EventArgs)">
+            <summary>
+            插件进程状态变化回调（由 IPluginRuntimeStatusService 触发）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatChannelPlugin.OnMonitorStateChanged(HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitorState)">
+            <summary>
+            WeChatMonitor 状态回调
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitor">
+             <summary>
+             微信进程监控器 — 从 MainPageViewModel.UnifiedWeChatMonitoring 抽出。
+             2秒轮询循环，职责：
+               1. 检测 WeChat.exe 是否运行
+               2. 检测微信是否已登录
+               3. 检测 VXModule.Shell 是否运行
+               4. 条件满足时发送 StartVXModuleEvent 注入微信进程
+               5. 通过 GetVXStatusRequestEvent 查询插件工作状态
+            
+             不启动/杀任何进程 — 进程管理完全由看门狗负责。
+             </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitor.PluginIsWorking">
+            <summary>
+            VXModule 插件是否已确认工作（由外部通过 SetPluginWorking 更新）
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitor.StateChanged">
+            <summary>
+            监控状态变化回调
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitor.ResetPluginState">
+            <summary>
+            重置插件工作状态（进程消失/PID变化时调用）
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitorState">
+            <summary>
+            监控器观测到的状态
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitorState.WeChatNotRunning">
+            <summary>WeChat.exe 未运行</summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitorState.WaitingForLogin">
+            <summary>微信未登录，等待用户登录</summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitorState.WaitingForPlugin">
+            <summary>VXModule.Shell 未运行，等待看门狗启动</summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitorState.Injecting">
+            <summary>正在注入微信进程</summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatSettingsContributor">
+             <summary>
+             微信渠道设置项贡献者。
+             向设置页提供微信相关的配置项，设置页通过 IChannelSettingsContributor 动态收集并渲染。
+            
+             贡献的设置项：
+               - wechat_enabled           : 微信启用开关（Toggle）
+               - wechat_nickname_reminder : 未支付昵称提醒播报开关（Toggle）
+             </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.SaveAlipayConfig(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.AlipayAppInfoModel)">
+            <summary>
+            保存或更新支付宝配置
+            </summary>
+            <param name="config">配置信息</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.SaveTestAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TestDemoDbo)">
+            <summary>
+            保存成绩
+            </summary>
+            <param name="dbo"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetAllTestAsync">
+            <summary>
+            获取成绩列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetAlipayConfigByAccount(System.String)">
+            <summary>
+            根据登录账号获取配置
+            </summary>
+            <param name="loginAccount">登录账号</param>
+            <returns>配置信息，不存在返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetAllAlipayConfigs">
+            <summary>
+            获取所有支付宝配置
+            </summary>
+            <returns>配置列表</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.DeleteAlipayConfig(System.String)">
+            <summary>
+            删除支付宝配置
+            </summary>
+            <param name="loginAccount">登录账号</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.AlipayConfigExists(System.String)">
+            <summary>
+            检查配置是否存在
+            </summary>
+            <param name="loginAccount">登录账号</param>
+            <returns>是否存在</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.AddPluginLog(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.PluginLogModel)">
+            <summary>
+            添加插件日志
+            </summary>
+            <param name="log">日志信息</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetPluginLogs(System.String,System.Int32)">
+            <summary>
+            获取指定插件的日志
+            </summary>
+            <param name="pluginName">插件名称</param>
+            <param name="limit">获取数量限制</param>
+            <returns>日志列表</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetAllPluginLogs(System.Int32)">
+            <summary>
+            获取所有插件日志
+            </summary>
+            <param name="limit">获取数量限制</param>
+            <returns>日志列表</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.CleanOldPluginLogs(System.Int32)">
+            <summary>
+            清理指定天数之前的日志
+            </summary>
+            <param name="days">保留天数</param>
+            <returns>删除的日志数量</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetRecentTransactionsAsync(System.Int32)">
+            <summary>
+            获取最近的交易记录
+            </summary>
+            <param name="count">获取数量</param>
+            <returns>交易记录列表</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetTransactionsByDateRangeAsync(System.DateTime,System.DateTime)">
+            <summary>
+            根据日期范围获取交易记录
+            </summary>
+            <param name="startDate">开始日期</param>
+            <param name="endDate">结束日期</param>
+            <returns>交易记录列表</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetAllTransactionsAsync">
+            <summary>
+            获取所有交易记录
+            </summary>
+            <returns>交易记录列表</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetTransactionByIdAsync(System.Int32)">
+            <summary>
+            根据ID获取交易记录
+            </summary>
+            <param name="id">交易ID</param>
+            <returns>交易记录，不存在返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetTransactionByOrderAsync(System.String)">
+            <summary>
+            根据订单号获取交易记录
+            </summary>
+            <param name="orderNumber">订单号</param>
+            <returns>交易记录，不存在返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.AddTransactionAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo)">
+            <summary>
+            添加交易记录
+            </summary>
+            <param name="transaction">交易记录</param>
+            <returns>新记录的ID</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.UpdateTransactionAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo)">
+            <summary>
+            更新交易记录
+            </summary>
+            <param name="transaction">交易记录</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.DeleteTransactionAsync(System.Int32)">
+            <summary>
+            删除交易记录
+            </summary>
+            <param name="id">交易ID</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetTotalAmountAsync(System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            获取总金额
+            </summary>
+            <param name="startDate">开始日期（可选）</param>
+            <param name="endDate">结束日期（可选）</param>
+            <returns>总金额</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetTransactionsByUserIdAsync(System.String)">
+            <summary>
+            根据用户ID获取订单
+            </summary>
+            <param name="userId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetOrderLastOrderByUserIdAsync(System.String)">
+            <summary>
+            获取用户最新一条订单数据
+            </summary>
+            <param name="userId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.HasUserAgreedVersionAsync(System.String)">
+            <summary>
+            检查用户是否已同意指定版本的条款
+            </summary>
+            <param name="version">版本号</param>
+            <returns>是否已同意</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.SaveUserAgreementAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.UserAgreementDbo)">
+            <summary>
+            保存用户同意记录
+            </summary>
+            <param name="agreement">同意记录</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetUserAgreementAsync">
+            <summary>
+            获取用户协议记录
+            </summary>
+            <returns>协议记录，不存在返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetLatestAgreedVersionAsync">
+            <summary>
+            获取用户最新同意的版本号
+            </summary>
+            <returns>版本号，不存在返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetNotificationConfigAsync">
+            <summary>
+            获取消息通知配置
+            </summary>
+            <returns>配置信息，不存在返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.SaveNotificationConfigAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConfigDbo)">
+            <summary>
+            保存消息通知配置
+            </summary>
+            <param name="config">配置信息</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.HasNotificationConsentAsync">
+            <summary>
+            检查用户是否已同意消息通知知情同意书
+            </summary>
+            <returns>是否已同意</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.SaveNotificationConsentAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConsentDbo)">
+            <summary>
+            保存消息通知知情同意记录
+            </summary>
+            <param name="consent">同意记录</param>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.SaveTestAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TestDemoDbo)">
+            <summary>
+            保存成绩
+            </summary>
+            <param name="dbo"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetAllTestAsync">
+            <summary>
+            获取成绩列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.SaveAlipayConfig(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.AlipayAppInfoModel)">
+            <summary>
+            保存或更新支付宝配置
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetAlipayConfigByAccount(System.String)">
+            <summary>
+            根据登录账号获取配置
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetAllAlipayConfigs">
+            <summary>
+            获取所有支付宝配置
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.DeleteAlipayConfig(System.String)">
+            <summary>
+            删除支付宝配置
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.AlipayConfigExists(System.String)">
+            <summary>
+            检查配置是否存在
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.AddPluginLog(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.PluginLogModel)">
+            <summary>
+            添加插件日志
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetPluginLogs(System.String,System.Int32)">
+            <summary>
+            获取指定插件的日志
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetAllPluginLogs(System.Int32)">
+            <summary>
+            获取所有插件日志
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.CleanOldPluginLogs(System.Int32)">
+            <summary>
+            清理指定天数之前的日志
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetRecentTransactionsAsync(System.Int32)">
+            <summary>
+            获取最近的交易记录
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetTransactionsByDateRangeAsync(System.DateTime,System.DateTime)">
+            <summary>
+            根据日期范围获取交易记录
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetAllTransactionsAsync">
+            <summary>
+            获取所有交易记录
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetTransactionByIdAsync(System.Int32)">
+            <summary>
+            根据ID获取交易记录
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetTransactionByOrderAsync(System.String)">
+            <summary>
+            根据订单号获取交易记录
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.AddTransactionAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo)">
+            <summary>
+            添加交易记录
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.UpdateTransactionAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.TransactionRecordDbo)">
+            <summary>
+            更新交易记录
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.DeleteTransactionAsync(System.Int32)">
+            <summary>
+            删除交易记录
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetTotalAmountAsync(System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            获取总金额
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetTransactionsByUserIdAsync(System.String)">
+            <summary>
+            <inheritdoc/>
+            </summary>
+            <param name="userId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetOrderLastOrderByUserIdAsync(System.String)">
+            <summary>
+            <inheritdoc/>
+            </summary>
+            <param name="userId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.HasUserAgreedVersionAsync(System.String)">
+            <summary>
+            检查用户是否已同意指定版本的条款
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.SaveUserAgreementAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.UserAgreementDbo)">
+            <summary>
+            保存用户同意记录
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetUserAgreementAsync">
+            <summary>
+            获取用户协议记录
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetLatestAgreedVersionAsync">
+            <summary>
+            获取用户最新同意的版本号
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetNotificationConfigAsync">
+            <summary>
+            获取消息通知配置
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.SaveNotificationConfigAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConfigDbo)">
+            <summary>
+            保存消息通知配置
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.HasNotificationConsentAsync">
+            <summary>
+            检查用户是否已同意消息通知知情同意书
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.SaveNotificationConsentAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels.NotificationConsentDbo)">
+            <summary>
+            保存消息通知知情同意记录
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IHttpNotificationService">
+            <summary>
+            HTTP通知服务接口
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IHttpNotificationService.SendPaymentNotificationAsync(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            发送支付事件通知
+            </summary>
+            <param name="paymentEvent">支付事件参数</param>
+            <returns>是否发送成功</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.HttpNotificationService">
+            <summary>
+            HTTP通知服务实现
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.HttpNotificationService.#ctor(HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository)">
+            <summary>
+            HTTP通知服务实现
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.HttpNotificationService.SendPaymentNotificationAsync(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            发送支付事件通知
+            采用"发送即忘"模式，不等待响应，不重试，不保证送达
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.HttpNotificationService.BuildMaskedNotificationData(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            构建脱敏后的通知数据
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.HttpNotificationService.GetEventTypeName(HRB.Payment.Core.Models.PaymentStatus)">
+            <summary>
+            获取事件类型名称
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILicenseService">
+            <summary>
+            软件激活服务接口
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILicenseService.GetLicenseInfoAsync">
+            <summary>
+            获取当前激活信息
+            </summary>
+            <returns>激活信息，如果不存在或无效返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILicenseService.ActivateFromKeyFileAsync(System.String)">
+            <summary>
+            通过.key文件激活软件
+            </summary>
+            <param name="keyFilePath">.key文件的完整路径</param>
+            <returns>激活结果（成功返回true和消息，失败返回false和错误信息）</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILicenseService.ValidateLicenseAsync">
+            <summary>
+            验证激活状态
+            </summary>
+            <returns>是否有效激活（已激活且未过期）</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILicenseService.GetMachineSN">
+            <summary>
+            获取当前机器的序列号（SN）
+            </summary>
+            <returns>机器序列号</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILicenseService.GetLicenseFilePath">
+            <summary>
+            获取激活文件路径
+            </summary>
+            <returns>激活文件的完整路径</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILicenseService.LicenseFileExists">
+            <summary>
+            检查激活文件是否存在
+            </summary>
+            <returns>激活文件是否存在</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILicenseService.GetLocalKey">
+            <summary>
+            获取本地密钥
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILoadingOverlayService">
+            <summary>
+            全局加载遮罩层服务接口
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILoadingOverlayService.SetContainer(HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls.LoadingOverlayContainer)">
+            <summary>
+            设置遮罩层容器
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILoadingOverlayService.Show(System.String)">
+            <summary>
+            显示遮罩层
+            </summary>
+            <param name="message">提示消息</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILoadingOverlayService.Hide">
+            <summary>
+            隐藏遮罩层
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILoadingOverlayService.UpdateMessage(System.String)">
+            <summary>
+            更新遮罩层消息
+            </summary>
+            <param name="message">新的提示消息</param>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderTimeoutEventArgs">
+            <summary>
+            订单超时事件参数
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderNotificationEventArgs">
+            <summary>
+            订单通知事件参数
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IOrderStateManager">
+            <summary>
+            订单状态管理服务接口
+            负责订单超时检查、播报次数追踪、静默取消管理
+            </summary>
+        </member>
+        <member name="E:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IOrderStateManager.OrderTimeout">
+            <summary>
+            订单超时事件（超过2分钟未支付）
+            </summary>
+        </member>
+        <member name="E:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IOrderStateManager.OrderNotification">
+            <summary>
+            订单需要播报提示事件（20秒、40秒、60秒）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IOrderStateManager.TrackOrder(System.String)">
+            <summary>
+            开始追踪订单
+            </summary>
+            <param name="orderNumber">订单号</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IOrderStateManager.UntrackOrder(System.String)">
+            <summary>
+            停止追踪订单
+            </summary>
+            <param name="orderNumber">订单号</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IOrderStateManager.MarkSilentCancel(System.String)">
+            <summary>
+            标记订单为静默取消（超时或重复扫码导致的取消）
+            </summary>
+            <param name="orderNumber">订单号</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IOrderStateManager.IsSilentCancel(System.String)">
+            <summary>
+            判断订单是否为静默取消
+            </summary>
+            <param name="orderNumber">订单号</param>
+            <returns>是否为静默取消</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IOrderStateManager.ClearSilentCancel(System.String)">
+            <summary>
+            清除静默取消标记
+            </summary>
+            <param name="orderNumber">订单号</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IOrderStateManager.CheckOrderStates(System.Collections.Generic.IEnumerable{HRB.Payment.Core.Models.TransactionRecord},System.DateTime)">
+            <summary>
+            检查订单状态（由定时器调用）
+            </summary>
+            <param name="scanningOrders">当前扫码中的订单列表</param>
+            <param name="currentTime">当前时间</param>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentChannelCoordinator">
+            <summary>
+            支付渠道协调器接口
+            负责微信和支付宝的启动、停止和状态管理
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentChannelCoordinator.StartWeChatAsync(System.Action)">
+            <summary>
+            启动微信客户端/插件（根据新旧模式不同处理）
+            </summary>
+            <param name="onLoginPollingStart">登录轮询启动回调</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentChannelCoordinator.StartAlipayShellAsync">
+            <summary>
+            启动支付宝插件（仅启动插件进程，等待插件就绪）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentChannelCoordinator.StartAlipayPollingAsync">
+            <summary>
+            启动支付宝业务轮询（发送StartAlipayPolling命令）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentChannelCoordinator.StopAlipayAsync">
+            <summary>
+            停止支付宝支付渠道
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentChannelCoordinator.SendAlipayAppStart">
+            <summary>
+            给支付宝插件发送开始事件，直到插件响应已启动（AppStarted）为止
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentMessageConverter">
+            <summary>
+            支付消息转换服务接口
+            负责将支付消息转换为支付事件参数
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentMessageConverter.ConvertToPaymentEventArgs(HRB.Payment.Core.Models.PaymentMessage,HRB.Payment.Core.Models.PaymentChannel)">
+            <summary>
+            将支付消息转换为支付事件参数
+            </summary>
+            <param name="paymentMessage">支付消息对象</param>
+            <param name="paymentChannel">支付渠道</param>
+            <returns>支付事件参数对象，转换失败返回null</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentNotificationHandler">
+            <summary>
+            支付通知处理服务接口
+            负责协调支付通知的完整处理流程：解析 → 转换 → 事件发布
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentNotificationHandler.HandleNotificationAsync(HRB.Payment.Message.Core.BusEvents.NotificationPayMessageEto)">
+            <summary>
+            处理支付通知消息
+            </summary>
+            <param name="notification">支付通知消息对象</param>
+            <returns>处理任务</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentTransactionService">
+            <summary>
+            支付交易服务接口。
+            职责：内存交易集合管理、订单状态流转、数据库持久化。
+            不涉及语音播报、UI 通知、HTTP 推送等副作用 — 调用方根据返回结果自行决定。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentTransactionService.Transactions">
+            <summary>
+            当前内存中的交易记录集合（最多保留最近 50 条），供 UI 绑定
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentTransactionService.LoadTodayTransactionsAsync">
+            <summary>
+            从数据库加载今日交易记录到内存集合
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentTransactionService.HandlePaymentStartedAsync(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            处理支付开始（扫码）事件。
+            包含：重复订单检测、同用户未支付订单标记静默取消、创建新交易记录、启动订单超时追踪。
+            </summary>
+            <param name="args">支付事件参数</param>
+            <returns>处理结果，调用方据此决定是否播报"上次未支付"语音等</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentTransactionService.HandlePaymentSuccessAsync(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            处理支付成功事件。
+            包含：取消超时追踪、更新交易状态、持久化到数据库。
+            </summary>
+            <param name="args">支付事件参数</param>
+            <returns>处理结果，调用方据此决定是否播报成功语音</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentTransactionService.HandlePaymentCancelledAsync(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            处理支付取消（超时/用户取消）事件。
+            包含：取消超时追踪、检测是否静默取消、更新交易状态、持久化到数据库。
+            </summary>
+            <param name="args">支付事件参数</param>
+            <returns>处理结果，IsSilentCancel=true 时调用方应跳过播报</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentTransactionService.FindTransaction(System.Func{HRB.Payment.Core.Models.TransactionRecord,System.Boolean})">
+            <summary>
+            按条件查找内存集合中的交易记录
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService">
+            <summary>
+            支付语音播报服务接口
+            负责所有支付相关的语音播报逻辑
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayPaymentStartedAsync(HRB.Payment.Core.Models.PaymentChannel,System.String)">
+            <summary>
+            播放支付开始提示音
+            </summary>
+            <param name="channel">支付渠道</param>
+            <param name="nickname">用户昵称（可选）</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayPaymentStartedWithBeforeNotPayAsync(HRB.Payment.Core.Models.PaymentChannel,System.String)">
+            <summary>
+            播放支付开始提示音（带"上次未付款"提示）
+            </summary>
+            <param name="channel">支付渠道</param>
+            <param name="nickname">用户昵称（可选）</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayPaymentCancelledAsync(System.String)">
+            <summary>
+            播放支付取消提示音
+            </summary>
+            <param name="nickname">用户昵称（可选）</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayPaymentSuccessAsync(System.Decimal,HRB.Payment.Core.Models.PaymentChannel)">
+            <summary>
+            播放支付成功语音（金额播报）
+            </summary>
+            <param name="amount">支付金额</param>
+            <param name="channel">支付渠道</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayScanNotPayAsync">
+            <summary>
+            播放"扫码未支付"提示音
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginKeepAliveService">
+            <summary>
+            插件保活服务接口
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginKeepAliveService.StartMonitoring(System.String,System.Func{System.Threading.Tasks.Task},Prism.Events.IEventAggregator)">
+            <summary>
+            启动保活监控（包含进程检测，可选心跳检测）
+            </summary>
+            <param name="pluginName">插件名称</param>
+            <param name="onPluginDied">插件进程消失或心跳超时时的回调</param>
+            <param name="eventAggregator">事件聚合器，用于发送心跳（可选，为 null 时不启用心跳检测）</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginKeepAliveService.StopMonitoring(System.String)">
+            <summary>
+            停止保活监控
+            </summary>
+            <param name="pluginName">插件名称</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginKeepAliveService.StopAll">
+            <summary>
+            停止所有监控
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginKeepAliveService.NotifyHeartbeatResponse(System.String)">
+            <summary>
+            通知收到心跳响应
+            </summary>
+            <param name="pluginName">插件名称</param>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginProcessService">
+            <summary>
+            插件进程管理服务接口
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginProcessService.StartMessageServiceAsync">
+            <summary>
+            启动总服务（必须最先启动）
+            </summary>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginProcessService.StartAlipayShellAsync">
+            <summary>
+            启动支付宝通知插件
+            </summary>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginProcessService.StartWeChatShellAsync">
+            <summary>
+            启动微信通知插件
+            </summary>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginProcessService.IsPluginRunning(System.String)">
+            <summary>
+            检查插件是否正在运行
+            </summary>
+            <param name="pluginName">插件名称</param>
+            <returns>是否运行中</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginProcessService.CleanupExistingProcessesAsync">
+            <summary>
+            清理所有已存在的插件进程（应用启动前调用）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginProcessService.StartProcessAsync(System.String,System.String,System.String,System.String)">
+            <summary>
+            启动进程
+            </summary>
+            <param name="pluginName"></param>
+            <param name="exePath"></param>
+            <param name="logMessage"></param>
+            <param name="fileName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginProcessService.StopProcessAsync(System.String,System.String)">
+            <summary>
+            停止指定进程
+            </summary>
+            <param name="exeName"></param>
+            <param name="logMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginRuntimeStatusService.WaitForMessageCenterRunningAsync(System.Threading.CancellationToken)">
+            <summary>
+            Wait until message center process is detected as running.
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ITimerCoordinator">
+            <summary>
+            定时器协调器接口
+            负责统一管理所有定时器的生命周期
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ITimerCoordinator.StartTimeUpdate(System.Action{System.DateTime})">
+            <summary>
+            启动时间更新定时器
+            </summary>
+            <param name="onUpdate">时间更新回调</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ITimerCoordinator.StartOrderMonitoring(System.Func{System.Collections.Generic.IEnumerable{HRB.Payment.Core.Models.TransactionRecord}},System.Func{System.DateTime},System.Action{System.Collections.Generic.IEnumerable{HRB.Payment.Core.Models.TransactionRecord},System.DateTime})">
+            <summary>
+            启动订单监控定时器
+            </summary>
+            <param name="getOrders">获取扫码中订单的回调</param>
+            <param name="getCurrentTime">获取当前时间的回调</param>
+            <param name="onCheck">检查订单状态的回调</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ITimerCoordinator.StartWeChatLoginPolling(System.Func{System.Threading.Tasks.Task{System.Boolean}},System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            启动微信登录轮询定时器
+            </summary>
+            <param name="checkLogin">检查登录状态的回调</param>
+            <param name="onLoginSuccess">登录成功的回调</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ITimerCoordinator.StopWeChatLoginPolling">
+            <summary>
+            停止微信登录轮询
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ITimerCoordinator.StopAll">
+            <summary>
+            停止所有定时器
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ITtsService">
+            <summary>
+            TTS服务
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatConnectionService">
+            <summary>
+            微信连接管理服务接口
+            负责管理微信客户端的连接生命周期和状态
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatConnectionService.IsConnected">
+            <summary>
+            获取当前连接状态
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatConnectionService.ConnectionStatus">
+            <summary>
+            获取连接状态描述
+            </summary>
+        </member>
+        <member name="E:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatConnectionService.ConnectionStatusChanged">
+            <summary>
+            连接状态变化事件
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatConnectionService.StartAsync">
+            <summary>
+            启动微信连接服务
+            在调试模式下直接连接，在生产模式下监听微信进程
+            </summary>
+            <returns>启动任务</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatConnectionService.StopAsync">
+            <summary>
+            停止微信连接服务
+            </summary>
+            <returns>停止任务</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ConnectionStatusChangedEventArgs">
+            <summary>
+            连接状态变化事件参数
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ConnectionStatusChangedEventArgs.IsConnected">
+            <summary>
+            是否已连接
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ConnectionStatusChangedEventArgs.Status">
+            <summary>
+            连接状态描述
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatMessageParser">
+            <summary>
+            微信消息解析服务接口
+            负责解析微信支付通知的XML消息
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatMessageParser.ParsePaymentMessage(System.String)">
+            <summary>
+            解析微信支付消息XML
+            </summary>
+            <param name="xmlContent">XML格式的支付消息内容</param>
+            <returns>解析后的支付消息对象，解析失败返回null</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService">
+            <summary>
+            微信服务接口
+            提供微信版本检测、登录状态检测和进程判断功能
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService.CheckWeChatVersionAsync(System.String)">
+            <summary>
+            检测微信版本是否符合要求
+            </summary>
+            <param name="requiredVersion">要求的微信版本号，如 "3.9.12.54"</param>
+            <returns>版本是否匹配</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService.CheckWeChatLoginStatusAsync">
+            <summary>
+            检测微信登录状态
+            </summary>
+            <returns>是否已登录</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService.IsWeChatProcessRunningAsync">
+            <summary>
+            判断微信进程是否存在
+            </summary>
+            <returns>进程是否存在</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService.GetWeChatProcessInfoAsync">
+            <summary>
+            获取微信进程信息
+            </summary>
+            <returns>进程信息对象，如果进程不存在则返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService.GetCurrentWeChatVersionAsync">
+            <summary>
+            获取当前微信版本号
+            </summary>
+            <returns>版本号字符串，如果未安装则返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService.GetAllWeChatProcessesAsync">
+            <summary>
+            获取所有微信进程信息
+            </summary>
+            <returns>微信进程信息列表</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService.IsWeChatInstalledAsync">
+            <summary>
+            检查微信是否安装
+            </summary>
+            <returns>是否已安装</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService.KillAllWeChatProcessesAsync">
+            <summary>
+            强制终止所有微信进程
+            </summary>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService.StartWeChatAsync">
+            <summary>
+            启动微信
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatProcessInfo">
+            <summary>
+            微信进程信息
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatProcessInfo.ProcessId">
+            <summary>
+            进程ID
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatProcessInfo.ProcessName">
+            <summary>
+            进程名称
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatProcessInfo.ExecutablePath">
+            <summary>
+            可执行文件完整路径
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatProcessInfo.FileVersion">
+            <summary>
+            文件版本号
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatProcessInfo.IsLoggedIn">
+            <summary>
+            是否已登录（通过内存特征判断）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatProcessInfo.MainWindowHandle">
+            <summary>
+            窗口句柄
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatProcessInfo.WindowTitle">
+            <summary>
+            窗口标题
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatVersionCheckResult">
+            <summary>
+            微信版本检测结果
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatVersionCheckResult.IsMatch">
+            <summary>
+            是否匹配
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatVersionCheckResult.CurrentVersion">
+            <summary>
+            当前版本
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatVersionCheckResult.RequiredVersion">
+            <summary>
+            要求的版本
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatVersionCheckResult.Message">
+            <summary>
+            检测消息
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatLoginStatusResult">
+            <summary>
+            微信登录状态检测结果
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatLoginStatusResult.IsLoggedIn">
+            <summary>
+            是否已登录
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatLoginStatusResult.StatusDescription">
+            <summary>
+            登录状态描述
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatLoginStatusResult.CheckTime">
+            <summary>
+            检测时间
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService">
+            <summary>
+            软件激活服务实现
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService.SECRET_KEY">
+            <summary>
+            加密密钥（与 KeyTool 保持一致）
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService.LICENSE_FILE_NAME">
+            <summary>
+            激活文件名
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService.#ctor">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService.GetLicenseInfoAsync">
+            <summary>
+            获取当前激活信息
+            </summary>
+            <returns>激活信息，如果不存在或无效返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService.ActivateFromKeyFileAsync(System.String)">
+            <summary>
+            通过.key文件激活软件
+            </summary>
+            <param name="keyFilePath">.key文件的完整路径</param>
+            <returns>激活结果（成功返回true和消息，失败返回false和错误信息）</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService.ValidateLicenseAsync">
+            <summary>
+            验证激活状态
+            </summary>
+            <returns>是否有效激活（已激活且未过期）</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService.GetMachineSN">
+            <summary>
+            获取当前机器的序列号（SN）
+            </summary>
+            <returns>机器序列号</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService.GetLocalKey">
+            <summary>
+            获取本地密钥
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService.GetLicenseFilePath">
+            <summary>
+            获取激活文件路径
+            </summary>
+            <returns>激活文件的完整路径</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService.LicenseFileExists">
+            <summary>
+            检查激活文件是否存在
+            </summary>
+            <returns>激活文件是否存在</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService.LoadLicenseFromFile">
+            <summary>
+            从文件加载激活信息
+            </summary>
+            <returns>激活信息，如果加载失败返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LicenseService.ValidateLicenseDto(HRB.Payment.Core.DtoModels.LicenseDto)">
+            <summary>
+            验证激活信息
+            </summary>
+            <param name="licenseDto">激活信息</param>
+            <returns>验证结果</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LoadingOverlayService">
+            <summary>
+            全局加载遮罩层服务实现
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LoadingOverlayService.SetContainer(HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls.LoadingOverlayContainer)">
+            <summary>
+            设置遮罩层容器
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LoadingOverlayService.Show(System.String)">
+            <summary>
+            显示遮罩层
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LoadingOverlayService.Hide">
+            <summary>
+            隐藏遮罩层
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.LoadingOverlayService.UpdateMessage(System.String)">
+            <summary>
+            更新遮罩层消息
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager">
+            <summary>
+            订单状态管理服务实现
+            负责订单超时检查、播报次数追踪、静默取消管理
+            </summary>
+        </member>
+        <member name="E:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.OrderTimeout">
+            <summary>
+            订单超时事件（超过2分钟未支付）
+            </summary>
+        </member>
+        <member name="E:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.OrderNotification">
+            <summary>
+            订单需要播报提示事件（20秒、40秒、60秒）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.TrackOrder(System.String)">
+            <summary>
+            开始追踪订单
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.UntrackOrder(System.String)">
+            <summary>
+            停止追踪订单
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.MarkSilentCancel(System.String)">
+            <summary>
+            标记订单为静默取消（超时或重复扫码导致的取消）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.IsSilentCancel(System.String)">
+            <summary>
+            判断订单是否为静默取消
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.ClearSilentCancel(System.String)">
+            <summary>
+            清除静默取消标记
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.CheckOrderStates(System.Collections.Generic.IEnumerable{HRB.Payment.Core.Models.TransactionRecord},System.DateTime)">
+            <summary>
+            检查订单状态（由定时器调用）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.CheckAndNotify(HRB.Payment.Core.Models.TransactionRecord,System.Double)">
+            <summary>
+            检查并触发通知事件
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.TriggerTimeout(HRB.Payment.Core.Models.TransactionRecord,System.DateTime)">
+            <summary>
+            触发超时事件
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentChannelCoordinator">
+            <summary>
+            支付渠道协调器实现
+            负责微信和支付宝的启动、停止和状态管理
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentChannelCoordinator.StartWeChatAsync(System.Action)">
+            <summary>
+            启动微信客户端/插件（根据新旧模式不同处理）
+            - 旧模式：主程序负责启动微信插件壳 + WeChat.exe
+            - 新模式：插件壳进程由看门狗管理；主程序仅负责 WeChat.exe，并等待插件壳存在后再进入业务链路
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentChannelCoordinator.StartAlipayShellAsync">
+            <summary>
+            启动支付宝插件（仅启动插件进程，等待插件就绪）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentChannelCoordinator.SendAlipayAppStart">
+            <summary>
+            给支付宝插件发送开始事件，直到插件响应已启动（AppStarted）为止
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentChannelCoordinator.StartAlipayPollingAsync">
+            <summary>
+            启动支付宝业务轮询（发送 StartAlipayPolling 命令）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentChannelCoordinator.StopAlipayAsync">
+            <summary>
+            停止支付宝支付渠道
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentChannelCoordinator.OnAlipayModuleEvent(System.String)">
+            <summary>
+            处理支付宝模块事件
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentMessageConverter">
+            <summary>
+            支付消息转换服务实现
+            负责将支付消息转换为支付事件参数
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentMessageConverter.ConvertToPaymentEventArgs(HRB.Payment.Core.Models.PaymentMessage,HRB.Payment.Core.Models.PaymentChannel)">
+            <summary>
+            将支付消息转换为支付事件参数
+            </summary>
+            <param name="paymentMessage">支付消息对象</param>
+            <param name="paymentChannel">支付渠道</param>
+            <returns>支付事件参数对象，转换失败返回null</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentNotificationHandler">
+            <summary>
+            支付通知处理服务实现
+            负责协调支付通知的完整处理流程：解析 → 转换 → 事件发布
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentNotificationHandler.#ctor(HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatMessageParser,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentMessageConverter,HRB.Payment.Core.Services.IPaymentEventPublisher)">
+            <summary>
+            构造函数
+            </summary>
+            <param name="messageParser">微信消息解析服务</param>
+            <param name="messageConverter">支付消息转换服务</param>
+            <param name="eventPublisher">支付事件发布服务</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentNotificationHandler.HandleNotificationAsync(HRB.Payment.Message.Core.BusEvents.NotificationPayMessageEto)">
+            <summary>
+            处理支付通知消息
+            </summary>
+            <param name="notification">支付通知消息对象</param>
+            <returns>处理任务</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentNotificationHandler.HandleWeChatNotificationAsync(HRB.Payment.Message.Core.BusEvents.NotificationPayMessageEto)">
+            <summary>
+            处理微信支付通知
+            </summary>
+            <param name="notification">支付通知消息对象</param>
+            <returns>处理任务</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentNotificationHandler.HandleAlipayNotificationAsync(HRB.Payment.Message.Core.BusEvents.NotificationPayMessageEto)">
+            <summary>
+             处理支付宝支付通知
+            </summary>
+            <param name="notification"></param>
+            <returns></returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentTransactionService">
+            <summary>
+            支付交易服务。
+            负责管理内存中的交易集合、订单状态流转以及数据库持久化。
+            语音播报、HTTP 通知等副作用由调用方根据处理结果决定。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentTransactionService.LoadTodayTransactionsAsync">
+            <summary>
+            加载今日交易记录到内存集合。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentTransactionService.HandlePaymentStartedAsync(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            处理支付开始事件。
+            返回处理结果，供调用方决定是否播报语音，
+            以及是否需要为上一笔未支付订单补发静默取消通知。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentTransactionService.HandlePaymentSuccessAsync(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            处理支付成功事件。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentTransactionService.HandlePaymentCancelledAsync(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            处理支付取消事件。
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService">
+            <summary>
+            支付语音播报服务实现
+            封装所有支付相关的语音播报逻辑
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentStartedAsync(HRB.Payment.Core.Models.PaymentChannel,System.String)">
+            <summary>
+            播放支付开始提示音
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentStartedWithBeforeNotPayAsync(HRB.Payment.Core.Models.PaymentChannel,System.String)">
+            <summary>
+            播放支付开始提示音（带"上次未付款"提示）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentCancelledAsync(System.String)">
+            <summary>
+            播放支付取消提示音
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentSuccessAsync(System.Decimal,HRB.Payment.Core.Models.PaymentChannel)">
+            <summary>
+            播放支付成功语音（金额播报）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayScanNotPayAsync">
+            <summary>
+            播放"扫码未支付"提示音
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.GetChannelVoice(HRB.Payment.Core.Models.PaymentChannel)">
+            <summary>
+            获取支付渠道对应的语音文件名
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService">
+            <summary>
+            插件保活服务实现
+            每5秒检测一次插件进程是否存在，每3秒发送一次心跳，如果10秒没有响应则重启
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.StartMonitoring(System.String,System.Func{System.Threading.Tasks.Task},Prism.Events.IEventAggregator)">
+            <summary>
+            启动保活监控（包含进程检测，可选心跳检测）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.StopMonitoring(System.String)">
+            <summary>
+            停止保活监控
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.StopAll">
+            <summary>
+            停止所有监控
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.NotifyHeartbeatResponse(System.String)">
+            <summary>
+            通知收到心跳响应
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.MonitorProcessAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.MonitoringContext)">
+            <summary>
+            监控插件进程
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.HeartbeatLoopAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.MonitoringContext)">
+            <summary>
+            心跳循环
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.MonitoringContext">
+            <summary>
+            监控上下文
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginProcessService">
+            <summary>
+            插件进程管理服务实现
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginProcessService.StartMessageServiceAsync">
+            <summary>
+            启动总服务（必须最先启动）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginProcessService.StartAlipayShellAsync">
+            <summary>
+            启动支付宝通知插件
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginProcessService.StartWeChatShellAsync">
+            <summary>
+            启动微信通知插件
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginProcessService.StopAllProcessesAsync">
+            <summary>
+            停止所有插件进程
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginProcessService.CleanupExistingProcessesAsync">
+            <summary>
+            清理所有已存在的插件进程（应用启动前调用）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginProcessService.IsPluginRunning(System.String)">
+            <summary>
+            检查插件是否正在运行
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginProcessService.StartProcessAsync(System.String,System.String,System.String,System.String)">
+            <summary>
+            启动进程
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginProcessService.StopProcessAsync(System.String,System.String)">
+            <summary>
+            停止进程
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginProcessService.LogAsync(System.String,System.String,System.String,System.Nullable{System.Int32},System.Boolean,System.String)">
+            <summary>
+            记录日志
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginProcessService.ShowErrorAndKillAllAsync(System.String)">
+            <summary>
+            显示错误并杀死所有进程
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginRuntimeStatusService">
+            <summary>
+            Runtime status aggregator for watchdog-managed plugin processes.
+            - Polls process existence (Running)
+            - Tracks last reply timestamps from bus events
+            </summary>
+        </member>
+        <member name="E:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginRuntimeStatusService.StatusChanged">
+            <summary>
+            状态变更事件
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginRuntimeStatusService.IsMessageCenterRunning">
+            <summary>
+            消息中心是否运行
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginRuntimeStatusService.MessageCenterLastSeenAt">
+            <summary>
+            消息中心最后在线时间
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginRuntimeStatusService.IsAlipayPluginRunning">
+            <summary>
+            支付宝插件是否运行
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginRuntimeStatusService.HasAlipayAppStarted">
+            <summary>
+            是否已收到支付宝 App 启动事件（即支付宝 App 已启动并建立通讯）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginRuntimeStatusService.AlipayLastReplyAt">
+            <summary>
+            支付宝插件最后回复时间
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginRuntimeStatusService.IsWeChatPluginRunning">
+            <summary>
+            微信插件是否运行
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginRuntimeStatusService.WeChatLastReplyAt">
+            <summary>
+            微信插件最后回复时间
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginRuntimeStatusService.WaitForMessageCenterRunningAsync(System.Threading.CancellationToken)">
+            <summary>
+            等待消息中心启动
+            </summary>
+            <param name="ct"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginRuntimeStatusService.MonitorLoopAsync">
+            <summary>
+            循环检查进程状态，更新内部状态并触发事件
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TimerCoordinator">
+            <summary>
+            定时器协调器实现
+            负责统一管理所有定时器的生命周期
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TimerCoordinator.StartTimeUpdate(System.Action{System.DateTime})">
+            <summary>
+            启动时间更新定时器
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TimerCoordinator.StartOrderMonitoring(System.Func{System.Collections.Generic.IEnumerable{HRB.Payment.Core.Models.TransactionRecord}},System.Func{System.DateTime},System.Action{System.Collections.Generic.IEnumerable{HRB.Payment.Core.Models.TransactionRecord},System.DateTime})">
+            <summary>
+            启动订单监控定时器
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TimerCoordinator.StopOrderMonitoring">
+            <summary>
+            停止订单监控
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TimerCoordinator.StartWeChatLoginPolling(System.Func{System.Threading.Tasks.Task{System.Boolean}},System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            启动微信登录轮询定时器
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TimerCoordinator.StopWeChatLoginPolling">
+            <summary>
+            停止微信登录轮询
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TimerCoordinator.StopAll">
+            <summary>
+            停止所有定时器
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService">
+            <summary>
+            TTS服务
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService.Speak(System.String)">
+            <summary>
+            播报
+            </summary>
+            <param name="hint"></param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService.SpeakAsync(System.String)">
+            <summary>
+            异步播报
+            </summary>
+            <param name="hint"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService.CleanText(System.String)">
+            <summary>
+            清理文本，只保留中英文字符、数字和空格，并在数字和字母之间插入空格
+            </summary>
+            <param name="text"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService.CleanTextChineseOnly(System.String)">
+            <summary>
+            清理文本，只保留汉字
+            </summary>
+            <param name="text"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService.GetVoice">
+            <summary>
+            获取中文语音
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService">
+            <summary>
+            微信连接管理服务实现
+            负责管理微信客户端的连接生命周期和状态
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.#ctor(Prism.Events.IEventAggregator,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginProcessService)">
+            <summary>
+            构造函数
+            </summary>
+            <param name="eventAggregator">事件聚合器，用于消息通信</param>
+            <param name="pluginProcessService"></param>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.IsConnected">
+            <summary>
+            获取当前连接状态
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.ConnectionStatus">
+            <summary>
+            获取连接状态描述
+            </summary>
+        </member>
+        <member name="E:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.ConnectionStatusChanged">
+            <summary>
+            连接状态变化事件
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.StartAsync">
+            <summary>
+            启动微信连接服务
+            </summary>
+            <returns>启动任务</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.StopAsync">
+            <summary>
+            停止微信连接服务
+            </summary>
+            <returns>停止任务</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.OnConnectionStatusChanged">
+            <summary>
+            触发连接状态变化事件
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatMessageParser">
+            <summary>
+            微信消息解析服务实现
+            负责解析微信支付通知的XML消息
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatMessageParser.ParsePaymentMessage(System.String)">
+            <summary>
+            解析微信支付消息XML
+            </summary>
+            <param name="xmlContent">XML格式的支付消息内容</param>
+            <returns>解析后的支付消息对象，解析失败返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatMessageParser.GetElementValue(System.Xml.Linq.XElement,System.String)">
+            <summary>
+            获取XML元素的值
+            </summary>
+            <param name="parent">父元素</param>
+            <param name="elementName">子元素名称</param>
+            <returns>元素值，不存在返回空字符串</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService">
+            <summary>
+            微信服务实现类
+            实现微信版本检测、登录状态检测和进程判断功能
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.CheckWeChatVersionAsync">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.CheckWeChatVersionAsync(System.String)">
+            <summary>
+            检测微信版本是否符合要求
+            </summary>
+            <param name="requiredVersion">要求的微信版本号，如 "3.9.12.54"</param>
+            <returns>版本是否匹配</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.CheckWeChatLoginStatusAsync">
+            <summary>
+            检测微信登录状态
+            </summary>
+            <returns>是否已登录</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.IsWeChatProcessRunningAsync">
+            <summary>
+            判断微信进程是否存在
+            </summary>
+            <returns>进程是否存在</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.GetWeChatProcessInfoAsync">
+            <summary>
+            获取微信进程信息
+            </summary>
+            <returns>进程信息对象，如果进程不存在则返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.GetCurrentWeChatVersionAsync">
+            <summary>
+            获取当前微信版本号
+            </summary>
+            <returns>版本号字符串，如果未安装则返回null</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.DetectWeChatLoginStatus(System.Diagnostics.Process)">
+            <summary>
+            检测微信登录状态（通过窗口类名判断）
+            使用EnumWindows枚举所有窗口，找到微信进程的窗口并检查类名
+            WeChatLoginWndForPC: 未登录状态
+            WeChatMainWndForPC: 已登录状态
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.GetAllWeChatProcessesAsync">
+            <summary>
+            获取所有微信进程信息
+            </summary>
+            <returns>微信进程信息列表</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.IsWeChatInstalledAsync">
+            <summary>
+            检查微信是否安装
+            </summary>
+            <returns>是否已安装</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.KillAllWeChatProcessesAsync">
+            <summary>
+            强制终止所有微信进程
+            </summary>
+            <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.StartWeChatAsync">
+            <summary>
+            <inheritdoc/>
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.V2.MainPageV2ViewModel">
+             <summary>
+             2.0 主页 ViewModel — 纯 UI 壳 + 事件路由。
+            
+             职责：
+               1. UI 状态（时间、字体、店铺名、导航、退出）
+               2. 订单展示（绑定 IPaymentTransactionService.Transactions）
+               3. 事件路由（支付事件 → TransactionService → 根据结果播声/推HTTP）
+            
+             不直接依赖任何插件通信、不管进程、不管连接。
+             </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.V2.MainPageV2ViewModel.Transactions">
+            <summary>
+            交易记录集合（来自 TransactionService）
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.V2.SettingsPageV2ViewModel">
+             <summary>
+             2.0 设置页 ViewModel — 纯设置壳。
+            
+             固定区域：激活/店铺/自启动/通知/版本
+             插件区域：通过 IChannelSettingsContributor 动态聚合各插件设置项
+            
+             砍掉：APModuleToUIEvent 事件处理、插件进程管理、保活、旧模式分支
+             </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.V2.SettingsPageV2ViewModel.ChannelSettings">
+            <summary>
+            插件渠道设置项（动态聚合）
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel">
+            <summary>
+            主页面视图模型
+            负责：UI状态管理、支付事件订阅、命令处理、数据加载
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.KeepAlive">
+            <summary>
+            视图模型保持活动状态
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.Transactions">
+            <summary>
+            交易记录集合（所有数据）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.IsWeChatConnected">
+            <summary>
+            微信是否已连接
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.BaseFontSize">
+            <summary>
+            基础字体大小
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.AmountFontSize">
+            <summary>
+            金额字体大小（比基础字体大5号）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.RowHeight">
+            <summary>
+            行高
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.CurrentTime">
+            <summary>
+            当前时间（网络时间）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.StoreName">
+            <summary>
+            店铺名称
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.MaintenanceContact">
+            <summary>
+            维护人员联系方式
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel._weChatProcessId">
+            <summary>
+            微信进程ID
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.SubscribeToEvents">
+            <summary>
+            订阅所有事件
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.OnNotificationMessageEvent(HRB.Payment.Message.Core.BusEvents.NotificationPayMessageEto)">
+            <summary>
+            处理支付通知消息
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.OnWeChatConnectionStatusChanged(System.Object,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ConnectionStatusChangedEventArgs)">
+            <summary>
+            处理微信连接状态变化
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.OnPaymentStarted(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            处理支付开始事件
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.OnPaymentCancelled(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            处理支付取消事件
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.OnPaymentSuccess(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            处理支付成功事件
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.SaveOrUpdateTransactionAsync(HRB.Payment.Core.Events.PaymentEventArgs,HRB.Payment.Core.Models.PaymentStatus)">
+            <summary>
+            保存或更新交易记录（包含状态）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.FindTransaction(System.Func{HRB.Payment.Core.Models.TransactionRecord,System.Boolean})">
+            <summary>
+            查找符合条件的交易记录
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.AddTransaction(HRB.Payment.Core.Models.TransactionRecord)">
+            <summary>
+            插入交易记录到集合头部，超过50条时移除最旧的记录
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.LoadDataAsync">
+            <summary>
+            异步加载交易数据
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.NavigateToHistory">
+            <summary>
+            导航到历史记录页面
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.NavigateToSettings">
+            <summary>
+            导航到设置页面
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.NavigateToLog">
+            <summary>
+            导航到日志页面
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.Exit">
+            <summary>
+            退出应用程序
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.InitializePaymentChannelsInNewModeAsync">
+            <summary>
+            初始化支付渠道（新模式）
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.StartWeChatMonitoring">
+            <summary>
+            启动微信统一监控 - 一个循环搞定所有事情
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.UnifiedWeChatMonitoring(System.Threading.CancellationToken)">
+            <summary>
+            统一的微信监控逻辑 - 替代原来的3个独立任务
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.HandleWeChatNotRunning">
+            <summary>
+            处理微信进程不存在的情况，避免插件状态混乱
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.HandleNewWeChatProcess(System.Int32)">
+            <summary>
+            处理新的微信进程
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.EnsurePluginWorking(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            确保插件正常工作
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.StopWeChatMonitoring">
+            <summary>
+            停止微信监控
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.StartTimers">
+            <summary>
+            启动所有定时器
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.UpdateCurrentTime(System.DateTime)">
+            <summary>
+            更新当前时间
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.OnOrderNotification(System.Object,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderNotificationEventArgs)">
+            <summary>
+            处理订单通知事件（20秒、40秒、60秒播报）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MainPageViewModel.OnOrderTimeout(System.Object,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderTimeoutEventArgs)">
+            <summary>
+            处理订单超时事件（超过2分钟自动取消）
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MessageDialogViewModel">
+            <summary>
+            消息对话框 ViewModel
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MessageDialogViewModel.Title">
+            <summary>
+            标题
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MessageDialogViewModel.Message">
+            <summary>
+            消息内容
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MessageDialogViewModel.Icon">
+            <summary>
+            图标类型：Info, Warning, Error, Question
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MessageDialogViewModel.ShowCancel">
+            <summary>
+            是否显示取消按钮
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MessageDialogViewModel.OkCommand">
+            <summary>
+            确定命令
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.MessageDialogViewModel.CancelCommand">
+            <summary>
+            取消命令
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.NotificationConsentDialogViewModel">
+            <summary>
+            消息通知知情同意书对话框 ViewModel
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.NotificationConsentDialogViewModel.Title">
+            <summary>
+            标题
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.NotificationConsentDialogViewModel.ConsentContent">
+            <summary>
+            知情同意书内容
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.NotificationConsentDialogViewModel.IsReadOnlyMode">
+            <summary>
+            是否为只读模式（只显示确认按钮）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.NotificationConsentDialogViewModel.AgreeCommand">
+            <summary>
+            同意命令
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.NotificationConsentDialogViewModel.DeclineCommand">
+            <summary>
+            拒绝命令
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.NotificationConsentDialogViewModel.LoadConsentContent">
+            <summary>
+            加载知情同意书内容
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.NotificationConsentDialogViewModel.LoadConsentContentFromFile(System.String)">
+            <summary>
+            从指定文件加载知情同意书内容
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PaymentShellViewModel">
+            <summary>
+            支付应用Shell视图模型
+            负责应用启动时的激活验证和页面导航
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PaymentShellViewModel.CheckUserAgreementAndLicenseAsync">
+            <summary>
+            检查用户协议和激活状态
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PaymentShellViewModel.ShowUserAgreementDialogAsync(System.String,System.String)">
+            <summary>
+            显示用户协议对话框
+            </summary>
+            <param name="currentVersion">当前版本号</param>
+            <param name="previousVersion">之前同意的版本号</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PaymentShellViewModel.GetMachineId">
+            <summary>
+            获取机器唯一标识
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PaymentShellViewModel.CheckLicenseAndNavigateAsync">
+            <summary>
+            检查激活状态并导航 — 2.0 统一路径，无新旧模式分支
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PaymentShellViewModel.ConnectMessageCenterAsync">
+            <summary>
+            后台连接消息中心并初始化插件
+            顺序：等待消息中心就绪 → 建立连接 → 初始化插件（订阅事件 + 启动监控/握手）
+            即使连接失败，插件仍需初始化（本地进程检测仍可工作）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PaymentShellViewModel.OnRuntimeStatusChanged(System.Object,System.EventArgs)">
+            <summary>
+            消息中心状态变化：掉线 → 标记断开；重新上线 → 自动重连
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel">
+            <summary>
+            插件日志页面视图模型
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.Logs">
+            <summary>
+            日志列表
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.SelectedPluginFilter">
+            <summary>
+            选中的插件筛选
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.IsLoading">
+            <summary>
+            是否正在加载
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.CurrentPage">
+            <summary>
+            当前页码
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.TotalPages">
+            <summary>
+            总页数
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.TotalCount">
+            <summary>
+            总记录数
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.PageInfo">
+            <summary>
+            页面信息
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.PluginFilterOptions">
+            <summary>
+            插件筛选选项
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.LoadLogsAsync">
+            <summary>
+            加载日志
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.RefreshAsync">
+            <summary>
+            刷新数据
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.GoToFirstPageAsync">
+            <summary>
+            跳转到第一页
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.GoToPreviousPageAsync">
+            <summary>
+            跳转到上一页
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.GoToNextPageAsync">
+            <summary>
+            跳转到下一页
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.GoToLastPageAsync">
+            <summary>
+            跳转到最后一页
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.UpdatePageInfo">
+            <summary>
+            更新页面信息
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.PluginLogPageViewModel.NavigateToMain">
+            <summary>
+            返回主页
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel">
+            <summary>
+            设置页面视图模型
+            负责：软件激活、机器序列号显示、到期时间显示
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.KeepAlive">
+            <summary>
+            视图模型保持活动状态
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.MachineSN">
+            <summary>
+            机器序列号（SN）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.ActivationStatus">
+            <summary>
+            激活状态显示
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.ExpiresAt">
+            <summary>
+            到期时间显示
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.RemainingDays">
+            <summary>
+            剩余天数
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.IsActivated">
+            <summary>
+            是否已激活
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.IsActivating">
+            <summary>
+            是否正在激活
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.LicenseFilePath">
+            <summary>
+            激活文件路径
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.IsAlipayEnabled">
+            <summary>
+            是否启用支付宝支付
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.IsWeChatEnabled">
+            <summary>
+            是否启用微信支付
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.UseNewPluginLifecycleMode">
+            <summary>
+            是否正在配置支付宝
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.IsAlipayNicknameReminderEnabled">
+            <summary>
+            支付宝未支付昵称提醒播报
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.IsWeChatNicknameReminderEnabled">
+            <summary>
+            微信未支付昵称提醒播报
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.IsAutoStartEnabled">
+            <summary>
+            是否启用开机自启动
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.NotificationUrl">
+            <summary>
+            通知接口URL
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.IsNotificationEnabled">
+            <summary>
+            是否启用消息通知
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.SelectKeyFileCommand">
+            <summary>
+            选择激活文件命令
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.ActivateCommand">
+            <summary>
+            激活命令
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.CopySNCommand">
+            <summary>
+            复制机器序列号命令
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.GoBackCommand">
+            <summary>
+            返回主页命令
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.ExitCommand">
+            <summary>
+            退出应用命令
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.AppVersion">
+            <summary>
+            软件版本号
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.StoreName">
+            <summary>
+            店铺名称
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.MaintenanceContact">
+            <summary>
+            维护人员联系方式
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.ShowDisclaimerCommand">
+            <summary>
+            显示免责条款与知情同意书命令
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.ShowNotificationConsentCommand">
+            <summary>
+            显示支付消息通知服务知情同意书命令
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.#ctor(HRB.Platform.Client.WPF.PaymentAppModule.Core.PaymentAppContext,Prism.Events.IEventAggregator,Prism.Navigation.Regions.IRegionManager,HRB.Platform.Client.WPF.Core.Services.IServices.IWpfDeviceRequestService,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILicenseService,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginProcessService,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.INotificationService,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ILoadingOverlayService,Prism.Dialogs.IDialogService,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginKeepAliveService,HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentChannelCoordinator,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginRuntimeStatusService,HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentChannelCoordinator)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.StartAlipayShellAsync">
+            <summary>
+            启动支付宝插件
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.StartPluginKeepAlive">
+            <summary>
+            启动插件保活（包含进程检测和心跳检测）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.StopPluginKeepAlive">
+            <summary>
+            停止插件保活
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.RestartAlipayShellAsync">
+            <summary>
+            重启 AlipayShell 插件
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.LoadPaymentSettings">
+            <summary>
+            加载支付设置
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.ValidateAndEnableAlipay">
+            <summary>
+            启用支付宝
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.SavePaymentSettings">
+            <summary>
+            保存支付设置
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.LoadLicenseInfoAsync">
+            <summary>
+            加载激活信息
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.SelectKeyFile">
+            <summary>
+            选择激活文件
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.ActivateAsync">
+            <summary>
+            执行激活
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.CanActivate">
+            <summary>
+            判断是否可以激活
+            </summary>
+            <returns>是否可以激活</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.CopySN">
+            <summary>
+            复制机器序列号到剪贴板
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.SetClipboardText(System.String)">
+            <summary>
+            设置剪贴板文本（带重试机制，兼容低版本系统）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.GetClipboardOwnerInfo">
+            <summary>
+            获取当前占用剪切板的进程信息
+            </summary>
+            <returns>进程信息字符串</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.OnGoBack">
+            <summary>
+            返回主页
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.OnExit">
+            <summary>
+            退出应用
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.CheckConsentAndEnableNotificationAsync">
+            <summary>
+            检查知情同意并启用通知
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.SaveNotificationConfigAsync">
+            <summary>
+            保存通知配置
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.LoadNotificationConfigAsync">
+            <summary>
+            加载通知配置
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.GetMachineId">
+            <summary>
+            获取机器唯一标识
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.GetAppVersion">
+            <summary>
+            获取软件版本号
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.ShowDisclaimer">
+            <summary>
+            显示免责条款与知情同意书
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.ShowNotificationConsent">
+            <summary>
+            显示支付消息通知服务知情同意书
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.UserAgreementDialogViewModel">
+            <summary>
+            用户协议对话框 ViewModel
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.UserAgreementDialogViewModel.Title">
+            <summary>
+            标题
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.UserAgreementDialogViewModel.AgreementContent">
+            <summary>
+            协议内容
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.UserAgreementDialogViewModel.AgreeCommand">
+            <summary>
+            同意命令
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.UserAgreementDialogViewModel.DeclineCommand">
+            <summary>
+            拒绝命令
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.UserAgreementDialogViewModel.LoadAgreementContent">
+            <summary>
+            加载协议内容
+            </summary>
+        </member>
+    </members>
+</doc>

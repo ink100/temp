@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../Build/MsBuildFiles/Common.Header.props" />
+
+  <PropertyGroup>
+    <TargetFramework>$(CurrentWpfFrameworkTargetFramework)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <CurrentBuildProjectName>HRB.Platform.Client.WPF.PaymentAppModule.Resources</CurrentBuildProjectName>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MsBuildFiles/Common.Footer.props" />
+  <Import Project="../../Build/MsBuildFiles/Common.Imports.targets" />
+  <Import Project="../../Build/MsBuildFiles/Common.Imports.Tools.targets" />
+  <ItemGroup>
+    <Compile Remove="CN\**" />
+    <Compile Remove="EN\**" />
+    <EmbeddedResource Remove="CN\**" />
+    <EmbeddedResource Remove="EN\**" />
+    <None Remove="CN\**" />
+    <None Remove="EN\**" />
+    <Page Remove="CN\**" />
+    <Page Remove="EN\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Common\Dark\pic_alipay.png" />
+    <None Remove="Common\Dark\pic_auth.png" />
+    <None Remove="Common\Dark\pic_fail.png" />
+    <None Remove="Common\Dark\pic_retrieve.png" />
+    <None Remove="Common\Dark\pic_success.png" />
+    <None Remove="Common\Dark\pic_title_bar.png" />
+    <None Remove="Common\Dark\pic_wait.png" />
+    <None Remove="Common\Dark\pic_wechat.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Common\Dark\pic_alipay.png" />
+    <EmbeddedResource Include="Common\Dark\pic_auth.png" />
+    <EmbeddedResource Include="Common\Dark\pic_fail.png" />
+    <EmbeddedResource Include="Common\Dark\pic_retrieve.png" />
+    <EmbeddedResource Include="Common\Dark\pic_success.png" />
+    <EmbeddedResource Include="Common\Dark\pic_title_bar.png" />
+    <EmbeddedResource Include="Common\Dark\pic_wait.png" />
+    <EmbeddedResource Include="Common\Dark\pic_wechat.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HRB.Payment.Core\HRB.Payment.Core.csproj" />
+  </ItemGroup>
+
+</Project>

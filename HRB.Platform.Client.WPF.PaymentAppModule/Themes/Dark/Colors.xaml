@@ -1,0 +1,48 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--  暗黑主题  -->
+
+    <Brush x:Key="DmGoBackButtonBackgroundColor">Transparent</Brush>
+
+    <!--  主题色  -->
+    <!--<Brush x:Key="ThemeColor">#171C26</Brush>-->
+    <Brush x:Key="ThemeColor">#0E213D</Brush>
+
+    <!--  背景色  -->
+    <Brush x:Key="BackgroundColor">Black</Brush>
+
+    <Brush x:Key="MainPageButtonColor">#233B63</Brush>
+
+    <!--  通用文本颜色  -->
+    <Brush x:Key="ThemeTextColor">White</Brush>
+
+    <!--  二级文本颜色  -->
+    <Brush x:Key="SecondTextColor">#BABBBE</Brush>
+
+    <!--  默认边框颜色  -->
+    <Brush x:Key="BorderColor">White</Brush>
+
+    <!--  RadioButton选中颜色  -->
+    <Brush x:Key="RadioButtonCheckedColor">#08406F</Brush>
+
+    <!--  RadioButton默认颜色  -->
+    <Brush x:Key="RadioButtonColor">#3F4654</Brush>
+
+    <!--  RadioButton选中文本颜色  -->
+    <Brush x:Key="RadioButtonCheckedTextColor">White</Brush>
+
+    <!--  RadioButton默认文本颜色  -->
+    <Brush x:Key="RadioButtonTextColor">White</Brush>
+
+    <!--  分割线颜色  -->
+    <Brush x:Key="DividerColor">#283B5A</Brush>
+
+
+
+
+
+
+</ResourceDictionary>
+
+

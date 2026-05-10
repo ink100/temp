@@ -1,0 +1,26 @@
+﻿<abstractions:BaseWpfApplication x:Class="HRB.Payment.Client.App.App"
+                                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                                 xmlns:local="clr-namespace:HRB.Payment.Client.App"
+                                 xmlns:abstractions="clr-namespace:HRB.Platform.Client.WPF.Core.Instruments.Abstractions;assembly=HRB.Platform.Client.WPF.Core">
+    <Application.Resources>
+        <ResourceDictionary>
+
+            <ResourceDictionary.MergedDictionaries>
+
+
+                <ResourceDictionary Source="pack://application:,,,/HRB.Platform.Client.WPF.ControlsAppModule;component/Themes/Dark/Theme.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/HRB.Platform.Client.WPF.Platform;component/Themes/Dark/Theme.xaml" />
+
+                <ResourceDictionary Source="pack://application:,,,/HRB.Platform.Client.WPF.PaymentAppModule;component/Themes/Dark/Theme.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/HRB.Platform.Client.WPF.PaymentAppModule;component/Themes/Light/Theme.xaml" />
+
+
+
+
+            </ResourceDictionary.MergedDictionaries>
+
+
+        </ResourceDictionary>
+    </Application.Resources>
+</abstractions:BaseWpfApplication>

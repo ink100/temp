@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../Build/MsBuildFiles/Common.Header.props" />
+
+  <PropertyGroup>
+    <TargetFramework>$(CurrentWpfFrameworkTargetFramework)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <CurrentBuildProjectName>HRB.Platform.Client.WPF.PaymentAppModule.Core</CurrentBuildProjectName>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MsBuildFiles/Common.Footer.props" />
+  <Import Project="../../Build/MsBuildFiles/Common.Imports.targets" />
+  <ItemGroup>
+    <PackageReference Include="AlipaySDKNet.Standard" Version="4.9.954" />
+    <PackageReference Include="Edge_tts_sharp" Version="1.1.6" />
+    <PackageReference Include="Markdig.Wpf" Version="0.5.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HRB.Platform.Client.WPF.PaymentAppModule.Languages\HRB.Platform.Client.WPF.PaymentAppModule.Languages.csproj" />
+    <ProjectReference Include="..\HRB.Platform.Client.WPF.PaymentAppModule.Resources\HRB.Platform.Client.WPF.PaymentAppModule.Resources.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!--<Reference Include="APModule">
+      <HintPath>$(RootSharedBinaryFullPath)\Build\Payment\Debug\APModule.Shell\APModule.dll</HintPath>
+    </Reference>-->
+    <Reference Include="HRB.Payment.Message.Client">
+      <HintPath>$(RootSharedBinaryFullPath)\net9.0\HRB.Payment.Message.Client.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+
+
+
+</Project>

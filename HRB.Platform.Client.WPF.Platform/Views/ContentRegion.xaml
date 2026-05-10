@@ -1,0 +1,20 @@
+﻿<models1:BaseRegionUserControl x:Class="HRB.Platform.Client.WPF.Platform.Views.ContentRegion"
+                               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                               xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
+                               xmlns:models1="clr-namespace:HRB.Platform.Client.WPF.Core.Models;assembly=HRB.Platform.Client.WPF.Core"
+                               d:DesignHeight="450"
+                               d:DesignWidth="800"
+                               mc:Ignorable="d">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+
+
+        </StackPanel>
+    </Grid>
+
+
+</models1:BaseRegionUserControl>

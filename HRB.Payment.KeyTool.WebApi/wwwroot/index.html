@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HRB 授权文件生成</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 960px; margin: 40px auto; padding: 0 16px; color: #111827; }
+    h1 { margin-bottom: 8px; }
+    .muted { color: #6b7280; margin-bottom: 24px; }
+    label { display: block; font-weight: 600; margin-top: 12px; margin-bottom: 8px; }
+    textarea, input { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; }
+    textarea { min-height: 160px; resize: vertical; }
+    button { margin-top: 18px; background: #111827; color: white; border: none; padding: 12px 18px; border-radius: 10px; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .log { margin-top: 16px; white-space: pre-wrap; padding: 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; min-height: 50px; }
+  </style>
+</head>
+<body>
+  <h1>HRB 页面版授权生成</h1>
+  <div class="muted">页面直接输入 激活码 / Client Key 和有效天数，后端生成 .key 文件。当前暂不需要 OTP。</div>
+
+  <label for="clientKey">激活码 / Client Key</label>
+  <textarea id="clientKey" placeholder="请输入客户端提供的激活码 / Client Key"></textarea>
+
+  <label for="validDays">有效天数</label>
+  <input id="validDays" type="number" min="1" value="7" />
+
+  <button id="generateBtn">生成 .key 文件</button>
+  <div class="log" id="log"></div>
+
+  <script>
+    const btn = document.getElementById('generateBtn');
+    const log = document.getElementById('log');
+
+    btn.addEventListener('click', async () => {
+      const clientKey = document.getElementById('clientKey').value.trim();
+      const validDays = Number(document.getElementById('validDays').value || 0);
+
+      if (!clientKey || validDays <= 0) {
+        log.textContent = '请完整填写 激活码 / Client Key 和有效天数';
+        return;
+      }
+
+      btn.disabled = true;
+      log.textContent = '生成中...';
+
+      try {
+        const response = await fetch('/api/license/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clientKey, validDays })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || '生成失败');
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `license_${Date.now()}.key`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        log.textContent = '授权文件已生成并开始下载';
+      } catch (error) {
+        log.textContent = error instanceof Error ? error.message : '生成失败';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

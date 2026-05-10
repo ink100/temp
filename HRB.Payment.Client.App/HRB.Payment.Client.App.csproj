@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+
+  <Import Project="../../Build/MsBuildFiles/Common.Header.props" />
+
+  <PropertyGroup>
+
+    <CurrentReleaseNumbers>1.0.13</CurrentReleaseNumbers>
+
+
+    <TargetFramework>$(CurrentWpfFrameworkTargetFramework)</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <NoWarn>$(CurrentNoWarn)</NoWarn>
+    <CurrentBuildProjectName>HRB.Payment.Client.App</CurrentBuildProjectName>
+    <ApplicationIcon>z3du2-0fupz-001.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!--<ApplicationIcon>icon.ico</ApplicationIcon>-->
+
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MsBuildFiles/Common.Footer.props" />
+  <Import Project="../../Build/MsBuildFiles/Common.Imports.targets" />
+  <ItemGroup>
+    <Content Include="z3du2-0fupz-001.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HRB.Platform.Client.WPF.PaymentAppModule\HRB.Platform.Client.WPF.PaymentAppModule.csproj" />
+    <ProjectReference Include="..\HRB.Platform.Client.WPF.Platform\HRB.Platform.Client.WPF.Platform.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="ReadMe.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="..\..\免责条款与知情同意书.md">
+      <Link>免责条款与知情同意书.md</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="免责条款与知情同意书.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="..\..\支付消息通知服务知情同意书.md">
+      <Link>支付消息通知服务知情同意书.md</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="支付消息通知服务知情同意书.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+
+
+
+</Project>

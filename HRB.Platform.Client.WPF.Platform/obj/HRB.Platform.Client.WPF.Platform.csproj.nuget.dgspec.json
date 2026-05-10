@@ -1,0 +1,702 @@
+{
+  "format": 1,
+  "restore": {
+    "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform\\HRB.Platform.Client.WPF.Platform.csproj": {}
+  },
+  "projects": {
+    "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj",
+        "projectName": "HRB.Payment.Core",
+        "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj",
+        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+        "outputPath": "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "E:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "E:\\csProject\\HRB-Client\\NuGet.Config",
+          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "E:\\csProject\\HRB.Payment.Clien\\HRB.SharedBinary\\NuGet": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows",
+          "dependencies": {
+            "HRB.Platform.Client.WPF.Core.Packages": {
+              "target": "Package",
+              "version": "[1.0.1, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "NAudio": {
+              "target": "Package",
+              "version": "[2.2.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WPF": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Core\\HRB.Platform.Client.WPF.ControlsAppModule.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Core\\HRB.Platform.Client.WPF.ControlsAppModule.Core.csproj",
+        "projectName": "HRB.Platform.Client.WPF.ControlsAppModule.Core",
+        "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Core\\HRB.Platform.Client.WPF.ControlsAppModule.Core.csproj",
+        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+        "outputPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Core\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "E:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "E:\\csProject\\HRB-Client\\NuGet.Config",
+          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "E:\\csProject\\HRB.Payment.Clien\\HRB.SharedBinary\\NuGet": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows",
+            "projectReferences": {
+              "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Languages\\HRB.Platform.Client.WPF.ControlsAppModule.Languages.csproj": {
+                "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Languages\\HRB.Platform.Client.WPF.ControlsAppModule.Languages.csproj"
+              },
+              "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Resources\\HRB.Platform.Client.WPF.ControlsAppModule.Resources.csproj": {
+                "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Resources\\HRB.Platform.Client.WPF.ControlsAppModule.Resources.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WPF": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Languages\\HRB.Platform.Client.WPF.ControlsAppModule.Languages.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Languages\\HRB.Platform.Client.WPF.ControlsAppModule.Languages.csproj",
+        "projectName": "HRB.Platform.Client.WPF.ControlsAppModule.Languages",
+        "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Languages\\HRB.Platform.Client.WPF.ControlsAppModule.Languages.csproj",
+        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+        "outputPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Languages\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "E:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "E:\\csProject\\HRB-Client\\NuGet.Config",
+          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "E:\\csProject\\HRB.Payment.Clien\\HRB.SharedBinary\\NuGet": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows",
+            "projectReferences": {
+              "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj": {
+                "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WPF": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Resources\\HRB.Platform.Client.WPF.ControlsAppModule.Resources.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Resources\\HRB.Platform.Client.WPF.ControlsAppModule.Resources.csproj",
+        "projectName": "HRB.Platform.Client.WPF.ControlsAppModule.Resources",
+        "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Resources\\HRB.Platform.Client.WPF.ControlsAppModule.Resources.csproj",
+        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+        "outputPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Resources\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "E:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "E:\\csProject\\HRB-Client\\NuGet.Config",
+          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "E:\\csProject\\HRB.Payment.Clien\\HRB.SharedBinary\\NuGet": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows",
+            "projectReferences": {
+              "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj": {
+                "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WPF": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule\\HRB.Platform.Client.WPF.ControlsAppModule.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule\\HRB.Platform.Client.WPF.ControlsAppModule.csproj",
+        "projectName": "HRB.Platform.Client.WPF.ControlsAppModule",
+        "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule\\HRB.Platform.Client.WPF.ControlsAppModule.csproj",
+        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+        "outputPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "E:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "E:\\csProject\\HRB-Client\\NuGet.Config",
+          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "E:\\csProject\\HRB.Payment.Clien\\HRB.SharedBinary\\NuGet": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows",
+            "projectReferences": {
+              "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Core\\HRB.Platform.Client.WPF.ControlsAppModule.Core.csproj": {
+                "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule.Core\\HRB.Platform.Client.WPF.ControlsAppModule.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WPF": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Core\\HRB.Platform.Client.WPF.Platform.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Core\\HRB.Platform.Client.WPF.Platform.Core.csproj",
+        "projectName": "HRB.Platform.Client.WPF.Platform.Core",
+        "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Core\\HRB.Platform.Client.WPF.Platform.Core.csproj",
+        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+        "outputPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Core\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "E:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "E:\\csProject\\HRB-Client\\NuGet.Config",
+          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "E:\\csProject\\HRB.Payment.Clien\\HRB.SharedBinary\\NuGet": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows",
+            "projectReferences": {
+              "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule\\HRB.Platform.Client.WPF.ControlsAppModule.csproj": {
+                "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.ControlsAppModule\\HRB.Platform.Client.WPF.ControlsAppModule.csproj"
+              },
+              "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Languages\\HRB.Platform.Client.WPF.Platform.Languages.csproj": {
+                "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Languages\\HRB.Platform.Client.WPF.Platform.Languages.csproj"
+              },
+              "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Resources\\HRB.Platform.Client.WPF.Platform.Resources.csproj": {
+                "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Resources\\HRB.Platform.Client.WPF.Platform.Resources.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WPF": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Languages\\HRB.Platform.Client.WPF.Platform.Languages.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Languages\\HRB.Platform.Client.WPF.Platform.Languages.csproj",
+        "projectName": "HRB.Platform.Client.WPF.Platform.Languages",
+        "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Languages\\HRB.Platform.Client.WPF.Platform.Languages.csproj",
+        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+        "outputPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Languages\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "E:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "E:\\csProject\\HRB-Client\\NuGet.Config",
+          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "E:\\csProject\\HRB.Payment.Clien\\HRB.SharedBinary\\NuGet": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows",
+            "projectReferences": {
+              "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj": {
+                "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WPF": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Resources\\HRB.Platform.Client.WPF.Platform.Resources.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Resources\\HRB.Platform.Client.WPF.Platform.Resources.csproj",
+        "projectName": "HRB.Platform.Client.WPF.Platform.Resources",
+        "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Resources\\HRB.Platform.Client.WPF.Platform.Resources.csproj",
+        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+        "outputPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Resources\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "E:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "E:\\csProject\\HRB-Client\\NuGet.Config",
+          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "E:\\csProject\\HRB.Payment.Clien\\HRB.SharedBinary\\NuGet": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows",
+            "projectReferences": {
+              "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj": {
+                "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WPF": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform\\HRB.Platform.Client.WPF.Platform.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform\\HRB.Platform.Client.WPF.Platform.csproj",
+        "projectName": "HRB.Platform.Client.WPF.Platform",
+        "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform\\HRB.Platform.Client.WPF.Platform.csproj",
+        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+        "outputPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "E:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "E:\\csProject\\HRB-Client\\NuGet.Config",
+          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "E:\\csProject\\HRB.Payment.Clien\\HRB.SharedBinary\\NuGet": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows",
+            "projectReferences": {
+              "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj": {
+                "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Payment.Core\\HRB.Payment.Core.csproj"
+              },
+              "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Core\\HRB.Platform.Client.WPF.Platform.Core.csproj": {
+                "projectPath": "E:\\csProject\\HRB-Client\\src\\HRB.Platform.Client.WPF.Platform.Core\\HRB.Platform.Client.WPF.Platform.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WPF": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

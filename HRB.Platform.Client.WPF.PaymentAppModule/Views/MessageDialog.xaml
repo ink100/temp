@@ -1,0 +1,135 @@
+<UserControl x:Class="HRB.Platform.Client.WPF.PaymentAppModule.Views.MessageDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:HRB.Platform.Client.WPF.PaymentAppModule.Core.Converters;assembly=HRB.Platform.Client.WPF.PaymentAppModule.Core"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:viewmodels="clr-namespace:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels;assembly=HRB.Platform.Client.WPF.PaymentAppModule.Core"
+             MinWidth="400"
+             MaxWidth="600"
+             prism:ViewModelLocator.AutoWireViewModel="True">
+    <UserControl.Resources>
+        <!--  转换器  -->
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+        <!--  按钮样式  -->
+        <Style x:Key="DialogButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="20,10" />
+            <Setter Property="MinWidth" Value="100" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.9" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Padding="30" Background="White" CornerRadius="8">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="20" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  图标和标题  -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                <!--  图标  -->
+                <Grid Width="50" Height="50" Margin="0,0,15,0">
+                    <Ellipse x:Name="IconBackground">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="#0078D7" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Icon}" Value="Warning">
+                                        <Setter Property="Fill" Value="#FFA500" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Icon}" Value="Error">
+                                        <Setter Property="Fill" Value="#DC3545" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Icon}" Value="Question">
+                                        <Setter Property="Fill" Value="#0078D7" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Icon}" Value="Info">
+                                        <Setter Property="Fill" Value="#0078D7" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock x:Name="IconText"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="32"
+                               FontWeight="Bold"
+                               Foreground="White">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="ℹ" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Icon}" Value="Warning">
+                                        <Setter Property="Text" Value="⚠" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Icon}" Value="Error">
+                                        <Setter Property="Text" Value="✖" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Icon}" Value="Question">
+                                        <Setter Property="Text" Value="?" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Icon}" Value="Info">
+                                        <Setter Property="Text" Value="ℹ" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <!--  标题  -->
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Foreground="#333333"
+                           Text="{Binding Title}" />
+            </StackPanel>
+
+            <!--  消息内容  -->
+            <TextBlock Grid.Row="2"
+                       FontSize="16"
+                       Foreground="#666666"
+                       LineHeight="24"
+                       Text="{Binding Message}"
+                       TextWrapping="Wrap" />
+
+            <!--  按钮  -->
+            <StackPanel Grid.Row="4" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Background="#4CAF50"
+                        Command="{Binding OkCommand}"
+                        Content="确定"
+                        Style="{StaticResource DialogButtonStyle}" />
+                <Button Margin="10,0,0,0"
+                        Background="#DC3545"
+                        Command="{Binding CancelCommand}"
+                        Content="取消"
+                        Style="{StaticResource DialogButtonStyle}"
+                        Visibility="{Binding ShowCancel, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

@@ -1,0 +1,27 @@
+本次已优化 4 个核心服务文件：
+
+1. PaymentVoiceService.cs
+- 增加 SemaphoreSlim 串行语音队列，避免连续收款/取消/未支付提醒时多段语音重叠、漏播、抢声。
+- 去掉多层 Task.Run(async...)，减少线程池开销。
+- 统一昵称空值/空白处理。
+
+2. HttpNotificationService.cs
+- 去掉嵌套 Task.Run，调用方可继续 fire-and-forget。
+- 增加 URL 合法性校验，仅允许 http/https。
+- 增加 5 秒超时、2 次轻量重试、HTTP 状态码日志。
+- 使用静态 HttpClient，减少 socket/连接资源浪费。
+- JSON 改为 Formatting.None，减少通知体大小。
+
+3. WeChatService.cs
+- 修复 Process.GetProcessesByName 后未释放 Process 句柄的问题，降低长期运行内存/句柄增长风险。
+- 微信启动前增加压缩包、启动文件、版本结果校验。
+- KillAllWeChatProcessesAsync 使用 entireProcessTree 并增加日志。
+- StartWeChatAsync 捕获启动异常并记录日志。
+
+4. PluginKeepAliveService.cs
+- 增加插件恢复防抖，避免进程监控和心跳监控同时触发导致重复重启插件。
+- 恢复失败会记录具体异常。
+- StopMonitoring/StopAll 保持原接口不变。
+
+替换方式：
+把压缩包中的 HRB.Platform.Client.WPF.PaymentAppModule.Core/Services/ 下 4 个文件，覆盖到原项目相同路径即可。

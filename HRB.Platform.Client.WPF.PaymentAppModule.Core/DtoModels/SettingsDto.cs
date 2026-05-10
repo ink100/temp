@@ -1,0 +1,153 @@
+using HRB.Platform.Client.Core.Enums;
+using HRB.Platform.Client.Core.Interfaces;
+
+namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
+{
+
+    public class SettingsDto : ISettings
+    {
+
+        public DateTime CreateDateTime { get; set; }
+        public DateTime LastUpdateDateTime { get; set; }
+
+        /// <summary>
+        /// 是否启用支付宝支付
+        /// </summary>
+        public bool IsAlipayEnabled { get; set; } = false;
+
+        /// <summary>
+        /// 是否启用微信支付
+        /// </summary>
+        public bool IsWeChatEnabled { get; set; } = false;
+
+        /// <summary>
+        /// 插件生命周期是否启用新模式（看门狗协同模式）
+        /// false: 旧模式（主程序主导）
+        /// true: 新模式（逐步切换）
+        /// </summary>
+        public bool UseNewPluginLifecycleMode { get; set; } = false;
+
+        /// <summary>
+        /// 字体大小
+        /// </summary>
+        public double FontSize { get; set; } = 60;
+
+        /// <summary>
+        /// 支付宝未支付昵称提醒播报
+        /// </summary>
+        public bool IsAlipayNicknameReminderEnabled { get; set; } = false;
+
+        /// <summary>
+        /// 微信未支付昵称提醒播报
+        /// </summary>
+        public bool IsWeChatNicknameReminderEnabled { get; set; } = false;
+
+        /// <summary>
+        /// 是否启用开机自启动
+        /// </summary>
+        public bool IsAutoStartEnabled { get; set; } = false;
+
+        /// <summary>
+        /// 店铺名称
+        /// </summary>
+        public string StoreName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 维护人员联系方式
+        /// </summary>
+        public string MaintenanceContact { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 是否启用新交易记录自动滚动到顶部
+        /// </summary>
+        public bool IsAutoScrollToLatestEnabled { get; set; } = false;
+
+        /// <summary>
+        /// 是否启用每天凌晨 1 点自动同步 Windows 系统时间
+        /// </summary>
+        public bool IsAutoSyncSystemTimeEnabled { get; set; } = false;
+
+        /// <summary>
+        /// 最近一次 Windows 系统时间同步时间
+        /// </summary>
+        public DateTime? LastSystemTimeSyncTime { get; set; }
+
+        /// <summary>
+        /// 最近一次 Windows 系统时间同步结果
+        /// </summary>
+        public string LastSystemTimeSyncResult { get; set; } = string.Empty;
+
+
+        /// <summary>
+        /// 是否开启扫码未支付提醒音
+        /// </summary>
+        public bool IsScanNotPayVoiceEnabled { get; set; } = true;
+
+        /// <summary>
+        /// 扫码后多少秒仍未支付，判定为超时未支付
+        /// </summary>
+        public int ScanTimeoutSeconds { get; set; } = 10;
+
+        /// <summary>
+        /// 扫码未支付提醒间隔秒数
+        /// </summary>
+        public int ScanNotPayNotifyIntervalSeconds { get; set; } = 10;
+
+        /// <summary>
+        /// 单笔订单扫码未支付最多提醒次数。默认 1 次；提醒间隔和超时秒数均默认 10 秒时，会在第 10 秒提醒一次并超时取消。
+        /// </summary>
+        public int ScanNotPayVoiceRepeatCount { get; set; } = 1;
+
+        /// <summary>
+        /// 同一类语音重复播报时，两次播报之间的间隔秒数，默认 1 秒。
+        /// </summary>
+        public int VoiceRepeatIntervalSeconds { get; set; } = 1;
+
+        /// <summary>
+        /// 是否播报上次未支付提醒
+        /// </summary>
+        public bool IsPriorUnpaidVoiceEnabled { get; set; } = true;
+
+        /// <summary>
+        /// 上次未支付提醒播报次数
+        /// </summary>
+        public int PriorUnpaidVoiceRepeatCount { get; set; } = 2;
+
+        /// <summary>
+        /// 是否开启支付取消通知
+        /// </summary>
+        public bool IsPaymentCancelledVoiceEnabled { get; set; } = true;
+
+        /// <summary>
+        /// 支付取消通知播报次数
+        /// </summary>
+        public int PaymentCancelledVoiceRepeatCount { get; set; } = 2;
+
+        /// <summary>
+        /// 是否开启支付成功金额播报
+        /// </summary>
+        public bool IsPaymentSuccessVoiceEnabled { get; set; } = true;
+
+        /// <summary>
+        /// TTS 音色名称。为空时使用默认中文音色。
+        /// </summary>
+        public string TtsVoiceName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// TTS 语速百分比，0 为正常，负数变慢，正数变快。
+        /// </summary>
+        public int TtsRate { get; set; } = 0;
+
+        /// <summary>
+        /// TTS 音量百分比，默认 100。
+        /// </summary>
+        public int TtsVolume { get; set; } = 100;
+
+        /// <summary>
+        /// 金额显示颜色，十六进制格式，例如 #F01F1B。
+        /// </summary>
+        public string AmountColorHex { get; set; } = "#F01F1B";
+
+    }
+
+}

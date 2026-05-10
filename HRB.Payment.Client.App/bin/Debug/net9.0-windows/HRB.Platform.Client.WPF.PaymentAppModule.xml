@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HRB.Platform.Client.WPF.PaymentAppModule</name>
+    </assembly>
+    <members>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Views.HistoryPage">
+            <summary>
+            Interaction logic for HistoryView.xaml
+            </summary>
+            <summary>
+            HistoryPage
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Views.HistoryPage.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Views.MainPage">
+            <summary>
+            MainPage.xaml 的交互逻辑
+            </summary>
+            <summary>
+            MainPage
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Views.MainPage.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Views.MessageDialog">
+            <summary>
+            MessageDialog.xaml 的交互逻辑
+            </summary>
+            <summary>
+            MessageDialog
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Views.MessageDialog.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Views.NotificationConsentDialog">
+            <summary>
+            NotificationConsentDialog.xaml 的交互逻辑
+            </summary>
+            <summary>
+            NotificationConsentDialog
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Views.NotificationConsentDialog.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Views.PaymentShell">
+            <summary>
+            PaymentShell.xaml 的交互逻辑
+            </summary>
+            <summary>
+            PaymentShell
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Views.PaymentShell.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Views.PluginLogPage">
+            <summary>
+            PluginLogPage.xaml 的交互逻辑
+            </summary>
+            <summary>
+            PluginLogPage
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Views.PluginLogPage.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Views.SettingsPage">
+            <summary>
+            SettingsPage.xaml 的交互逻辑
+            </summary>
+            <summary>
+            SettingsPage
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Views.SettingsPage.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Views.UserAgreementDialog">
+            <summary>
+            UserAgreementDialog.xaml 的交互逻辑
+            </summary>
+            <summary>
+            UserAgreementDialog
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Views.UserAgreementDialog.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Views.V2.MainPageV2">
+            <summary>
+            MainPageV2
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Views.V2.MainPageV2.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Views.V2.SettingsPageV2">
+            <summary>
+            SettingsPageV2
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Views.V2.SettingsPageV2.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+    </members>
+</doc>

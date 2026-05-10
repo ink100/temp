@@ -1,0 +1,367 @@
+﻿<models:BaseRegionUserControl x:Class="HRB.Platform.Client.WPF.PaymentAppModule.Views.V2.MainPageV2"
+                              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                              xmlns:controlExtensions="clr-namespace:HRB.Platform.Client.WPF.PaymentAppModule.Core.ControlExtensions;assembly=HRB.Platform.Client.WPF.PaymentAppModule.Core"
+                              xmlns:converters="clr-namespace:HRB.Platform.Client.WPF.PaymentAppModule.Core.Converters;assembly=HRB.Platform.Client.WPF.PaymentAppModule.Core"
+                              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                              xmlns:models="clr-namespace:HRB.Platform.Client.WPF.Core.Models;assembly=HRB.Platform.Client.WPF.Core"
+                              xmlns:resource="clr-namespace:HRB.Platform.Client.WPF.PaymentAppModule.Resources;assembly=HRB.Platform.Client.WPF.PaymentAppModule.Resources"
+                              xmlns:v2="clr-namespace:HRB.Platform.Client.WPF.PaymentAppModule.Core.V2;assembly=HRB.Platform.Client.WPF.PaymentAppModule.Core"
+                              d:DataContext="{d:DesignInstance v2:MainPageV2ViewModel}"
+                              d:DesignHeight="1080"
+                              d:DesignWidth="1920"
+                              mc:Ignorable="d">
+    <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <Style x:Key="DataGridTextColumnStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#333333" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="DataGridAmountStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#333333" />
+            <Setter Property="Background" Value="#F5F5F5" />
+            <Setter Property="BorderBrush" Value="#E0E0E0" />
+            <Setter Property="BorderThickness" Value="0,0,0,2" />
+            <Setter Property="Padding" Value="20,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="MinHeight" Value="60" />
+        </Style>
+        <Style x:Key="HoverButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.9" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="StatusIndicatorStyle" TargetType="Ellipse">
+            <Setter Property="Fill" Value="#DC3545" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding}" Value="True">
+                    <Setter Property="Fill" Value="#4CAF50" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--  Row 0: 头部栏  -->
+        <Grid Grid.Row="0" Background="Transparent">
+
+            <TextBlock Margin="20,0,0,0"
+                       VerticalAlignment="Center"
+                       FontSize="{Binding BaseFontSize}"
+                       FontWeight="Bold"
+                       Foreground="#333333"
+                       Text="{Binding CurrentTime}" />
+
+            <TextBlock HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontSize="{Binding BaseFontSize}"
+                       FontStyle="Italic"
+                       FontWeight="Bold"
+                       Foreground="#333333"
+                       Text="{Binding StoreName}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StoreName}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <Border Margin="0,0,10,0"
+                    Padding="8"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Background="#CCFFFFFF"
+                    CornerRadius="8">
+                <StackPanel Orientation="Horizontal">
+
+                    <!--  插件状态面板 (始终显示)  -->
+                    <Border Margin="0,0,10,0"
+                            Padding="8"
+                            Background="#CCFFFFFF"
+                            CornerRadius="8">
+                        <StackPanel>
+                            <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                                <Ellipse Width="10" Height="10" VerticalAlignment="Center">
+                                    <Ellipse.Style>
+                                        <Style BasedOn="{StaticResource StatusIndicatorStyle}" TargetType="Ellipse">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsAlipayAvailable}" Value="True">
+                                                    <Setter Property="Fill" Value="#4CAF50" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ellipse.Style>
+                                </Ellipse>
+                                <TextBlock Margin="8,0,0,0"
+                                           FontSize="12"
+                                           Foreground="#333333"
+                                           Text="支付宝" />
+                                <TextBlock Margin="8,0,0,0"
+                                           FontSize="12"
+                                           Foreground="#666666"
+                                           Text="{Binding AlipayStatusMessage}" />
+                            </StackPanel>
+                            <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                                <Ellipse Width="10" Height="10" VerticalAlignment="Center">
+                                    <Ellipse.Style>
+                                        <Style BasedOn="{StaticResource StatusIndicatorStyle}" TargetType="Ellipse">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsWeChatAvailable}" Value="True">
+                                                    <Setter Property="Fill" Value="#4CAF50" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ellipse.Style>
+                                </Ellipse>
+                                <TextBlock Margin="8,0,0,0"
+                                           FontSize="12"
+                                           Foreground="#333333"
+                                           Text="微信" />
+                                <TextBlock Margin="8,0,0,0"
+                                           FontSize="12"
+                                           Foreground="#666666"
+                                           Text="{Binding WeChatStatusMessage}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!--  字体大小 + 导航按钮  -->
+                    <StackPanel Orientation="Horizontal">
+                        <Button Background="#6C757D"
+                                Command="{Binding SetSmallFontCommand}"
+                                Content="小"
+                                Style="{StaticResource HoverButtonStyle}" />
+                        <Button Margin="15,0,0,0"
+                                Background="#6C757D"
+                                Command="{Binding SetMediumFontCommand}"
+                                Content="中"
+                                Style="{StaticResource HoverButtonStyle}" />
+                        <Button Margin="15,0,0,0"
+                                Background="#6C757D"
+                                Command="{Binding SetLargeFontCommand}"
+                                Content="大"
+                                Style="{StaticResource HoverButtonStyle}" />
+                        <Border Width="2"
+                                Height="30"
+                                Margin="15,0"
+                                Background="#CCCCCC" />
+                        <Button Background="#28A745"
+                                Command="{Binding NavigateToHistoryCommand}"
+                                Content="查询"
+                                Style="{StaticResource HoverButtonStyle}" />
+                        <Button Margin="15,0,0,0"
+                                Background="#0078D7"
+                                Command="{Binding NavigateToSettingsCommand}"
+                                Content="设置"
+                                Style="{StaticResource HoverButtonStyle}" />
+                        <Button Margin="15,0,0,0"
+                                Background="#DC3545"
+                                Command="{Binding ExitCommand}"
+                                Content="退出"
+                                Style="{StaticResource HoverButtonStyle}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!--  Row 1: 交易记录表格  -->
+        <Grid Grid.Row="1" Margin="20,0,20,20">
+            <DataGrid x:Name="TransactionsDataGrid"
+                      AutoGenerateColumns="False"
+                      Background="White"
+                      BorderThickness="0"
+                      CanUserReorderColumns="False"
+                      CanUserResizeColumns="False"
+                      CanUserSortColumns="False"
+                      ColumnHeaderHeight="60"
+                      FontSize="{Binding DataContext.BaseFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      HorizontalGridLinesBrush="#E0E0E0"
+                      IsReadOnly="True"
+                      ItemsSource="{Binding Transactions}"
+                      SelectionMode="Single"
+                      SelectionUnit="FullRow"
+                      VerticalGridLinesBrush="Transparent">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Width="1*"
+                                        Binding="{Binding TimeOnly}"
+                                        ElementStyle="{StaticResource DataGridTextColumnStyle}"
+                                        Header="时间"
+                                        HeaderStyle="{StaticResource DataGridColumnHeaderStyle}" />
+                    <DataGridTemplateColumn Width="1.5*" Header="支付渠道">
+                        <DataGridTemplateColumn.HeaderStyle>
+                            <StaticResource ResourceKey="DataGridColumnHeaderStyle" />
+                        </DataGridTemplateColumn.HeaderStyle>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
+                                    <Image Width="{Binding DataContext.BaseFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}" VerticalAlignment="Center">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding PaymentChannel}" Value="Alipay">
+                                                        <Setter Property="Source" Value="{controlExtensions:ImageResource Source={x:Static resource:ResourceConstKeys.COMMON_THEME_PIC_ALIPAY_PNG}}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding PaymentChannel}" Value="WeChat">
+                                                        <Setter Property="Source" Value="{controlExtensions:ImageResource Source={x:Static resource:ResourceConstKeys.COMMON_THEME_PIC_WECHAT_PNG}}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                    <TextBlock Margin="10,0"
+                                               VerticalAlignment="Center"
+                                               FontSize="{Binding DataContext.BaseFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               Text="{Binding PaymentChannelDisplay}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="0.5*" Header="状态">
+                        <DataGridTemplateColumn.HeaderStyle>
+                            <StaticResource ResourceKey="DataGridColumnHeaderStyle" />
+                        </DataGridTemplateColumn.HeaderStyle>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
+                                    <Image Width="{Binding DataContext.AmountFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}" VerticalAlignment="Center">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Scan">
+                                                        <Setter Property="Source" Value="{controlExtensions:ImageResource Source={x:Static resource:ResourceConstKeys.COMMON_THEME_PIC_WAIT_PNG}}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Success">
+                                                        <Setter Property="Source" Value="{controlExtensions:ImageResource Source={x:Static resource:ResourceConstKeys.COMMON_THEME_PIC_SUCCESS_PNG}}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Cancel">
+                                                        <Setter Property="Source" Value="{controlExtensions:ImageResource Source={x:Static resource:ResourceConstKeys.COMMON_THEME_PIC_FAIL_PNG}}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="3*" Header="金额">
+                        <DataGridTemplateColumn.HeaderStyle>
+                            <StaticResource ResourceKey="DataGridColumnHeaderStyle" />
+                        </DataGridTemplateColumn.HeaderStyle>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontSize="{Binding DataContext.AmountFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                           Text="{Binding AmountDisplay}">
+                                    <TextBlock.Style>
+                                        <Style BasedOn="{StaticResource DataGridAmountStyle}" TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding PaymentChannel}" Value="Alipay">
+                                                    <Setter Property="Foreground" Value="#F01F1B" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding PaymentChannel}" Value="WeChat">
+                                                    <Setter Property="Foreground" Value="#F01F1B" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!--  Binding="{Binding Remarks}"  -->
+
+                    <DataGridTextColumn Width="2*"
+                                        ElementStyle="{StaticResource DataGridTextColumnStyle}"
+                                        Header="备注"
+                                        HeaderStyle="{StaticResource DataGridColumnHeaderStyle}" />
+                </DataGrid.Columns>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Background" Value="White" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="MinHeight" Value="{Binding DataContext.RowHeight, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Status}" Value="Scan">
+                                <Setter Property="Background" Value="#FFF3E0" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="Cancel">
+                                <Setter Property="Background" Value="#FFB3B3" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Padding" Value="20,0" />
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                        <Setter Property="FontSize" Value="{Binding DataContext.BaseFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                    </Style>
+                </DataGrid.CellStyle>
+            </DataGrid>
+        </Grid>
+
+        <!--  Row 2: 维护联系人  -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding MaintenanceContact}" Value="">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+            <TextBlock FontSize="{Binding BaseFontSize}" FontWeight="Bold" Text="安装维护电话：" />
+            <TextBlock FontSize="{Binding BaseFontSize}"
+                       FontWeight="Bold"
+                       Foreground="#333333"
+                       Text="{Binding MaintenanceContact}" />
+        </StackPanel>
+    </Grid>
+</models:BaseRegionUserControl>

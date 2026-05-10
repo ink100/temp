@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HRB.Platform.Client.WPF.Platform</name>
+    </assembly>
+    <members>
+        <member name="T:HRB.Platform.Client.WPF.Platform.Views.ContentRegion">
+            <summary>
+            ContentRegion
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.Platform.Views.ContentRegion.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.Platform.Views.WindowShell">
+            <summary>
+            WindowShell.xaml 的交互逻辑
+            </summary>
+            <summary>
+            WindowShell
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.Platform.Views.WindowShell.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+    </members>
+</doc>

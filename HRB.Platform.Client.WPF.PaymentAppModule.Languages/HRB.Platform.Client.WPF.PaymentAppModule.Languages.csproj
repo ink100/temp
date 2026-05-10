@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../Build/MsBuildFiles/Common.Header.props" />
+
+  <PropertyGroup>
+    <TargetFramework>$(CurrentWpfFrameworkTargetFramework)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <CurrentBuildProjectName>HRB.Platform.Client.WPF.PaymentAppModule.Languages</CurrentBuildProjectName>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MsBuildFiles/Common.Footer.props" />
+  <Import Project="../../Build/MsBuildFiles/Common.Imports.targets" />
+  <Import Project="../../Build/MsBuildFiles/Common.Imports.Tools.targets" />
+  <ItemGroup>
+    <None Remove="CN.json" />
+    <None Remove="EN.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CN.json" />
+    <EmbeddedResource Include="EN.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HRB.Payment.Core\HRB.Payment.Core.csproj" />
+  </ItemGroup>
+
+
+
+</Project>

@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HRB.Platform.Client.WPF.ControlsAppModule.Languages</name>
+    </assembly>
+    <members>
+        <member name="F:HRB.Platform.Client.WPF.ControlsAppModule.Languages.LanguageEnums.CN_Name">
+            <summary>
+            中文
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.ControlsAppModule.Languages.LanguageEnums.EN_Name">
+            <summary>
+            英文
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.ControlsAppModule.Languages.LanguageEnums.Controls_AppModule_Name">
+            <summary>
+            控件库
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.ControlsAppModule.Languages.LanguageEnums.Button_OK">
+            <summary>
+            确定
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.ControlsAppModule.Languages.LanguageEnums.Button_Cancel">
+            <summary>
+            取消
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.ControlsAppModule.Languages.LanguageEnums.Hint">
+            <summary>
+            提示
+            </summary>
+        </member>
+    </members>
+</doc>

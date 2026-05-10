@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../Build/MsBuildFiles/Common.Header.props" />
+
+  <PropertyGroup>
+    <TargetFramework>$(CurrentWpfFrameworkTargetFramework)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <CurrentBuildProjectName>HRB.Platform.Client.WPF.ControlsAppModule.Resources</CurrentBuildProjectName>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MsBuildFiles/Common.Footer.props" />
+  <Import Project="../../Build/MsBuildFiles/Common.Imports.targets" />
+  <Import Project="../../Build/MsBuildFiles/Common.Imports.Tools.targets" />
+  <ItemGroup>
+    <None Remove="Common\Dark\pic_retrieve.png" />
+    <None Remove="Common\Dark\pic_title_bar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Common\Dark\pic_retrieve.png" />
+    <EmbeddedResource Include="Common\Dark\pic_title_bar.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HRB.Payment.Core\HRB.Payment.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="CN\" />
+    <Folder Include="EN\" />
+  </ItemGroup>
+
+
+
+</Project>

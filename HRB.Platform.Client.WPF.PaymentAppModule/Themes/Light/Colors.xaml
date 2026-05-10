@@ -1,0 +1,38 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--  浅色主题  -->
+
+    <Brush x:Key="ThemeColor">White</Brush>
+
+    <!--  通用字体色  -->
+    <Brush x:Key="ThemeTextColor">Black</Brush>
+
+
+    <Brush x:Key="MainPageButtonColor">White</Brush>
+
+    <!--  二级文本颜色  -->
+    <Brush x:Key="SecondTextColor">#444444</Brush>
+
+    <!--  默认边框颜色  -->
+    <Brush x:Key="BorderColor">#444444</Brush>
+
+
+    <!--  背景色  -->
+    <Brush x:Key="BackgroundColor">#EAECEF</Brush>
+
+    <!--  RadioButton选中颜色  -->
+    <Brush x:Key="RadioButtonCheckedColor">#E4EDFF</Brush>
+
+    <!--  RadioButton默认颜色  -->
+    <Brush x:Key="RadioButtonColor">#F7F9FA</Brush>
+
+    <!--  RadioButton选中文本颜色  -->
+    <Brush x:Key="RadioButtonCheckedTextColor">#556FF6</Brush>
+
+    <!--  RadioButton默认文本颜色  -->
+    <Brush x:Key="RadioButtonTextColor">Black</Brush>
+
+    <!--  分割线颜色  -->
+    <Brush x:Key="DividerColor">#EDEDED</Brush>
+
+</ResourceDictionary>

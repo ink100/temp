@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../Build/MsBuildFiles/Common.Header.props" />
+
+  <PropertyGroup>
+    <TargetFramework>$(CurrentWpfFrameworkTargetFramework)</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <CurrentBuildProjectName>HRB.Platform.Client.WPF.ControlsAppModule</CurrentBuildProjectName>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MsBuildFiles/Common.Footer.props" />
+  <Import Project="../../Build/MsBuildFiles/Common.Imports.targets" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\HRB.Platform.Client.WPF.ControlsAppModule.Core\HRB.Platform.Client.WPF.ControlsAppModule.Core.csproj" />
+  </ItemGroup>
+
+
+</Project>

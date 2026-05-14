@@ -11,6 +11,9 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
+using Application = System.Windows.Application;
+using Clipboard = System.Windows.Clipboard;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
 {

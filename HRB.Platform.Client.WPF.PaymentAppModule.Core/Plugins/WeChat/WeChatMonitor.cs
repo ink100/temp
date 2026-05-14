@@ -4,6 +4,7 @@ using HRB.Platform.Client.Core.Interfaces;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Extensions;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Services;
 using System.Windows;
+using Application = System.Windows.Application;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
 {

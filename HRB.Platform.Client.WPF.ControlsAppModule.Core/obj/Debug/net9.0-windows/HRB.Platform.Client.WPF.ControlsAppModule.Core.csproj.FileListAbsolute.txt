@@ -1,3 +1,9 @@
+E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.csproj.AssemblyReference.cache
+E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.GeneratedMSBuildEditorConfig.editorconfig
+E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.AssemblyInfoInputs.cache
+E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.AssemblyInfo.cs
+E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.csproj.CoreCompileInputs.cache
+E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.sourcelink.json
 E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\bin\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.xml
 E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\bin\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.deps.json
 E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\bin\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.dll
@@ -23,12 +29,6 @@ E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\bin\D
 E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\bin\Debug\net9.0-windows\HRB.Platform.Core.xml
 E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\bin\Debug\net9.0-windows\HRB.Platform.Client.Core.xml
 E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\bin\Debug\net9.0-windows\HRB.Platform.Client.WPF.Core.xml
-E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.csproj.AssemblyReference.cache
-E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.GeneratedMSBuildEditorConfig.editorconfig
-E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.AssemblyInfoInputs.cache
-E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.AssemblyInfo.cs
-E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.csproj.CoreCompileInputs.cache
-E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.sourcelink.json
 E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Plat.F1B71342.Up2Date
 E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\HRB.Platform.Client.WPF.ControlsAppModule.Core.dll
 E:\csProject\HRB-Client\src\HRB.Platform.Client.WPF.ControlsAppModule.Core\obj\Debug\net9.0-windows\refint\HRB.Platform.Client.WPF.ControlsAppModule.Core.dll

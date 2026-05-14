@@ -17,7 +17,14 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using MediaBrush = System.Windows.Media.Brush;
 using WinForms = System.Windows.Forms;
+using Color = System.Windows.Media.Color;
+using ColorConverter = System.Windows.Media.ColorConverter;
+using Brushes = System.Windows.Media.Brushes;
+using Application = System.Windows.Application;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using Clipboard = System.Windows.Clipboard;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
 {
@@ -319,7 +326,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             }
         } = "#F01F1B";
 
-        public Brush AmountColorPreviewBrush
+        public MediaBrush AmountColorPreviewBrush
         {
             get;
             set => SetProperty(ref field, value);
@@ -683,7 +690,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             }
         }
 
-        private static Brush BuildBrush(string? colorHex)
+        private static MediaBrush BuildBrush(string? colorHex)
         {
             try
             {

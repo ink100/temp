@@ -5,6 +5,8 @@ using HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 {

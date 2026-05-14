@@ -14,6 +14,7 @@ using System.IO;
 using System.Management;
 using System.Reflection;
 using System.Windows;
+using Application = System.Windows.Application;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
 {

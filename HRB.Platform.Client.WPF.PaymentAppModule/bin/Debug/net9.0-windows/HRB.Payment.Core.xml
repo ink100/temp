@@ -39,6 +39,12 @@
             支付状态
             </summary>
         </member>
+        <member name="P:HRB.Payment.Core.Models.TransactionRecord.LedgerIdentifierDisplay">
+            <summary>
+            台账界面使用的渠道唯一标识。
+            支付宝显示流水单号/订单号；微信显示 wxid。
+            </summary>
+        </member>
         <member name="P:HRB.Payment.Core.Models.TransactionRecord.StatusDisplay">
             <summary>
             状态显示文本

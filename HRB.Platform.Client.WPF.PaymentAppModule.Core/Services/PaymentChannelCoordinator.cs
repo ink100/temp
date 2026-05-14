@@ -3,6 +3,7 @@ using HRB.Platform.Client.Core.Interfaces;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration;
 using System.Diagnostics;
 using System.Windows;
+using MessageBox = System.Windows.MessageBox;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 {

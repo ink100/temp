@@ -1,8 +1,11 @@
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
+using WpfControl = System.Windows.Controls.Control;
+using WpfRichTextBox = System.Windows.Controls.RichTextBox;
 using System.Windows.Documents;
 using System.Windows.Media;
+using Color = System.Windows.Media.Color;
+using FontFamily = System.Windows.Media.FontFamily;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls
 {
@@ -10,9 +13,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls
     /// Markdown查看器控件
     /// 支持基本的Markdown语法渲染
     /// </summary>
-    public class MarkdownViewer : Control
+    public class MarkdownViewer : WpfControl
     {
-        private RichTextBox _richTextBox;
+        private WpfRichTextBox? _richTextBox;
 
         static MarkdownViewer()
         {
@@ -43,7 +46,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-            _richTextBox = GetTemplateChild("PART_RichTextBox") as RichTextBox;
+            _richTextBox = GetTemplateChild("PART_RichTextBox") as WpfRichTextBox;
             RenderMarkdown();
         }
 

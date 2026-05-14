@@ -1,3 +1,8 @@
+E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\HRB.Payment.Client.App.csproj.AssemblyReference.cache
+E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\HRB.Payment.Client.App_Content.g.cs
+E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\HRB.Payment.Client.App_MarkupCompile.cache
+E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\App.g.cs
+E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\HRB.Payment.Client.App_MarkupCompile.lref
 E:\csProject\HRB-Client\src\HRB.Payment.Client.App\bin\Debug\net9.0-windows\ReadMe.txt
 E:\csProject\HRB-Client\src\HRB.Payment.Client.App\bin\Debug\net9.0-windows\HRB.Payment.Client.App.exe
 E:\csProject\HRB-Client\src\HRB.Payment.Client.App\bin\Debug\net9.0-windows\免责条款与知情同意书.md
@@ -215,11 +220,6 @@ E:\csProject\HRB-Client\src\HRB.Payment.Client.App\bin\Debug\net9.0-windows\HRB.
 E:\csProject\HRB-Client\src\HRB.Payment.Client.App\bin\Debug\net9.0-windows\HRB.Platform.Client.Core.xml
 E:\csProject\HRB-Client\src\HRB.Payment.Client.App\bin\Debug\net9.0-windows\HRB.Platform.Client.WPF.Core.xml
 E:\csProject\HRB-Client\src\HRB.Payment.Client.App\bin\Debug\net9.0-windows\HRB.Payment.Message.Client.xml
-E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\HRB.Payment.Client.App.csproj.AssemblyReference.cache
-E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\App.g.cs
-E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\HRB.Payment.Client.App_Content.g.cs
-E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\HRB.Payment.Client.App_MarkupCompile.cache
-E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\HRB.Payment.Client.App_MarkupCompile.lref
 E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\App.baml
 E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\HRB.Payment.Client.App.g.resources
 E:\csProject\HRB-Client\src\HRB.Payment.Client.App\obj\Debug\net9.0-windows\HRB.Payment.Client.App.GeneratedMSBuildEditorConfig.editorconfig

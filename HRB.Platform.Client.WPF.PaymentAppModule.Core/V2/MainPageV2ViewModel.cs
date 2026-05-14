@@ -2,10 +2,8 @@
 using HRB.Payment.Core.Helpers;
 using HRB.Payment.Core.Models;
 using HRB.Payment.Core.Services;
-using HRB.Payment.Message.Client.BusEvents;
 using HRB.Payment.Message.Core.BusEvents;
 using HRB.Platform.Client.Core.ExtensionFunctions;
-using HRB.Platform.Client.Core.Interfaces;
 using HRB.Platform.Client.WPF.Core.Services.IServices;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay;
@@ -15,6 +13,8 @@ using HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
 {

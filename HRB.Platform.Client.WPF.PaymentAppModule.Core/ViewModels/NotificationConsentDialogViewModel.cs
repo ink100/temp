@@ -4,6 +4,7 @@ using Prism.Dialogs;
 using System;
 using System.IO;
 using System.Windows.Input;
+using DialogResult = Prism.Dialogs.DialogResult;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
 {

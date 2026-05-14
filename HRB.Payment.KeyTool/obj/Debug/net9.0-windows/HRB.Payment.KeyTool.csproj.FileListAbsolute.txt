@@ -1,3 +1,8 @@
+E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\HRB.Payment.KeyTool.csproj.AssemblyReference.cache
+E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\MainWindow.g.cs
+E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\App.g.cs
+E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\HRB.Payment.KeyTool_MarkupCompile.cache
+E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\HRB.Payment.KeyTool_MarkupCompile.lref
 E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\bin\Debug\net9.0-windows\HRB.Payment.KeyTool.exe
 E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\bin\Debug\net9.0-windows\HRB.Payment.KeyTool.deps.json
 E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\bin\Debug\net9.0-windows\HRB.Payment.KeyTool.runtimeconfig.json
@@ -157,11 +162,6 @@ E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\bin\Debug\net9.0-windows\HRB.Pla
 E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\bin\Debug\net9.0-windows\HRB.Payment.Core.pdb
 E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\bin\Debug\net9.0-windows\HRB.Payment.Core.xml
 E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\bin\Debug\net9.0-windows\HRB.Platform.Client.Core.xml
-E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\HRB.Payment.KeyTool.csproj.AssemblyReference.cache
-E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\MainWindow.g.cs
-E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\App.g.cs
-E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\HRB.Payment.KeyTool_MarkupCompile.cache
-E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\HRB.Payment.KeyTool_MarkupCompile.lref
 E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\MainWindow.baml
 E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\HRB.Payment.KeyTool.g.resources
 E:\csProject\HRB-Client\src\HRB.Payment.KeyTool\obj\Debug\net9.0-windows\HRB.Payment.KeyTool.GeneratedMSBuildEditorConfig.editorconfig

@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v9.0": {
-      "HRB.Payment.Client.App/1.0.11": {
+      "HRB.Payment.Client.App/1.0.13": {
         "dependencies": {
           "HRB.Platform.Client.WPF.PaymentAppModule": "1.0.0",
           "HRB.Platform.Client.WPF.Platform": "1.0.0",
@@ -2381,7 +2381,7 @@
         "runtime": {
           "HRB.Payment.Core.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2392,7 +2392,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.ControlsAppModule.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2404,7 +2404,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.ControlsAppModule.Core.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2415,7 +2415,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.ControlsAppModule.Languages.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2426,7 +2426,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.ControlsAppModule.Resources.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2437,7 +2437,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.PaymentAppModule.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2452,7 +2452,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.PaymentAppModule.Core.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2463,7 +2463,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.PaymentAppModule.Languages.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2474,7 +2474,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.PaymentAppModule.Resources.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2486,7 +2486,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.Platform.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2499,7 +2499,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.Platform.Core.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2510,7 +2510,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.Platform.Languages.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2521,7 +2521,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.Platform.Resources.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1804"
+            "fileVersion": "2026.5.13.934"
           }
         }
       },
@@ -2584,7 +2584,7 @@
     }
   },
   "libraries": {
-    "HRB.Payment.Client.App/1.0.11": {
+    "HRB.Payment.Client.App/1.0.13": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

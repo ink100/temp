@@ -1,5 +1,6 @@
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls;
 using System.Windows;
+using Application = System.Windows.Application;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 {

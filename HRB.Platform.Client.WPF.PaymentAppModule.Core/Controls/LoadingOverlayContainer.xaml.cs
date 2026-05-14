@@ -1,12 +1,12 @@
 using System.Windows;
-using System.Windows.Controls;
+using WpfUserControl = System.Windows.Controls.UserControl;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls
 {
     /// <summary>
     /// 全局加载遮罩层容器控件
     /// </summary>
-    public partial class LoadingOverlayContainer : UserControl
+    public partial class LoadingOverlayContainer : WpfUserControl
     {
         public LoadingOverlayContainer()
         {

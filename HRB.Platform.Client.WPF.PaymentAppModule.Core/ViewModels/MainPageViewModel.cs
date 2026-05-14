@@ -16,6 +16,8 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
 {

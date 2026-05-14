@@ -39,7 +39,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
             _option.Text = CleanTextChineseOnly(hint);
             _option.Rate = Math.Clamp(settings.TtsRate, -50, 100);
-            _option.Volume = Math.Clamp(settings.TtsVolume, 0, 100) / 100.0;
+            _option.Volume = (float)(Math.Clamp(settings.TtsVolume, 0, 100) / 100.0);
         }
 
         private string CleanTextChineseOnly(string text)

@@ -597,6 +597,96 @@
             维护人员联系方式
             </summary>
         </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsAutoScrollToLatestEnabled">
+            <summary>
+            是否启用新交易记录自动滚动到顶部
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsAutoSyncSystemTimeEnabled">
+            <summary>
+            是否启用每天凌晨 1 点自动同步 Windows 系统时间
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.LastSystemTimeSyncTime">
+            <summary>
+            最近一次 Windows 系统时间同步时间
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.LastSystemTimeSyncResult">
+            <summary>
+            最近一次 Windows 系统时间同步结果
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsScanNotPayVoiceEnabled">
+            <summary>
+            是否开启扫码未支付提醒音
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.ScanTimeoutSeconds">
+            <summary>
+            扫码后多少秒仍未支付，判定为超时未支付，正式默认 120 秒。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.ScanNotPayNotifyIntervalSeconds">
+            <summary>
+            扫码未支付提醒间隔秒数
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.ScanNotPayVoiceRepeatCount">
+            <summary>
+            单笔订单扫码未支付最多提醒次数。默认 1 次；提醒间隔和超时秒数均默认 10 秒时，会在第 10 秒提醒一次并超时取消。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.VoiceRepeatIntervalSeconds">
+            <summary>
+            同一类语音重复播报时，两次播报之间的间隔秒数，默认 1 秒。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsPriorUnpaidVoiceEnabled">
+            <summary>
+            是否播报上次未支付提醒
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.PriorUnpaidVoiceRepeatCount">
+            <summary>
+            上次未支付提醒播报次数
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsPaymentCancelledVoiceEnabled">
+            <summary>
+            是否开启支付取消通知
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.PaymentCancelledVoiceRepeatCount">
+            <summary>
+            支付取消通知播报次数
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsPaymentSuccessVoiceEnabled">
+            <summary>
+            是否开启支付成功金额播报
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.TtsVoiceName">
+            <summary>
+            TTS 音色名称。为空时使用默认中文音色。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.TtsRate">
+            <summary>
+            TTS 语速百分比，0 为正常，负数变慢，正数变快。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.TtsVolume">
+            <summary>
+            TTS 音量百分比，默认 100。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.AmountColorHex">
+            <summary>
+            金额显示颜色，十六进制格式，例如 #F01F1B。
+            </summary>
+        </member>
         <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.EnvironmentSettings.USER_AGREEMENT_VERSION">
             <summary>
             用户协议版本号 - 更新此版本号将要求用户重新同意条款
@@ -1265,18 +1355,20 @@
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.HttpNotificationService">
             <summary>
-            HTTP通知服务实现
+            HTTP通知服务实现。
+            优化点：去掉嵌套 Task.Run，增加地址校验、超时、轻量重试和响应码日志，避免通知失败时无感知。
             </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.HttpNotificationService.#ctor(HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository)">
             <summary>
-            HTTP通知服务实现
+            HTTP通知服务实现。
+            优化点：去掉嵌套 Task.Run，增加地址校验、超时、轻量重试和响应码日志，避免通知失败时无感知。
             </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.HttpNotificationService.SendPaymentNotificationAsync(HRB.Payment.Core.Events.PaymentEventArgs)">
             <summary>
-            发送支付事件通知
-            采用"发送即忘"模式，不等待响应，不重试，不保证送达
+            发送支付事件通知。
+            调用方仍可使用 fire-and-forget；服务内部会真实执行请求并记录失败原因。
             </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.HttpNotificationService.BuildMaskedNotificationData(HRB.Payment.Core.Events.PaymentEventArgs)">
@@ -1540,37 +1632,48 @@
             负责所有支付相关的语音播报逻辑
             </summary>
         </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayPaymentStartedAsync(HRB.Payment.Core.Models.PaymentChannel,System.String)">
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayPaymentStartedAsync(HRB.Payment.Core.Models.PaymentChannel,System.String,System.String)">
             <summary>
             播放支付开始提示音
             </summary>
             <param name="channel">支付渠道</param>
             <param name="nickname">用户昵称（可选）</param>
+            <param name="orderNumber">订单号（用于去重，可选）</param>
         </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayPaymentStartedWithBeforeNotPayAsync(HRB.Payment.Core.Models.PaymentChannel,System.String)">
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayPaymentStartedWithBeforeNotPayAsync(HRB.Payment.Core.Models.PaymentChannel,System.String,System.String)">
             <summary>
             播放支付开始提示音（带"上次未付款"提示）
             </summary>
             <param name="channel">支付渠道</param>
             <param name="nickname">用户昵称（可选）</param>
+            <param name="orderNumber">订单号（用于去重，可选）</param>
         </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayPaymentCancelledAsync(System.String)">
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayPaymentCancelledAsync(System.String,System.String)">
             <summary>
             播放支付取消提示音
             </summary>
             <param name="nickname">用户昵称（可选）</param>
+            <param name="orderNumber">订单号（用于去重和抑制旧的未支付提示，可选）</param>
         </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayPaymentSuccessAsync(System.Decimal,HRB.Payment.Core.Models.PaymentChannel)">
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayPaymentSuccessAsync(System.Decimal,HRB.Payment.Core.Models.PaymentChannel,System.String)">
             <summary>
             播放支付成功语音（金额播报）
             </summary>
             <param name="amount">支付金额</param>
             <param name="channel">支付渠道</param>
+            <param name="orderNumber">订单号（用于去重和抑制旧的未支付提示，可选）</param>
         </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayScanNotPayAsync">
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.PlayScanNotPayAsync(System.String)">
             <summary>
             播放"扫码未支付"提示音
             </summary>
+            <param name="orderNumber">订单号（用于在订单已成功/取消后跳过过期提示，可选）</param>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentVoiceService.MarkOrderCompleted(System.String)">
+            <summary>
+            标记订单已经完成，用于跳过队列中尚未播放的过期“扫码未支付”提示。
+            </summary>
+            <param name="orderNumber">订单号</param>
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPluginKeepAliveService">
             <summary>
@@ -2057,7 +2160,7 @@
             检查订单状态（由定时器调用）
             </summary>
         </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.CheckAndNotify(HRB.Payment.Core.Models.TransactionRecord,System.Double)">
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.CheckAndNotify(HRB.Payment.Core.Models.TransactionRecord,System.Double,System.Int32,System.Int32)">
             <summary>
             检查并触发通知事件
             </summary>
@@ -2186,33 +2289,35 @@
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService">
             <summary>
-            支付语音播报服务实现
-            封装所有支付相关的语音播报逻辑
+            支付语音播报服务实现。
+            语音播放设备通常只能稳定串行播放；这里用队列锁避免多笔订单连续触发时出现重叠、抢声或漏播。
+            同时增加订单级去重和过期扫码提示抑制，避免用户已经付款后又听到“扫码未支付”。
             </summary>
         </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentStartedAsync(HRB.Payment.Core.Models.PaymentChannel,System.String)">
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentStartedAsync(HRB.Payment.Core.Models.PaymentChannel,System.String,System.String)">
             <summary>
             播放支付开始提示音
             </summary>
         </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentStartedWithBeforeNotPayAsync(HRB.Payment.Core.Models.PaymentChannel,System.String)">
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentStartedWithBeforeNotPayAsync(HRB.Payment.Core.Models.PaymentChannel,System.String,System.String)">
             <summary>
-            播放支付开始提示音（带"上次未付款"提示）
+            播放支付开始提示音（带“上次未付款”提示）
             </summary>
         </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentCancelledAsync(System.String)">
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentCancelledAsync(System.String,System.String)">
             <summary>
             播放支付取消提示音
             </summary>
         </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentSuccessAsync(System.Decimal,HRB.Payment.Core.Models.PaymentChannel)">
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentSuccessAsync(System.Decimal,HRB.Payment.Core.Models.PaymentChannel,System.String)">
             <summary>
             播放支付成功语音（金额播报）
             </summary>
         </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayScanNotPayAsync">
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayScanNotPayAsync(System.String)">
             <summary>
-            播放"扫码未支付"提示音
+            播放“扫码未支付”提示音。
+            如果此提示在队列里等待期间订单已经成功/取消，则会自动跳过，避免过期语音误播。
             </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.GetChannelVoice(HRB.Payment.Core.Models.PaymentChannel)">
@@ -2222,8 +2327,8 @@
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService">
             <summary>
-            插件保活服务实现
-            每5秒检测一次插件进程是否存在，每3秒发送一次心跳，如果10秒没有响应则重启
+            插件保活服务实现。
+            优化点：增加重启防抖，避免进程检测和心跳检测同时触发导致重复启动插件。
             </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.StartMonitoring(System.String,System.Func{System.Threading.Tasks.Task},Prism.Events.IEventAggregator)">
@@ -2244,21 +2349,6 @@
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.NotifyHeartbeatResponse(System.String)">
             <summary>
             通知收到心跳响应
-            </summary>
-        </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.MonitorProcessAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.MonitoringContext)">
-            <summary>
-            监控插件进程
-            </summary>
-        </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.HeartbeatLoopAsync(HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.MonitoringContext)">
-            <summary>
-            心跳循环
-            </summary>
-        </member>
-        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginKeepAliveService.MonitoringContext">
-            <summary>
-            监控上下文
             </summary>
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PluginProcessService">
@@ -2376,6 +2466,12 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.SystemTimeSyncService">
+            <summary>
+            Windows 系统时间同步服务。
+            说明：w32tm 同步是否成功取决于 Windows Time 服务、网络和当前账号权限。
+            </summary>
+        </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TimerCoordinator">
             <summary>
             定时器协调器实现
@@ -2416,39 +2512,6 @@
             <summary>
             TTS服务
             </summary>
-        </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService.Speak(System.String)">
-            <summary>
-            播报
-            </summary>
-            <param name="hint"></param>
-        </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService.SpeakAsync(System.String)">
-            <summary>
-            异步播报
-            </summary>
-            <param name="hint"></param>
-            <returns></returns>
-        </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService.CleanText(System.String)">
-            <summary>
-            清理文本，只保留中英文字符、数字和空格，并在数字和字母之间插入空格
-            </summary>
-            <param name="text"></param>
-            <returns></returns>
-        </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService.CleanTextChineseOnly(System.String)">
-            <summary>
-            清理文本，只保留汉字
-            </summary>
-            <param name="text"></param>
-            <returns></returns>
-        </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService.GetVoice">
-            <summary>
-            获取中文语音
-            </summary>
-            <returns></returns>
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService">
             <summary>
@@ -2518,78 +2581,65 @@
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService">
             <summary>
-            微信服务实现类
-            实现微信版本检测、登录状态检测和进程判断功能
+            微信服务实现类。
+            优化点：释放 Process 句柄、启动前校验目录和压缩包、避免重复枚举进程导致句柄泄露。
             </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.CheckWeChatVersionAsync">
             <summary>
-            
+            检查并准备指定版本的微信运行目录。
             </summary>
-            <returns></returns>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.CheckWeChatVersionAsync(System.String)">
             <summary>
             检测微信版本是否符合要求
             </summary>
-            <param name="requiredVersion">要求的微信版本号，如 "3.9.12.54"</param>
-            <returns>版本是否匹配</returns>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.CheckWeChatLoginStatusAsync">
             <summary>
             检测微信登录状态
             </summary>
-            <returns>是否已登录</returns>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.IsWeChatProcessRunningAsync">
             <summary>
             判断微信进程是否存在
             </summary>
-            <returns>进程是否存在</returns>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.GetWeChatProcessInfoAsync">
             <summary>
-            获取微信进程信息
+            获取微信进程信息，如果存在多个进程，优先返回最早启动的主进程。
             </summary>
-            <returns>进程信息对象，如果进程不存在则返回null</returns>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.GetCurrentWeChatVersionAsync">
             <summary>
             获取当前微信版本号
-            </summary>
-            <returns>版本号字符串，如果未安装则返回null</returns>
-        </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.DetectWeChatLoginStatus(System.Diagnostics.Process)">
-            <summary>
-            检测微信登录状态（通过窗口类名判断）
-            使用EnumWindows枚举所有窗口，找到微信进程的窗口并检查类名
-            WeChatLoginWndForPC: 未登录状态
-            WeChatMainWndForPC: 已登录状态
             </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.GetAllWeChatProcessesAsync">
             <summary>
             获取所有微信进程信息
             </summary>
-            <returns>微信进程信息列表</returns>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.IsWeChatInstalledAsync">
             <summary>
-            检查微信是否安装
+            检查微信是否安装/运行
             </summary>
-            <returns>是否已安装</returns>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.KillAllWeChatProcessesAsync">
             <summary>
             强制终止所有微信进程
             </summary>
-            <returns>是否成功</returns>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.StartWeChatAsync">
             <summary>
-            <inheritdoc/>
+            启动微信
             </summary>
-            <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.DetectWeChatLoginStatus(System.Diagnostics.Process)">
+            <summary>
+            检测微信登录状态（通过窗口类名判断）。
+            WeChatLoginWndForPC: 未登录；WeChatMainWndForPC: 已登录。
+            </summary>
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.V2.MainPageV2ViewModel">
              <summary>

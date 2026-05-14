@@ -1,15 +1,17 @@
 using System;
 using System.Windows;
-using System.Windows.Controls;
+using WpfUserControl = System.Windows.Controls.UserControl;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using ColorConverter = System.Windows.Media.ColorConverter;
+using Color = System.Windows.Media.Color;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls
 {
     public enum NotificationType { Success, Error, Warning, Info }
 
-    public partial class NotificationControl : UserControl
+    public partial class NotificationControl : WpfUserControl
     {
         public Action? OnRemove;
         private DispatcherTimer? _timer;

@@ -1,5 +1,7 @@
+using HRB.Platform.Client.Core.ExtensionFunctions;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core;
 using System.Diagnostics;
+using ThreadingTimer = System.Threading.Timer;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 {
@@ -10,7 +12,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
     public static class SystemTimeSyncService
     {
         private static readonly object Locker = new();
-        private static Timer? _dailyTimer;
+        private static ThreadingTimer? _dailyTimer;
         private static PaymentAppContext? _appContext;
         private static bool _isSyncing;
 
@@ -45,7 +47,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 nextRun = nextRun.AddDays(1);
 
             var dueTime = nextRun - now;
-            _dailyTimer = new Timer(async _ =>
+            _dailyTimer = new ThreadingTimer(async _ =>
             {
                 await AutoSyncAsync();
                 RefreshSchedule();

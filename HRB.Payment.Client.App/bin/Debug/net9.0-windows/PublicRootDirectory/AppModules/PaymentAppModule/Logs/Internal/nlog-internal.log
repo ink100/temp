@@ -1,0 +1,60 @@
+2026-05-13 09:35:18.7076 Debug Message Template Auto Format enabled
+2026-05-13 09:35:18.8520 Debug Object reflection needed to configure instance of type: NLog.Layouts.SimpleLayout
+2026-05-13 09:35:18.9385 Debug Wrapping target 'file' with AsyncTargetWrapper and renaming to 'file_wrapped'
+2026-05-13 09:35:18.9385 Debug Adding target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=file)
+2026-05-13 09:35:18.9385 Info Registered target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=file)
+2026-05-13 09:35:18.9471 Debug Wrapping target 'fileError' with AsyncTargetWrapper and renaming to 'fileError_wrapped'
+2026-05-13 09:35:18.9471 Debug Adding target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=fileError)
+2026-05-13 09:35:18.9471 Info Registered target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=fileError)
+2026-05-13 09:35:18.9746 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.0.7.4784. Product version: 6.0.7+4dd16e8d54b0f5510479cbe00ba28b77501b7901. GlobalAssemblyCache: False
+2026-05-13 09:35:18.9746 Info Configuration assigned to local LogFactory, but constructed using global LogFactory
+2026-05-13 09:35:18.9799 Debug --- NLog configuration dump ---
+2026-05-13 09:35:18.9799 Debug Targets:
+2026-05-13 09:35:18.9799 Debug AsyncWrapper_FileTarget(Name=file)
+2026-05-13 09:35:18.9799 Debug AsyncWrapper_FileTarget(Name=fileError)
+2026-05-13 09:35:18.9799 Debug Rules:
+2026-05-13 09:35:18.9940 Debug logNamePattern: (Microsoft.:StartsWith) levels: [ Trace ] writeTo: [ ] final: True
+2026-05-13 09:35:18.9940 Debug logNamePattern: (:All) levels: [ Trace Debug Info Warn Error Fatal ] writeTo: [ file ]
+2026-05-13 09:35:18.9940 Debug logNamePattern: (:All) levels: [ Error Fatal ] writeTo: [ fileError ]
+2026-05-13 09:35:18.9940 Debug --- End of NLog configuration dump ---
+2026-05-13 09:35:18.9940 Info LogManager.ThrowExceptions = true can crash the application! Use only for unit-testing and last resort troubleshooting.
+2026-05-13 09:35:19.0125 Debug Unused target checking is started... Rule Count: 3, Target Count: 2
+2026-05-13 09:35:19.0271 Debug Unused target checking is completed. Total Rule Count: 3, Total Target Count: 2, Unused Target Count: 0
+2026-05-13 09:35:19.1155 Info Configuration initialized: TargetNames=file, fileError, ConfigItems=71, FilePath=
+2026-05-13 09:35:19.1306 Debug Targets configured when LogLevel >= Trace for Logger: PaymentLogger
+2026-05-13 09:35:19.1306 Debug Logger PaymentLogger [Trace] => file
+2026-05-13 09:35:19.1306 Debug Logger PaymentLogger [Debug] => file
+2026-05-13 09:35:19.1306 Debug Logger PaymentLogger [Info] => file
+2026-05-13 09:35:19.1306 Debug Logger PaymentLogger [Warn] => file
+2026-05-13 09:35:19.1306 Debug Logger PaymentLogger [Error] => file fileError
+2026-05-13 09:35:19.1348 Debug Logger PaymentLogger [Fatal] => file fileError
+2026-05-14 09:16:11.1283 Debug Message Template Auto Format enabled
+2026-05-14 09:16:11.2660 Debug Object reflection needed to configure instance of type: NLog.Layouts.SimpleLayout
+2026-05-14 09:16:11.3321 Debug Wrapping target 'file' with AsyncTargetWrapper and renaming to 'file_wrapped'
+2026-05-14 09:16:11.3321 Debug Adding target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=file)
+2026-05-14 09:16:11.3476 Info Registered target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=file)
+2026-05-14 09:16:11.3476 Debug Wrapping target 'fileError' with AsyncTargetWrapper and renaming to 'fileError_wrapped'
+2026-05-14 09:16:11.3476 Debug Adding target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=fileError)
+2026-05-14 09:16:11.3476 Info Registered target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=fileError)
+2026-05-14 09:16:11.3790 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.0.7.4784. Product version: 6.0.7+4dd16e8d54b0f5510479cbe00ba28b77501b7901. GlobalAssemblyCache: False
+2026-05-14 09:16:11.3790 Info Configuration assigned to local LogFactory, but constructed using global LogFactory
+2026-05-14 09:16:11.3790 Debug --- NLog configuration dump ---
+2026-05-14 09:16:11.3790 Debug Targets:
+2026-05-14 09:16:11.3790 Debug AsyncWrapper_FileTarget(Name=file)
+2026-05-14 09:16:11.3937 Debug AsyncWrapper_FileTarget(Name=fileError)
+2026-05-14 09:16:11.3937 Debug Rules:
+2026-05-14 09:16:11.3937 Debug logNamePattern: (Microsoft.:StartsWith) levels: [ Trace ] writeTo: [ ] final: True
+2026-05-14 09:16:11.3937 Debug logNamePattern: (:All) levels: [ Trace Debug Info Warn Error Fatal ] writeTo: [ file ]
+2026-05-14 09:16:11.3937 Debug logNamePattern: (:All) levels: [ Error Fatal ] writeTo: [ fileError ]
+2026-05-14 09:16:11.3937 Debug --- End of NLog configuration dump ---
+2026-05-14 09:16:11.3937 Info LogManager.ThrowExceptions = true can crash the application! Use only for unit-testing and last resort troubleshooting.
+2026-05-14 09:16:11.4098 Debug Unused target checking is started... Rule Count: 3, Target Count: 2
+2026-05-14 09:16:11.4388 Debug Unused target checking is completed. Total Rule Count: 3, Total Target Count: 2, Unused Target Count: 0
+2026-05-14 09:16:11.5125 Info Configuration initialized: TargetNames=file, fileError, ConfigItems=71, FilePath=
+2026-05-14 09:16:11.5306 Debug Targets configured when LogLevel >= Trace for Logger: PaymentLogger
+2026-05-14 09:16:11.5306 Debug Logger PaymentLogger [Trace] => file
+2026-05-14 09:16:11.5306 Debug Logger PaymentLogger [Debug] => file
+2026-05-14 09:16:11.5352 Debug Logger PaymentLogger [Info] => file
+2026-05-14 09:16:11.5352 Debug Logger PaymentLogger [Warn] => file
+2026-05-14 09:16:11.5352 Debug Logger PaymentLogger [Error] => file fileError
+2026-05-14 09:16:11.5352 Debug Logger PaymentLogger [Fatal] => file fileError

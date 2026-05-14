@@ -1,10 +1,10 @@
-using System.Windows.Controls;
+using WpfUserControl = System.Windows.Controls.UserControl;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls;
 using System.Windows;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls
 {
-    public partial class NotificationContainer : UserControl
+    public partial class NotificationContainer : WpfUserControl
     {
         public NotificationContainer()
         {

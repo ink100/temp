@@ -59,3 +59,125 @@
 2026-05-14 15:37:16.1927 Debug FileTarget(Name=fileError_wrapped): Closed.
 2026-05-14 15:37:16.1927 Debug Finished closing logging configuration.
 2026-05-14 15:37:16.1927 Info LogFactory has been disposed.
+2026-05-17 01:41:48.7637 Debug Message Template Auto Format enabled
+2026-05-17 01:41:48.8004 Debug Wrapping target 'file' with AsyncTargetWrapper and renaming to 'file_wrapped'
+2026-05-17 01:41:48.8004 Debug Adding target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=file)
+2026-05-17 01:41:48.8004 Info Registered target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=file)
+2026-05-17 01:41:48.8004 Debug Wrapping target 'fileError' with AsyncTargetWrapper and renaming to 'fileError_wrapped'
+2026-05-17 01:41:48.8004 Debug Adding target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=fileError)
+2026-05-17 01:41:48.8004 Info Registered target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=fileError)
+2026-05-17 01:41:48.8004 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.0.7.4784. Product version: 6.0.7+4dd16e8d54b0f5510479cbe00ba28b77501b7901. GlobalAssemblyCache: False
+2026-05-17 01:41:48.8004 Info Configuration assigned to local LogFactory, but constructed using global LogFactory
+2026-05-17 01:41:48.8004 Debug --- NLog configuration dump ---
+2026-05-17 01:41:48.8004 Debug Targets:
+2026-05-17 01:41:48.8004 Debug AsyncWrapper_FileTarget(Name=file)
+2026-05-17 01:41:48.8004 Debug AsyncWrapper_FileTarget(Name=fileError)
+2026-05-17 01:41:48.8004 Debug Rules:
+2026-05-17 01:41:48.8004 Debug logNamePattern: (Microsoft.:StartsWith) levels: [ Trace ] writeTo: [ ] final: True
+2026-05-17 01:41:48.8161 Debug logNamePattern: (:All) levels: [ Trace Debug Info Warn Error Fatal ] writeTo: [ file ]
+2026-05-17 01:41:48.8161 Debug logNamePattern: (:All) levels: [ Error Fatal ] writeTo: [ fileError ]
+2026-05-17 01:41:48.8161 Debug --- End of NLog configuration dump ---
+2026-05-17 01:41:48.8161 Info LogManager.ThrowExceptions = true can crash the application! Use only for unit-testing and last resort troubleshooting.
+2026-05-17 01:41:48.8161 Debug Unused target checking is started... Rule Count: 3, Target Count: 2
+2026-05-17 01:41:48.8161 Debug Unused target checking is completed. Total Rule Count: 3, Total Target Count: 2, Unused Target Count: 0
+2026-05-17 01:41:48.8161 Info Configuration initialized: TargetNames=file, fileError, ConfigItems=71, FilePath=
+2026-05-17 01:41:48.8161 Debug Targets configured when LogLevel >= Trace for Logger: PlatformWpfLogger
+2026-05-17 01:41:48.8161 Debug Logger PlatformWpfLogger [Trace] => file
+2026-05-17 01:41:48.8161 Debug Logger PlatformWpfLogger [Debug] => file
+2026-05-17 01:41:48.8161 Debug Logger PlatformWpfLogger [Info] => file
+2026-05-17 01:41:48.8161 Debug Logger PlatformWpfLogger [Warn] => file
+2026-05-17 01:41:48.8161 Debug Logger PlatformWpfLogger [Error] => file fileError
+2026-05-17 01:41:48.8161 Debug Logger PlatformWpfLogger [Fatal] => file fileError
+2026-05-17 01:42:08.8402 Info AppDomain Shutting down. LogFactory closing...
+2026-05-17 01:42:08.8537 Debug LogFactory Starting Flush with timeout=1.5 secs
+2026-05-17 01:42:08.8644 Info LogFactory has been disposed.
+2026-05-17 01:42:08.8644 Info AppDomain Shutting down. LogFactory closing...
+2026-05-17 01:42:08.8644 Debug LogFactory Starting Flush with timeout=1.5 secs
+2026-05-17 01:42:08.8776 Debug Flush completed
+2026-05-17 01:42:08.8776 Debug Closing logging configuration...
+2026-05-17 01:42:08.8776 Debug AsyncWrapper_FileTarget(Name=file): Closing...
+2026-05-17 01:42:08.8776 Debug AsyncWrapper_FileTarget(Name=file): Closed.
+2026-05-17 01:42:08.8776 Debug FileTarget(Name=file_wrapped): Closing...
+2026-05-17 01:42:08.8776 Debug FileTarget(Name=file_wrapped): Closed.
+2026-05-17 01:42:08.8944 Debug AsyncWrapper_FileTarget(Name=fileError): Closing...
+2026-05-17 01:42:08.8944 Debug AsyncWrapper_FileTarget(Name=fileError): Closed.
+2026-05-17 01:42:08.8944 Debug FileTarget(Name=fileError_wrapped): Closing...
+2026-05-17 01:42:08.8944 Debug FileTarget(Name=fileError_wrapped): Closed.
+2026-05-17 01:42:08.8944 Debug Finished closing logging configuration.
+2026-05-17 01:42:08.8944 Info LogFactory has been disposed.
+2026-05-17 01:42:08.8944 Info AppDomain Shutting down. LogFactory closing...
+2026-05-17 01:42:08.8944 Debug LogFactory Starting Flush with timeout=1.5 secs
+2026-05-17 01:42:08.8944 Debug Flush completed
+2026-05-17 01:42:08.8944 Debug Unregistered shutdown event handler for ProcessExit.
+2026-05-17 01:42:08.8944 Debug Closing logging configuration...
+2026-05-17 01:42:08.8944 Debug AsyncWrapper_FileTarget(Name=file): Closing...
+2026-05-17 01:42:08.8944 Debug AsyncWrapper_FileTarget(Name=file): Closed.
+2026-05-17 01:42:08.8944 Debug FileTarget(Name=file_wrapped): Closing...
+2026-05-17 01:42:08.8944 Debug FileTarget(Name=file_wrapped): Closed.
+2026-05-17 01:42:08.8944 Debug AsyncWrapper_FileTarget(Name=fileError): Closing...
+2026-05-17 01:42:08.8944 Debug AsyncWrapper_FileTarget(Name=fileError): Closed.
+2026-05-17 01:42:08.8944 Debug FileTarget(Name=fileError_wrapped): Closing...
+2026-05-17 01:42:08.8944 Debug FileTarget(Name=fileError_wrapped): Closed.
+2026-05-17 01:42:08.9091 Debug Finished closing logging configuration.
+2026-05-17 01:42:08.9091 Info LogFactory has been disposed.
+2026-05-17 01:43:46.1763 Debug Message Template Auto Format enabled
+2026-05-17 01:43:46.1763 Debug Wrapping target 'file' with AsyncTargetWrapper and renaming to 'file_wrapped'
+2026-05-17 01:43:46.1763 Debug Adding target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=file)
+2026-05-17 01:43:46.1763 Info Registered target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=file)
+2026-05-17 01:43:46.1763 Debug Wrapping target 'fileError' with AsyncTargetWrapper and renaming to 'fileError_wrapped'
+2026-05-17 01:43:46.1763 Debug Adding target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=fileError)
+2026-05-17 01:43:46.1763 Info Registered target NLog.Targets.Wrappers.AsyncTargetWrapper(Name=fileError)
+2026-05-17 01:43:46.1763 Info NLog, Version=6.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c. File version: 6.0.7.4784. Product version: 6.0.7+4dd16e8d54b0f5510479cbe00ba28b77501b7901. GlobalAssemblyCache: False
+2026-05-17 01:43:46.1894 Info Configuration assigned to local LogFactory, but constructed using global LogFactory
+2026-05-17 01:43:46.1894 Debug --- NLog configuration dump ---
+2026-05-17 01:43:46.1894 Debug Targets:
+2026-05-17 01:43:46.1894 Debug AsyncWrapper_FileTarget(Name=file)
+2026-05-17 01:43:46.1894 Debug AsyncWrapper_FileTarget(Name=fileError)
+2026-05-17 01:43:46.1894 Debug Rules:
+2026-05-17 01:43:46.1894 Debug logNamePattern: (Microsoft.:StartsWith) levels: [ Trace ] writeTo: [ ] final: True
+2026-05-17 01:43:46.1894 Debug logNamePattern: (:All) levels: [ Trace Debug Info Warn Error Fatal ] writeTo: [ file ]
+2026-05-17 01:43:46.1894 Debug logNamePattern: (:All) levels: [ Error Fatal ] writeTo: [ fileError ]
+2026-05-17 01:43:46.1894 Debug --- End of NLog configuration dump ---
+2026-05-17 01:43:46.1894 Info LogManager.ThrowExceptions = true can crash the application! Use only for unit-testing and last resort troubleshooting.
+2026-05-17 01:43:46.1894 Debug Unused target checking is started... Rule Count: 3, Target Count: 2
+2026-05-17 01:43:46.1894 Debug Unused target checking is completed. Total Rule Count: 3, Total Target Count: 2, Unused Target Count: 0
+2026-05-17 01:43:46.1894 Info Configuration initialized: TargetNames=file, fileError, ConfigItems=71, FilePath=
+2026-05-17 01:43:46.1894 Debug Targets configured when LogLevel >= Trace for Logger: PlatformWpfLogger
+2026-05-17 01:43:46.1894 Debug Logger PlatformWpfLogger [Trace] => file
+2026-05-17 01:43:46.2045 Debug Logger PlatformWpfLogger [Debug] => file
+2026-05-17 01:43:46.2045 Debug Logger PlatformWpfLogger [Info] => file
+2026-05-17 01:43:46.2045 Debug Logger PlatformWpfLogger [Warn] => file
+2026-05-17 01:43:46.2045 Debug Logger PlatformWpfLogger [Error] => file fileError
+2026-05-17 01:43:46.2045 Debug Logger PlatformWpfLogger [Fatal] => file fileError
+2026-05-17 01:43:52.7030 Info AppDomain Shutting down. LogFactory closing...
+2026-05-17 01:43:52.7313 Debug LogFactory Starting Flush with timeout=1.5 secs
+2026-05-17 01:43:52.7313 Info LogFactory has been disposed.
+2026-05-17 01:43:52.7313 Info AppDomain Shutting down. LogFactory closing...
+2026-05-17 01:43:52.7365 Debug LogFactory Starting Flush with timeout=1.5 secs
+2026-05-17 01:43:52.7365 Debug Flush completed
+2026-05-17 01:43:52.7365 Debug Closing logging configuration...
+2026-05-17 01:43:52.7365 Debug AsyncWrapper_FileTarget(Name=file): Closing...
+2026-05-17 01:43:52.7509 Debug AsyncWrapper_FileTarget(Name=file): Closed.
+2026-05-17 01:43:52.7509 Debug FileTarget(Name=file_wrapped): Closing...
+2026-05-17 01:43:52.7509 Debug FileTarget(Name=file_wrapped): Closed.
+2026-05-17 01:43:52.7509 Debug AsyncWrapper_FileTarget(Name=fileError): Closing...
+2026-05-17 01:43:52.7509 Debug AsyncWrapper_FileTarget(Name=fileError): Closed.
+2026-05-17 01:43:52.7509 Debug FileTarget(Name=fileError_wrapped): Closing...
+2026-05-17 01:43:52.7509 Debug FileTarget(Name=fileError_wrapped): Closed.
+2026-05-17 01:43:52.7509 Debug Finished closing logging configuration.
+2026-05-17 01:43:52.7509 Info LogFactory has been disposed.
+2026-05-17 01:43:52.7509 Info AppDomain Shutting down. LogFactory closing...
+2026-05-17 01:43:52.7509 Debug LogFactory Starting Flush with timeout=1.5 secs
+2026-05-17 01:43:52.7509 Debug Flush completed
+2026-05-17 01:43:52.7509 Debug Unregistered shutdown event handler for ProcessExit.
+2026-05-17 01:43:52.7509 Debug Closing logging configuration...
+2026-05-17 01:43:52.7509 Debug AsyncWrapper_FileTarget(Name=file): Closing...
+2026-05-17 01:43:52.7509 Debug AsyncWrapper_FileTarget(Name=file): Closed.
+2026-05-17 01:43:52.7509 Debug FileTarget(Name=file_wrapped): Closing...
+2026-05-17 01:43:52.7509 Debug FileTarget(Name=file_wrapped): Closed.
+2026-05-17 01:43:52.7509 Debug AsyncWrapper_FileTarget(Name=fileError): Closing...
+2026-05-17 01:43:52.7509 Debug AsyncWrapper_FileTarget(Name=fileError): Closed.
+2026-05-17 01:43:52.7680 Debug FileTarget(Name=fileError_wrapped): Closing...
+2026-05-17 01:43:52.7680 Debug FileTarget(Name=fileError_wrapped): Closed.
+2026-05-17 01:43:52.7680 Debug Finished closing logging configuration.
+2026-05-17 01:43:52.7680 Info LogFactory has been disposed.

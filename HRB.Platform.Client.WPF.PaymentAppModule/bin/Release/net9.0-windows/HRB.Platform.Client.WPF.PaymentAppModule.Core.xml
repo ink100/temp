@@ -2285,6 +2285,11 @@
             <summary>
             加载今日交易记录到内存集合。
             </summary>
+            <summary>
+            加载首页交易记录。
+            优先加载当天记录；
+            如果当天没有记录，则回退加载最近 50 条历史记录。
+            </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentTransactionService.HandlePaymentStartedAsync(HRB.Payment.Core.Events.PaymentEventArgs)">
             <summary>

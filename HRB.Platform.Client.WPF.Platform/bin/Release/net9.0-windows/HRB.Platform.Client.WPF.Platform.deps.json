@@ -2320,7 +2320,7 @@
         "runtime": {
           "HRB.Payment.Core.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.5.14.1531"
+            "fileVersion": "2026.5.14.1534"
           }
         }
       },
@@ -2331,7 +2331,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.ControlsAppModule.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.5.14.1531"
+            "fileVersion": "2026.5.14.1535"
           }
         }
       },
@@ -2343,7 +2343,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.ControlsAppModule.Core.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.5.14.1531"
+            "fileVersion": "2026.5.14.1535"
           }
         }
       },
@@ -2354,7 +2354,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.ControlsAppModule.Languages.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.5.14.1531"
+            "fileVersion": "2026.5.14.1535"
           }
         }
       },
@@ -2365,7 +2365,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.ControlsAppModule.Resources.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.5.14.1531"
+            "fileVersion": "2026.5.14.1535"
           }
         }
       },
@@ -2378,7 +2378,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.Platform.Core.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.5.14.1531"
+            "fileVersion": "2026.5.14.1536"
           }
         }
       },
@@ -2389,7 +2389,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.Platform.Languages.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.5.14.1531"
+            "fileVersion": "2026.5.14.1535"
           }
         }
       },
@@ -2400,7 +2400,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.Platform.Resources.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.5.14.1531"
+            "fileVersion": "2026.5.14.1535"
           }
         }
       },

@@ -37,14 +37,34 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// <summary>
         /// 加载今日交易记录到内存集合。
         /// </summary>
+        /// <summary>
+        /// 加载首页交易记录。
+        /// 优先加载当天记录；
+        /// 如果当天没有记录，则回退加载最近 50 条历史记录。
+        /// </summary>
         public async Task LoadTodayTransactionsAsync()
         {
             var today = DateTime.Today;
             var tomorrow = today.AddDays(1);
+
             var records = await _repository.GetTransactionsByDateRangeAsync(today, tomorrow);
 
+            // 方案 C：
+            // 1. 当天有记录，首页只展示当天记录；
+            // 2. 当天没有记录，首页展示最近 50 条历史记录，避免页面空白。
+            if (records == null || records.Count == 0)
+            {
+                records = await _repository.GetRecentTransactionsAsync(MaxTransactionCount);
+            }
+
             Transactions.Clear();
-            foreach (var dbo in records.OrderByDescending(t => t.TransactionTime).Take(MaxTransactionCount))
+
+            foreach (var dbo in records
+                .OrderByDescending(t =>
+                    t.TransactionTime == default
+                        ? t.CreatedAt
+                        : t.TransactionTime)
+                .Take(MaxTransactionCount))
             {
                 Transactions.Add(dbo.ToModel());
             }

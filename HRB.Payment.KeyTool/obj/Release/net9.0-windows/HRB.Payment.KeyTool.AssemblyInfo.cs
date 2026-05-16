@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HRB.Payment.KeyTool")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f76bc26818d5eba82c4e7da3530ec138990b2b67")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+37bb4f74d66ecb85ac5b27451eab4dd4e632a8b2")]
 [assembly: System.Reflection.AssemblyProductAttribute("HRB.Payment.KeyTool")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HRB.Payment.KeyTool")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -13,12 +13,12 @@ using System.Reflection;
 
 [assembly: System.Reflection.AssemblyCompanyAttribute("Copyright © HR Brother 2025")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
-[assembly: System.Reflection.AssemblyDescriptionAttribute("\n      HRB.Payment.Client.App\n    ")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("2026.03.31.1734")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.11+2dd4e47166ab33563a7443c3f52d046b64216977")]
+[assembly: System.Reflection.AssemblyDescriptionAttribute("\r\n      HRB.Payment.Client.App\r\n    ")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("2026.05.14.1536")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.13+f76bc26818d5eba82c4e7da3530ec138990b2b67")]
 [assembly: System.Reflection.AssemblyProductAttribute("HRB.Payment.Client.App")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HRB.Payment.Client.App")]
-[assembly: System.Reflection.AssemblyVersionAttribute("1.0.11")]
+[assembly: System.Reflection.AssemblyVersionAttribute("1.0.13")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows7.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows7.0")]
 

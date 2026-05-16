@@ -71,23 +71,30 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             bool hasPriorUnpaid = false;
             PaymentEventArgs? priorCancelledPayment = null;
 
-            if (!string.IsNullOrEmpty(args.UserId))
+            if (!string.IsNullOrWhiteSpace(args.UserId))
             {
                 var currentTime = PcHelper.GetNetNowTime();
 
-                // 只看该用户“最近一笔”记录，不能在历史记录里随便找一条非成功记录。
-                // 否则用户中间已经成功付款后，旧的 Scan/Cancel 记录仍会导致误报“上次未付款”。
-                var lastOrder = Transactions
-                    .Where(t => t.UserId == args.UserId && t.OrderNumber != args.OrderNumber)
-                    .OrderByDescending(GetTransactionSortTime)
-                    .FirstOrDefault();
+                // “上次未支付”判断统一以数据库为准，
+                // 并且必须区分支付渠道，避免微信与支付宝记录互相影响。
+                //
+                // 注意：
+                // 本次扫码订单此时还没有入库，
+                // 因此这里查到的一定是“历史上一笔订单”，不会误拿到当前订单。
+                var lastOrder = await _repository.GetOrderLastOrderByUserIdAndChannelAsync(
+                    args.UserId,
+                    args.PaymentChannel);
 
-                if (lastOrder != null)
+                if (lastOrder != null && lastOrder.OrderNumber != args.OrderNumber)
                 {
+                    // 最近一笔订单如果是 Success，
+                    // IsPriorUnpaid 会直接返回 false，
+                    // 因此不会误播“上次未支付”。
                     hasPriorUnpaid = IsPriorUnpaid(lastOrder, currentTime);
 
-                    // 只有上一笔仍处于支付中时，才需要静默取消并补发取消通知。
-                    // 已成功的最近记录绝不触发上次未支付提醒。
+                    // 如果同一用户、同一渠道的上一笔订单仍处于 Scan，
+                    // 说明该订单还在等待支付。
+                    // 此时用户又重新扫码，静默取消旧 Scan，只保留新订单继续处理。
                     if (lastOrder.Status == PaymentStatus.Scan)
                     {
                         _orderStateManager.MarkSilentCancel(lastOrder.OrderNumber);
@@ -96,18 +103,32 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                         lastOrder.Status = PaymentStatus.Cancel;
                         lastOrder.TransactionTime = currentTime;
 
-                        priorCancelledPayment = BuildPaymentEventArgs(lastOrder, currentTime, PaymentStatus.Cancel);
-                        await SaveOrUpdateAsync(priorCancelledPayment, PaymentStatus.Cancel);
-                    }
-                }
-                else
-                {
-                    // 查询数据库，处理上一笔订单已经不在内存中的情况。
-                    // 数据库方法返回的是该用户最新一条订单；如果最新一条是 Success，则不提醒。
-                    var last = await _repository.GetOrderLastOrderByUserIdAsync(args.UserId);
+                        await _repository.UpdateTransactionAsync(lastOrder);
 
-                    if (last != null && IsPriorUnpaid(last, currentTime))
-                        hasPriorUnpaid = true;
+                        priorCancelledPayment = new PaymentEventArgs
+                        {
+                            OrderNumber = lastOrder.OrderNumber,
+                            UserId = lastOrder.UserId,
+                            DisplayName = lastOrder.DisplayName,
+                            Amount = lastOrder.Amount,
+                            PaymentChannel = lastOrder.PaymentChannel,
+                            Remarks = lastOrder.Remarks,
+                            PayTime = currentTime,
+                            Status = PaymentStatus.Cancel
+                        };
+
+                        // 同步刷新首页内存列表中的对应记录，
+                        // 这只是为了 UI 立即显示为取消，
+                        // 不再参与“上次未支付”的业务判断。
+                        var memoryOrder = FindTransaction(t =>
+                            t.OrderNumber == lastOrder.OrderNumber);
+
+                        if (memoryOrder != null)
+                        {
+                            memoryOrder.Status = PaymentStatus.Cancel;
+                            memoryOrder.TransactionTime = currentTime;
+                        }
+                    }
                 }
             }
 
@@ -305,7 +326,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             if (transaction.Status == PaymentStatus.Success)
                 return false;
 
-            return (currentTime - transaction.TransactionTime).TotalSeconds >= GetScanTimeoutSeconds();
+            var baseTime = transaction.TransactionTime == default
+                ? transaction.CreatedAt
+                : transaction.TransactionTime;
+
+            return (currentTime - baseTime).TotalSeconds >= GetScanTimeoutSeconds();
         }
 
         private static PaymentEventArgs BuildPaymentEventArgs(

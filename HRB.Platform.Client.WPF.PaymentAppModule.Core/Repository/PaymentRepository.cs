@@ -1,4 +1,5 @@
-﻿using HRB.Platform.Client.Core.Interfaces;
+﻿using HRB.Payment.Core.Models;
+using HRB.Platform.Client.Core.Interfaces;
 using HRB.Platform.Client.WPF.Core.Instruments.Abstractions;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels;
 
@@ -479,7 +480,37 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
             var list = await collection.FindAsync(c => c.UserId == userId);
             return list.OrderByDescending(c => c.TransactionTime).FirstOrDefault();
         }
+        public async Task<TransactionRecordDbo?> GetOrderLastOrderByUserIdAsync(string userId,string paymentChannel)
+        {
+            var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
+            var list = await collection.FindAsync(c => c.UserId == userId);
+            return list.OrderByDescending(c => c.TransactionTime).FirstOrDefault();
+        }
+        /// <summary>
+        /// 获取指定用户在指定渠道下的最新一条订单。
+        /// “上次未支付”必须区分支付渠道，
+        /// 否则可能出现微信记录影响支付宝、支付宝记录影响微信的问题。
+        /// </summary>
+        public async Task<TransactionRecordDbo> GetOrderLastOrderByUserIdAndChannelAsync(
+            string userId,
+            PaymentChannel paymentChannel)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return null;
 
+            var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
+
+            var list = await collection.FindAsync(c =>
+                c.UserId == userId &&
+                c.PaymentChannel == paymentChannel);
+
+            return list
+                .OrderByDescending(c =>
+                    c.TransactionTime == default
+                        ? c.CreatedAt
+                        : c.TransactionTime)
+                .FirstOrDefault();
+        }
         #endregion
 
         #region 用户协议管理

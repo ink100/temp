@@ -1,5 +1,6 @@
 ﻿using HRB.Platform.Client.Core.Interfaces;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels;
+using HRB.Payment.Core.Models;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
 {
@@ -169,6 +170,18 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
         /// <returns></returns>
         Task<TransactionRecordDbo?> GetOrderLastOrderByUserIdAsync(string userId);
 
+        /// <summary>
+        /// 获取指定用户在指定支付渠道下的最新一条订单数据。
+        /// 用于判断“上次未支付”，避免微信与支付宝记录互相串扰。
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <param name="paymentChannel">支付渠道</param>
+        /// <returns>最新一条订单，不存在则返回 null</returns>
+        Task<TransactionRecordDbo> GetOrderLastOrderByUserIdAndChannelAsync(
+            string userId,
+            PaymentChannel paymentChannel);
+
+
         #endregion
 
         #region 用户协议管理
@@ -230,5 +243,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
         Task<bool> SaveNotificationConsentAsync(NotificationConsentDbo consent);
 
         #endregion
+
+        
     }
 }

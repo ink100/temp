@@ -1132,6 +1132,15 @@
             <param name="userId"></param>
             <returns></returns>
         </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetOrderLastOrderByUserIdAndChannelAsync(System.String,HRB.Payment.Core.Models.PaymentChannel)">
+            <summary>
+            获取指定用户在指定支付渠道下的最新一条订单数据。
+            用于判断“上次未支付”，避免微信与支付宝记录互相串扰。
+            </summary>
+            <param name="userId">用户ID</param>
+            <param name="paymentChannel">支付渠道</param>
+            <returns>最新一条订单，不存在则返回 null</returns>
+        </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.HasUserAgreedVersionAsync(System.String)">
             <summary>
             检查用户是否已同意指定版本的条款
@@ -1300,6 +1309,13 @@
             </summary>
             <param name="userId"></param>
             <returns></returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetOrderLastOrderByUserIdAndChannelAsync(System.String,HRB.Payment.Core.Models.PaymentChannel)">
+            <summary>
+            获取指定用户在指定渠道下的最新一条订单。
+            “上次未支付”必须区分支付渠道，
+            否则可能出现微信记录影响支付宝、支付宝记录影响微信的问题。
+            </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.HasUserAgreedVersionAsync(System.String)">
             <summary>

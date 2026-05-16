@@ -2385,7 +2385,7 @@
         "runtime": {
           "HRB.Payment.Core.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1733"
+            "fileVersion": "2026.5.14.1534"
           }
         }
       },
@@ -2396,7 +2396,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.PaymentAppModule.Languages.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1733"
+            "fileVersion": "2026.5.14.1534"
           }
         }
       },
@@ -2407,7 +2407,7 @@
         "runtime": {
           "HRB.Platform.Client.WPF.PaymentAppModule.Resources.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "2026.3.31.1733"
+            "fileVersion": "2026.5.14.1534"
           }
         }
       },

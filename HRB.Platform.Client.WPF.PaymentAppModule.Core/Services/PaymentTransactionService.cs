@@ -35,41 +35,68 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         }
 
         /// <summary>
-        /// 加载今日交易记录到内存集合。
-        /// </summary>
-        /// <summary>
         /// 加载首页交易记录。
-        /// 优先加载当天记录；
-        /// 如果当天没有记录，则回退加载最近 50 条历史记录。
+        /// 当天记录优先；
+        /// 如果当天记录不足 50 条，则使用最近历史记录补足到 50 条。
+        /// 同时临时弹窗显示加载诊断信息，便于排查页面不显示问题。
         /// </summary>
         public async Task LoadTodayTransactionsAsync()
         {
             var today = DateTime.Today;
             var tomorrow = today.AddDays(1);
 
-            var records = await _repository.GetTransactionsByDateRangeAsync(today, tomorrow);
+            // 1. 查询当天记录
+            var todayRecords = await _repository.GetTransactionsByDateRangeAsync(today, tomorrow);
+            var todayCount = todayRecords?.Count ?? 0;
 
-            // 方案 C：
-            // 1. 当天有记录，首页只展示当天记录；
-            // 2. 当天没有记录，首页展示最近 50 条历史记录，避免页面空白。
-            if (records == null || records.Count == 0)
+            var mergedRecords = todayRecords?.ToList() ?? new List<TransactionRecordDbo>();
+
+            // 2. 当天不足 50 条时，用最近历史记录补足
+            var recentCount = 0;
+
+            if (mergedRecords.Count < MaxTransactionCount)
             {
-                records = await _repository.GetRecentTransactionsAsync(MaxTransactionCount);
+                var recentRecords = await _repository.GetRecentTransactionsAsync(MaxTransactionCount);
+                recentCount = recentRecords?.Count ?? 0;
+
+                mergedRecords = mergedRecords
+                    .Concat(recentRecords ?? new List<TransactionRecordDbo>())
+                    .GroupBy(t => t.Id)
+                    .Select(g => g.First())
+                    .ToList();
             }
 
-            Transactions.Clear();
-
-            foreach (var dbo in records
+            // 3. 最终按时间倒序，最多保留 50 条
+            var finalRecords = mergedRecords
                 .OrderByDescending(t =>
                     t.TransactionTime == default
                         ? t.CreatedAt
                         : t.TransactionTime)
-                .Take(MaxTransactionCount))
+                .Take(MaxTransactionCount)
+                .ToList();
+
+            // 4. 写入首页集合
+            Transactions.Clear();
+
+            foreach (var dbo in finalRecords)
             {
                 Transactions.Add(dbo.ToModel());
             }
-        }
 
+           /* // 5. 临时诊断弹窗
+            System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+            {
+                System.Windows.MessageBox.Show(
+                    $"首页记录加载诊断：\n\n" +
+                    $"当天记录数：{todayCount}\n" +
+                    $"最近历史查询数：{recentCount}\n" +
+                    $"最终准备展示数：{finalRecords.Count}\n" +
+                    $"Transactions 实际内存数：{Transactions.Count}",
+                    "记录加载诊断",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+            });*/
+        }
         /// <summary>
         /// 处理支付开始事件。
         /// 返回处理结果，供调用方决定是否播报语音，

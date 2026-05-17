@@ -2283,12 +2283,10 @@
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentTransactionService.LoadTodayTransactionsAsync">
             <summary>
-            加载今日交易记录到内存集合。
-            </summary>
-            <summary>
             加载首页交易记录。
-            优先加载当天记录；
-            如果当天没有记录，则回退加载最近 50 条历史记录。
+            当天记录优先；
+            如果当天记录不足 50 条，则使用最近历史记录补足到 50 条。
+            同时临时弹窗显示加载诊断信息，便于排查页面不显示问题。
             </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentTransactionService.HandlePaymentStartedAsync(HRB.Payment.Core.Events.PaymentEventArgs)">

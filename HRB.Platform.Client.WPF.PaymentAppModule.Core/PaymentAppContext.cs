@@ -87,8 +87,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core
 
                 }
 
-                _CurrentSettings.IsWeChatNicknameReminderEnabled = false;
-                _CurrentSettings.IsAlipayNicknameReminderEnabled = false;
+                //_CurrentSettings.IsWeChatNicknameReminderEnabled = false;
+                //_CurrentSettings.IsAlipayNicknameReminderEnabled = false;
 
                 return _CurrentSettings;
 

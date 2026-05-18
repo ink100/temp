@@ -53,7 +53,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                     Label = "未支付昵称提醒播报",
                     Type = SettingType.Toggle,
                     CurrentValue = settings.IsWeChatNicknameReminderEnabled,
-                    IsEnabled = false,
+                    IsEnabled = settings.IsWeChatEnabled,
                     DisabledHint = settings.IsWeChatEnabled ? null : "请先启用微信收款播报",
                     Order = 21
                 }

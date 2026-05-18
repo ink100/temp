@@ -59,7 +59,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay
                     Label = "未支付昵称提醒播报",
                     Type = SettingType.Toggle,
                     CurrentValue = settings.IsAlipayNicknameReminderEnabled,
-                    IsEnabled = false,
+                    IsEnabled = _plugin.IsEnabled,
                     DisabledHint = _plugin.IsEnabled ? null : "请先启用支付宝收款播报",
                     Order = 11
                 }

@@ -20,7 +20,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
         private DispatcherTimer? _autoScrollResumeTimer;
         private bool _isProgrammaticScroll;
         private bool _isAutoScrollSuspendedByUser;
-        private bool _isAutoScrollPending;
+        /// <summary>
+        /// 是否已经安排了一次自动滚动任务。
+        /// 用于合并连续新增记录产生的重复滚动请求，避免 UI 线程堆积。
+        /// </summary>
+        private bool _isAutoScrollScheduled;
         public MainPageV2()
         {
             InitializeComponent();
@@ -93,12 +97,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
             if (!IsAutoScrollEnabled() || _isAutoScrollSuspendedByUser)
                 return;
 
-            // 标记为“待自动滚动”。
-            // 新行插入后 DataGrid 会重新布局，可能触发 ScrollChanged。
-            // 这段时间内不应把 ScrollChanged 误判成用户手动滚动。
-            _isAutoScrollPending = true;
+            // 如果已经排队了一次自动滚动，就不再重复排队。
+            // 连续多条交易进入时，最终只需要滚到一次最新记录即可。
+            if (_isAutoScrollScheduled)
+                return;
 
-            // 使用 ContextIdle，尽量等 DataGrid 布局稳定后再执行滚动。
+            _isAutoScrollScheduled = true;
+
             Dispatcher.BeginInvoke(
                 ScrollTransactionsToTop,
                 DispatcherPriority.ContextIdle);
@@ -111,70 +116,38 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
 
         private void ScrollTransactionsToTop()
         {
-            if (!IsAutoScrollEnabled() || _isAutoScrollSuspendedByUser)
-            {
-                _isAutoScrollPending = false;
-                return;
-            }
-
-            _transactionScrollViewer ??= FindVisualChild<ScrollViewer>(TransactionsDataGrid);
-            if (_transactionScrollViewer == null)
-            {
-                _isAutoScrollPending = false;
-                return;
-            }
-
-            _isProgrammaticScroll = true;
-
             try
             {
-                // 先强制刷新布局，确保第 0 条记录已经准备好进入视图。
-                TransactionsDataGrid.UpdateLayout();
+                if (!IsAutoScrollEnabled() || _isAutoScrollSuspendedByUser)
+                    return;
 
-                ScrollLatestRecordIntoView();
+                _transactionScrollViewer ??= FindVisualChild<ScrollViewer>(TransactionsDataGrid);
+                if (_transactionScrollViewer == null)
+                    return;
 
-                // DataGrid 虚拟化或异步布局下，第一次滚动可能会被后续布局覆盖。
-                // 这里再投递一次轻量校正，保证最终落在最新记录。
+                _isProgrammaticScroll = true;
+
+                if (TransactionsDataGrid.Items.Count > 0)
+                {
+                    // 先确保最新记录进入可视区域
+                    var latestItem = TransactionsDataGrid.Items[0];
+                    TransactionsDataGrid.ScrollIntoView(latestItem);
+                }
+
+                // 再将滚动条精确置顶
+                _transactionScrollViewer.ScrollToTop();
+            }
+            finally
+            {
+                // 等这一轮 UI 滚动事件处理完后，再解除程序滚动标记
                 Dispatcher.BeginInvoke(() =>
                 {
-                    try
-                    {
-                        if (!IsAutoScrollEnabled() || _isAutoScrollSuspendedByUser)
-                            return;
-
-                        TransactionsDataGrid.UpdateLayout();
-                        ScrollLatestRecordIntoView();
-                    }
-                    finally
-                    {
-                        Dispatcher.BeginInvoke(
-                            CompleteProgrammaticAutoScroll,
-                            DispatcherPriority.Background);
-                    }
-                }, DispatcherPriority.ContextIdle);
-            }
-            catch
-            {
-                CompleteProgrammaticAutoScroll();
-                throw;
+                    _isProgrammaticScroll = false;
+                    _isAutoScrollScheduled = false;
+                }, DispatcherPriority.Background);
             }
         }
-        private void ScrollLatestRecordIntoView()
-        {
-            _transactionScrollViewer?.ScrollToTop();
-
-            if (TransactionsDataGrid.Items.Count > 0)
-            {
-                var latestItem = TransactionsDataGrid.Items[0];
-                TransactionsDataGrid.ScrollIntoView(latestItem);
-            }
-        }
-
-        private void CompleteProgrammaticAutoScroll()
-        {
-            _isProgrammaticScroll = false;
-            _isAutoScrollPending = false;
-        }
+        
 
         private void OnUserScrollInput(object sender, MouseWheelEventArgs e)
         {
@@ -194,15 +167,15 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
 
         private void OnTransactionScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            // 1. 程序主动滚动时，不应识别为用户滚动。
-            // 2. 新记录刚插入、自动滚动尚未完成时，
-            //    DataGrid 布局变化也可能触发 ScrollChanged，
-            //    这同样不能误判成用户滚动。
-            if (_isProgrammaticScroll || _isAutoScrollPending)
+            // 程序主动滚动时，不识别为用户手动滚动
+            if (_isProgrammaticScroll)
                 return;
 
             // 鼠标拖动滚动条时不会触发 PreviewMouseWheel，
-            // 这里继续作为“用户手动滚动”的兜底识别。
+            // 这里继续作为“用户手动滚动”的兜底判断。
+            //
+            // ExtentHeightChange 接近 0，说明不是因为列表内容高度变化导致的滚动，
+            // 更可能是用户主动滚动。
             if (Math.Abs(e.VerticalChange) > 0.01 &&
                 Math.Abs(e.ExtentHeightChange) < 0.01)
             {

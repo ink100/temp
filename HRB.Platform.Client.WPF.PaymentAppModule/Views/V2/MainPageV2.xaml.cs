@@ -68,7 +68,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
             DetachTransactionsCollectionChanged();
             _autoScrollResumeTimer?.Stop();
             _isProgrammaticScroll = false;
-            _isAutoScrollPending = false;
+            _isAutoScrollScheduled = false;
             _isAutoScrollSuspendedByUser = false;
         }
 

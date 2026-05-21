@@ -232,43 +232,60 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
 
         private async Task OnPaymentStartedAsync(PaymentEventArgs args)
         {
-            var result = await _transactionService.HandlePaymentStartedAsync(args);
-            if (result.AlreadyExists)
-                return;
+            try
+            {
+                var result = await _transactionService.HandlePaymentStartedAsync(args);
+                if (result.AlreadyExists)
+                    return;
 
-            if (result.PriorCancelledPayment != null)
-                _ = _httpNotificationService.SendPaymentNotificationAsync(result.PriorCancelledPayment);
+                if (result.PriorCancelledPayment != null)
+                    _ = _httpNotificationService.SendPaymentNotificationAsync(result.PriorCancelledPayment);
 
-            _ = _httpNotificationService.SendPaymentNotificationAsync(args);
+                _ = _httpNotificationService.SendPaymentNotificationAsync(args);
 
-            var nickname = ShouldPlayNickname(args) ? args.DisplayName : null;
-            var settings = _appContext.CurrentSettings;
+                var nickname = ShouldPlayNickname(args) ? args.DisplayName : null;
+                var settings = _appContext.CurrentSettings;
 
-            if (result.HasPriorUnpaid && settings.IsPriorUnpaidVoiceEnabled)
-                _ = _voiceService.PlayPaymentStartedWithBeforeNotPayAsync(args.PaymentChannel, nickname, args.OrderNumber);
-            else
-                _ = _voiceService.PlayPaymentStartedAsync(args.PaymentChannel, nickname, args.OrderNumber);
+                if (result.HasPriorUnpaid && settings.IsPriorUnpaidVoiceEnabled)
+                    _ = _voiceService.PlayPaymentStartedWithBeforeNotPayAsync(args.PaymentChannel, nickname, args.OrderNumber);
+                else
+                    _ = _voiceService.PlayPaymentStartedAsync(args.PaymentChannel, nickname, args.OrderNumber);
+            }
+            catch (Exception ex)
+            {
+                GlobalSettings.CurrentAppContext.CurrentLogger.Error($"处理扫码开始事件失败: {ex.Message}");
+            }
         }
 
 
-        private async void OnPaymentCancelled(PaymentEventArgs args)
+        private void OnPaymentCancelled(PaymentEventArgs args)
         {
-            var result = await _transactionService.HandlePaymentCancelledAsync(args);
+            _ = OnPaymentCancelledAsync(args);
+        }
 
-            // 不管是否静默取消，都要标记订单完成。
-            // 这样可以跳过队列里还没来得及播放的“扫码未支付”旧提示。
-            _voiceService.MarkOrderCompleted(args.OrderNumber);
-
-            if (!result.StateChanged)
-                return;
-
-            _ = _httpNotificationService.SendPaymentNotificationAsync(args);
-
-            var settings = _appContext.CurrentSettings;
-            if (!result.IsSilentCancel && settings.IsPaymentCancelledVoiceEnabled)
+        private async Task OnPaymentCancelledAsync(PaymentEventArgs args)
+        {
+            try
             {
-                var nickname = ShouldPlayNickname(args) ? args.DisplayName : null;
-                _ = _voiceService.PlayPaymentCancelledAsync(nickname, args.OrderNumber);
+                var result = await _transactionService.HandlePaymentCancelledAsync(args);
+
+                _voiceService.MarkOrderCompleted(args.OrderNumber);
+
+                if (!result.StateChanged)
+                    return;
+
+                _ = _httpNotificationService.SendPaymentNotificationAsync(args);
+
+                var settings = _appContext.CurrentSettings;
+                if (!result.IsSilentCancel && settings.IsPaymentCancelledVoiceEnabled)
+                {
+                    var nickname = ShouldPlayNickname(args) ? args.DisplayName : null;
+                    _ = _voiceService.PlayPaymentCancelledAsync(nickname, args.OrderNumber);
+                }
+            }
+            catch (Exception ex)
+            {
+                GlobalSettings.CurrentAppContext.CurrentLogger.Error($"处理支付取消事件失败: {ex.Message}");
             }
         }
 

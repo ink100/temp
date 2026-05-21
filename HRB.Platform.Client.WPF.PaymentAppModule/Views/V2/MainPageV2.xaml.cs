@@ -15,15 +15,17 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
     public partial class MainPageV2 : BaseRegionUserControl
     {
         private static readonly TimeSpan AutoScrollSuspendDuration = TimeSpan.FromSeconds(5);
+        private static readonly TimeSpan AutoScrollDebounceDuration = TimeSpan.FromMilliseconds(180);
+        private static readonly TimeSpan MinAutoScrollInterval = TimeSpan.FromMilliseconds(500);
 
         private ScrollViewer? _transactionScrollViewer;
         private DispatcherTimer? _autoScrollResumeTimer;
+        private DispatcherTimer? _autoScrollDebounceTimer;
+
+        private DateTime _lastAutoScrollAt = DateTime.MinValue;
+
         private bool _isProgrammaticScroll;
         private bool _isAutoScrollSuspendedByUser;
-        /// <summary>
-        /// 是否已经安排了一次自动滚动任务。
-        /// 用于合并连续新增记录产生的重复滚动请求，避免 UI 线程堆积。
-        /// </summary>
         private bool _isAutoScrollScheduled;
         public MainPageV2()
         {
@@ -67,6 +69,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
 
             DetachTransactionsCollectionChanged();
             _autoScrollResumeTimer?.Stop();
+            _autoScrollDebounceTimer?.Stop();
+
             _isProgrammaticScroll = false;
             _isAutoScrollScheduled = false;
             _isAutoScrollSuspendedByUser = false;
@@ -97,18 +101,48 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
             if (!IsAutoScrollEnabled() || _isAutoScrollSuspendedByUser)
                 return;
 
-            // 如果已经排队了一次自动滚动，就不再重复排队。
-            // 连续多条交易进入时，最终只需要滚到一次最新记录即可。
+            ScheduleAutoScroll();
+        }
+        /// <summary>
+        /// 合并连续新增交易产生的自动滚动请求。
+        /// 采用“短延迟 + 最小滚动间隔”的方式，避免突发记录把 UI 线程塞满。
+        /// </summary>
+        private void ScheduleAutoScroll()
+        {
+            if (!IsAutoScrollEnabled() || _isAutoScrollSuspendedByUser)
+                return;
+
             if (_isAutoScrollScheduled)
                 return;
 
             _isAutoScrollScheduled = true;
 
-            Dispatcher.BeginInvoke(
-                ScrollTransactionsToTop,
-                DispatcherPriority.ContextIdle);
+            var now = DateTime.UtcNow;
+            var elapsed = now - _lastAutoScrollAt;
+
+            var delay = elapsed >= MinAutoScrollInterval
+                ? AutoScrollDebounceDuration
+                : MinAutoScrollInterval - elapsed;
+
+            if (delay < TimeSpan.FromMilliseconds(60))
+                delay = TimeSpan.FromMilliseconds(60);
+
+            _autoScrollDebounceTimer ??= new DispatcherTimer();
+            _autoScrollDebounceTimer.Tick -= OnAutoScrollDebounceTimerTick;
+            _autoScrollDebounceTimer.Tick += OnAutoScrollDebounceTimerTick;
+            _autoScrollDebounceTimer.Interval = delay;
+            _autoScrollDebounceTimer.Stop();
+            _autoScrollDebounceTimer.Start();
         }
 
+        private void OnAutoScrollDebounceTimerTick(object? sender, EventArgs e)
+        {
+            _autoScrollDebounceTimer?.Stop();
+
+            Dispatcher.BeginInvoke(
+                ScrollTransactionsToTop,
+                DispatcherPriority.Background);
+        }
         private bool IsAutoScrollEnabled()
         {
             return DataContext is MainPageV2ViewModel vm && vm.IsAutoScrollToLatestEnabled;
@@ -116,6 +150,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
 
         private void ScrollTransactionsToTop()
         {
+            var shouldResetProgrammaticFlagLater = false;
+
             try
             {
                 if (!IsAutoScrollEnabled() || _isAutoScrollSuspendedByUser)
@@ -125,29 +161,37 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
                 if (_transactionScrollViewer == null)
                     return;
 
-                _isProgrammaticScroll = true;
-
-                if (TransactionsDataGrid.Items.Count > 0)
+                // 已经在顶部，就不要重复触发布局和滚动事件
+                if (_transactionScrollViewer.VerticalOffset <= 0.5)
                 {
-                    // 先确保最新记录进入可视区域
-                    var latestItem = TransactionsDataGrid.Items[0];
-                    TransactionsDataGrid.ScrollIntoView(latestItem);
+                    _lastAutoScrollAt = DateTime.UtcNow;
+                    return;
                 }
 
-                // 再将滚动条精确置顶
+                _isProgrammaticScroll = true;
+                shouldResetProgrammaticFlagLater = true;
+
                 _transactionScrollViewer.ScrollToTop();
+                _lastAutoScrollAt = DateTime.UtcNow;
             }
             finally
             {
-                // 等这一轮 UI 滚动事件处理完后，再解除程序滚动标记
-                Dispatcher.BeginInvoke(() =>
+                if (shouldResetProgrammaticFlagLater)
+                {
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        _isProgrammaticScroll = false;
+                        _isAutoScrollScheduled = false;
+                    }, DispatcherPriority.Background);
+                }
+                else
                 {
                     _isProgrammaticScroll = false;
                     _isAutoScrollScheduled = false;
-                }, DispatcherPriority.Background);
+                }
             }
         }
-        
+
 
         private void OnUserScrollInput(object sender, MouseWheelEventArgs e)
         {
@@ -190,6 +234,10 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
 
             _isAutoScrollSuspendedByUser = true;
 
+            // 用户开始手动查看历史记录时，取消尚未执行的自动滚动
+            _autoScrollDebounceTimer?.Stop();
+            _isAutoScrollScheduled = false;
+
             _autoScrollResumeTimer ??= new DispatcherTimer
             {
                 Interval = AutoScrollSuspendDuration
@@ -204,6 +252,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
         {
             _autoScrollResumeTimer?.Stop();
             _isAutoScrollSuspendedByUser = false;
+            // 用户 5 秒不再手动滚动后，补一次滚动到最新记录
+            ScheduleAutoScroll();
         }
 
         private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject

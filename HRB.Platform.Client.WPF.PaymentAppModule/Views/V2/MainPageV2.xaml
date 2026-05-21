@@ -204,6 +204,12 @@
         <!--  Row 1: 交易记录表格  -->
         <Grid Grid.Row="1" Margin="20,0,20,20">
             <DataGrid x:Name="TransactionsDataGrid"
+                      EnableRowVirtualization="True"
+                      EnableColumnVirtualization="True"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True"
+                      ScrollViewer.IsDeferredScrollingEnabled="True"
                       AutoGenerateColumns="False"
                       Background="White"
                       BorderThickness="0"

@@ -365,9 +365,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(orderNumber))
+                    return null;
+
                 var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
-                var transactions = await collection.FindAsync(t => t.OrderNumber == orderNumber);
-                return transactions.FirstOrDefault();
+                return await collection.FindOneAsync(t => t.OrderNumber == orderNumber);
             }
             catch (Exception ex)
             {

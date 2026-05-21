@@ -40,6 +40,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
         private readonly IPaymentNotificationHandler _notificationHandler;
         private readonly IPaymentEventPublisher _eventPublisher;
         private readonly AlipayChannelPlugin _alipayPlugin;
+
         private readonly WeChatChannelPlugin _weChatPlugin;
 
         #region UI 绑定属性
@@ -189,7 +190,19 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             _weChatPlugin.StatusChanged += OnPluginStatusChanged;
             RefreshPluginStatus();
         }
-
+        public async Task<bool> LoadMoreTransactionsAsync()
+        {
+            try
+            {
+                return await _transactionService.LoadMoreTransactionsAsync();
+            }
+            catch (Exception ex)
+            {
+                GlobalSettings.CurrentAppContext.CurrentLogger.Error(
+                    $"首页加载更多交易记录失败: {ex.Message}");
+                return false;
+            }
+        }
         #region 生命周期
 
         protected override void OnNavigatedToEvent(NavigationContext navigationContext)

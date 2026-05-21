@@ -1,6 +1,7 @@
-﻿using HRB.Platform.Client.Core.Interfaces;
+﻿using HRB.Payment.Core.Models;
+using HRB.Platform.Client.Core.Interfaces;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels;
-using HRB.Payment.Core.Models;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
 {
@@ -119,6 +120,19 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
             DateTime endDate,
             int count);
         /// <summary>
+        /// 获取指定游标之前的更旧交易记录。
+        /// 用于首页向下滚动加载更多历史记录。
+        /// </summary>
+        /// <param name="beforeTime">当前已加载最后一条记录的有效时间</param>
+        /// <param name="beforeId">当前已加载最后一条记录的 Id</param>
+        /// <param name="count">获取数量</param>
+        /// <returns>更旧的交易记录列表</returns>
+        Task<List<TransactionRecordDbo>> GetRecentTransactionsBeforeAsync(
+            DateTime beforeTime,
+            int beforeId,
+            int count);
+
+        /// <summary>
         /// 获取所有交易记录
         /// </summary>
         /// <returns>交易记录列表</returns>
@@ -158,7 +172,30 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
         /// <param name="id">交易ID</param>
         /// <returns>是否成功</returns>
         Task<bool> DeleteTransactionAsync(int id);
+        /// <summary>
+        /// 台账游标分页查询。
+        /// 打开台账时 beforeTime 传 null；向下滚动时传当前游标。
+        /// </summary>
+        Task<CursorPageResult<TransactionRecordDbo>> GetLedgerTransactionsBeforeAsync(
+            DateTime startDate,
+            DateTime endDate,
+            PaymentChannel? paymentChannel,
+            PaymentStatus? status,
+            string? keyword,
+            DateTime? beforeTime,
+            int beforeId,
+            int count);
 
+        /// <summary>
+        /// 根据台账筛选条件单独查询统计数据。
+        /// 统计不依赖当前已加载的列表数据。
+        /// </summary>
+        Task<LedgerSummaryDto> GetLedgerSummaryAsync(
+            DateTime startDate,
+            DateTime endDate,
+            PaymentChannel? paymentChannel,
+            PaymentStatus? status,
+            string? keyword);
         /// <summary>
         /// 获取总金额
         /// </summary>

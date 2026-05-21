@@ -27,6 +27,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
         private bool _isProgrammaticScroll;
         private bool _isAutoScrollSuspendedByUser;
         private bool _isAutoScrollScheduled;
+        private bool _isLoadingMoreTransactions;
         public MainPageV2()
         {
             InitializeComponent();
@@ -215,15 +216,56 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
             if (_isProgrammaticScroll)
                 return;
 
-            // 鼠标拖动滚动条时不会触发 PreviewMouseWheel，
-            // 这里继续作为“用户手动滚动”的兜底判断。
-            //
-            // ExtentHeightChange 接近 0，说明不是因为列表内容高度变化导致的滚动，
-            // 更可能是用户主动滚动。
-            if (Math.Abs(e.VerticalChange) > 0.01 &&
-                Math.Abs(e.ExtentHeightChange) < 0.01)
+            if (Math.Abs(e.VerticalChange) > 0.01 && Math.Abs(e.ExtentHeightChange) < 0.01)
             {
                 SuspendAutoScrollTemporarily();
+            }
+
+            TryLoadMoreTransactionsIfNeeded(e);
+        }
+        private void TryLoadMoreTransactionsIfNeeded(ScrollChangedEventArgs e)
+        {
+            if (_isLoadingMoreTransactions)
+                return;
+
+            // 只在用户向下滚动时触发，避免初次加载或内容高度变化时自动连续加载。
+            if (e.VerticalChange <= 0.01)
+                return;
+
+            if (e.ExtentHeight <= 0 || e.ViewportHeight <= 0)
+                return;
+
+            var remaining = e.ExtentHeight - e.VerticalOffset - e.ViewportHeight;
+
+            // 使用 CanContentScroll=True 时，这里的单位通常接近“行数”。
+            // 剩余 3 行以内时开始加载下一页。
+            if (remaining > 3)
+                return;
+
+            _ = LoadMoreTransactionsAsync();
+        }
+        private async Task LoadMoreTransactionsAsync()
+        {
+            if (_isLoadingMoreTransactions)
+                return;
+
+            if (DataContext is not MainPageV2ViewModel vm)
+                return;
+
+            _isLoadingMoreTransactions = true;
+
+            try
+            {
+                await vm.LoadMoreTransactionsAsync();
+            }
+            catch (Exception ex)
+            {
+                GlobalSettings.CurrentAppContext.CurrentLogger.Error(
+                    $"滚动加载更多交易记录失败: {ex.Message}");
+            }
+            finally
+            {
+                _isLoadingMoreTransactions = false;
             }
         }
 

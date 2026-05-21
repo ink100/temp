@@ -17,12 +17,15 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
     /// </summary>
     public sealed class PaymentTransactionService : IPaymentTransactionService
     {
-        private const int MaxTransactionCount = 20;
-
+        private const int TransactionPageSize = 20;
+        // 首页最多缓存 100 条，避免用户一直滚动导致内存集合无限增长。
+        // DataGrid 已开启虚拟化，100 条在低配机器上仍然可控。
+        private const int MaxCachedTransactionCount = 100;
         private readonly IPaymentRepository _repository;
         private readonly IOrderStateManager _orderStateManager;
         private readonly IHrbLogger _log;
-
+        private bool _isLoadingMoreTransactions;
+        private bool _hasMoreTransactions = true;
         public ObservableCollection<TransactionRecord> Transactions { get; } = new();
 
         public PaymentTransactionService(
@@ -34,6 +37,19 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             _log = GlobalSettings.CurrentAppContext.CurrentLogger;
         }
 
+        private static DateTime GetEffectiveTransactionTime(TransactionRecord transaction)
+        {
+            return transaction.TransactionTime == default
+                ? transaction.CreatedAt
+                : transaction.TransactionTime;
+        }
+
+        private static DateTime GetEffectiveTransactionTime(TransactionRecordDbo transaction)
+        {
+            return transaction.TransactionTime == default
+                ? transaction.CreatedAt
+                : transaction.TransactionTime;
+        }
         /// <summary>
         /// 加载首页交易记录。
         /// 当天记录优先；
@@ -42,22 +58,21 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         public async Task LoadTodayTransactionsAsync()
         {
+            _hasMoreTransactions = true;
+
             var today = DateTime.Today;
             var tomorrow = today.AddDays(1);
 
-            // 1. 首页默认只查最近 20 条当天记录，不再查询当天全部记录。
             var todayRecords = await _repository.GetRecentTransactionsByDateRangeAsync(
                 today,
                 tomorrow,
-                MaxTransactionCount);
+                TransactionPageSize);
 
             var mergedRecords = todayRecords?.ToList() ?? new List<TransactionRecordDbo>();
 
-            // 2. 当天不足 20 条时，用最近历史记录补足。
-            // GetRecentTransactionsAsync 内部已经改为限量查询，不再 FindAllAsync。
-            if (mergedRecords.Count < MaxTransactionCount)
+            if (mergedRecords.Count < TransactionPageSize)
             {
-                var recentRecords = await _repository.GetRecentTransactionsAsync(MaxTransactionCount);
+                var recentRecords = await _repository.GetRecentTransactionsAsync(TransactionPageSize);
 
                 mergedRecords = mergedRecords
                     .Concat(recentRecords ?? new List<TransactionRecordDbo>())
@@ -66,18 +81,20 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     .ToList();
             }
 
-            // 3. 最终仍保持原来的业务规则：按有效交易时间倒序，最多保留 20 条。
             var finalRecords = mergedRecords
                 .OrderByDescending(t => t.TransactionTime == default ? t.CreatedAt : t.TransactionTime)
-                .Take(MaxTransactionCount)
+                .ThenByDescending(t => t.Id)
+                .Take(TransactionPageSize)
                 .ToList();
 
-            // 4. 写入首页集合。
             Transactions.Clear();
             foreach (var dbo in finalRecords)
             {
                 Transactions.Add(dbo.ToModel());
             }
+
+            if (finalRecords.Count < TransactionPageSize)
+                _hasMoreTransactions = false;
         }
         /// <summary>
         /// 处理支付开始事件。
@@ -283,7 +300,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         private void AddTransaction(TransactionRecord transaction)
         {
             Transactions.Insert(0, transaction);
-            while (Transactions.Count > MaxTransactionCount)
+
+            TrimTransactionCache();
+        }
+
+        private void TrimTransactionCache()
+        {
+            while (Transactions.Count > MaxCachedTransactionCount)
                 Transactions.RemoveAt(Transactions.Count - 1);
         }
 
@@ -379,5 +402,84 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 Status = status
             };
         }
+
+        public async Task<bool> LoadMoreTransactionsAsync()
+        {
+            if (_isLoadingMoreTransactions || !_hasMoreTransactions)
+                return false;
+
+            if (Transactions.Count == 0)
+                return false;
+
+            _isLoadingMoreTransactions = true;
+
+            try
+            {
+                var lastTransaction = Transactions
+                    .OrderBy(GetEffectiveTransactionTime)
+                    .ThenBy(t => t.Id)
+                    .FirstOrDefault();
+
+                if (lastTransaction == null)
+                    return false;
+
+                var beforeTime = GetEffectiveTransactionTime(lastTransaction);
+                var beforeId = lastTransaction.Id;
+
+                var records = await _repository.GetRecentTransactionsBeforeAsync(
+                    beforeTime,
+                    beforeId,
+                    TransactionPageSize);
+
+                if (records == null || records.Count == 0)
+                {
+                    _hasMoreTransactions = false;
+                    return false;
+                }
+
+                var existingIds = Transactions
+                    .Select(t => t.Id)
+                    .ToHashSet();
+
+                var newRecords = records
+                    .Where(t => !existingIds.Contains(t.Id))
+                    .OrderByDescending(GetEffectiveTransactionTime)
+                    .ThenByDescending(t => t.Id)
+                    .Take(TransactionPageSize)
+                    .ToList();
+
+                if (newRecords.Count == 0)
+                {
+                    if (records.Count < TransactionPageSize)
+                        _hasMoreTransactions = false;
+
+                    return false;
+                }
+
+                foreach (var dbo in newRecords)
+                {
+                    Transactions.Add(dbo.ToModel());
+                }
+
+                TrimTransactionCache();
+
+                if (records.Count < TransactionPageSize)
+                    _hasMoreTransactions = false;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _log.Info($"加载更多交易记录失败: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                _isLoadingMoreTransactions = false;
+            }
+
+        }
+
+
     }
 }

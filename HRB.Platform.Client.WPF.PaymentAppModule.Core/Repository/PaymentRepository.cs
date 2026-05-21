@@ -2,6 +2,7 @@
 using HRB.Platform.Client.Core.Interfaces;
 using HRB.Platform.Client.WPF.Core.Instruments.Abstractions;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels;
 using LiteDB;
 using System.Threading;
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
@@ -93,7 +94,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
                 return false;
             }
         }
-
+       
         /// <summary>
         /// 根据登录账号获取配置
         /// </summary>
@@ -325,17 +326,63 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
                 ? transaction.CreatedAt
                 : transaction.TransactionTime;
         }
+        private static bool IsBeforeCursor(
+    TransactionRecordDbo transaction,
+    DateTime beforeTime,
+    int beforeId)
+        {
+            var effectiveTime = GetEffectiveTransactionTime(transaction);
+
+            return effectiveTime < beforeTime ||
+                   effectiveTime == beforeTime && transaction.Id < beforeId;
+        }
+
+        private static bool MatchesKeyword(TransactionRecordDbo transaction, string? keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+                return true;
+
+            return ContainsIgnoreCase(transaction.OrderNumber, keyword) ||
+                   ContainsIgnoreCase(transaction.UserId, keyword) ||
+                   ContainsIgnoreCase(transaction.DisplayName, keyword) ||
+                   ContainsIgnoreCase(transaction.Remarks, keyword) ||
+                   transaction.PaymentChannel.ToString().Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+                   transaction.Status.ToString().Contains(keyword, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool ContainsIgnoreCase(string? source, string keyword)
+        {
+            return !string.IsNullOrWhiteSpace(source) &&
+                   source.Contains(keyword, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool MatchesLedgerCondition(
+            TransactionRecordDbo transaction,
+            PaymentChannel? paymentChannel,
+            PaymentStatus? status,
+            string? keyword)
+        {
+            if (paymentChannel.HasValue && transaction.PaymentChannel != paymentChannel.Value)
+                return false;
+
+            if (status.HasValue && transaction.Status != status.Value)
+                return false;
+
+            return MatchesKeyword(transaction, keyword);
+        }
 
         private static List<TransactionRecordDbo> MergeAndTakeRecent(
-            IEnumerable<TransactionRecordDbo> first,
-            IEnumerable<TransactionRecordDbo> second,
-            int count)
+     IEnumerable<TransactionRecordDbo> first,
+     IEnumerable<TransactionRecordDbo> second,
+     int count)
         {
+            
             return first
                 .Concat(second)
                 .GroupBy(t => t.Id)
                 .Select(g => g.First())
                 .OrderByDescending(GetEffectiveTransactionTime)
+                .ThenByDescending(t => t.Id)
                 .Take(count)
                 .ToList();
         }
@@ -431,6 +478,53 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
                 return new List<TransactionRecordDbo>();
             }
         }
+
+        public async Task<List<TransactionRecordDbo>> GetRecentTransactionsBeforeAsync(
+    DateTime beforeTime,
+    int beforeId,
+    int count)
+        {
+            try
+            {
+                if (count <= 0 || beforeTime == default)
+                    return new List<TransactionRecordDbo>();
+
+                await EnsureTransactionIndexesAsync();
+
+                var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
+
+                // 取更多候选，避免同一秒多笔交易、TransactionTime 为空等情况导致漏数据。
+                var queryCount = Math.Max(count * 4, 80);
+
+                var byTransactionTime = await collection.Query()
+                    .Where(t => t.TransactionTime <= beforeTime)
+                    .OrderByDescending(t => t.TransactionTime)
+                    .Limit(queryCount)
+                    .ToListAsync();
+
+                var byCreatedAt = await collection.Query()
+                    .Where(t => t.CreatedAt <= beforeTime)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .Limit(queryCount)
+                    .ToListAsync();
+
+                return byTransactionTime
+                    .Concat(byCreatedAt)
+                    .GroupBy(t => t.Id)
+                    .Select(g => g.First())
+                    .Where(t => IsBeforeCursor(t, beforeTime, beforeId))
+                    .OrderByDescending(GetEffectiveTransactionTime)
+                    .ThenByDescending(t => t.Id)
+                    .Take(count)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _log.Info($"获取更旧交易记录失败: {ex.Message}");
+                return new List<TransactionRecordDbo>();
+            }
+        }
+
         /// <summary>
         /// 获取所有交易记录
         /// </summary>
@@ -572,6 +666,183 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
+        public async Task<CursorPageResult<TransactionRecordDbo>> GetLedgerTransactionsBeforeAsync(
+     DateTime startDate,
+     DateTime endDate,
+     PaymentChannel? paymentChannel,
+     PaymentStatus? status,
+     string? keyword,
+     DateTime? beforeTime,
+     int beforeId,
+     int count)
+        {
+            try
+            {
+                if (count <= 0)
+                    return new CursorPageResult<TransactionRecordDbo>();
+
+                await EnsureTransactionIndexesAsync();
+
+                var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
+
+                // 台账可能带关键词，关键词需要内存匹配，所以候选数要大于页面数量。
+                var queryCount = Math.Max(count * 10, 500);
+
+                // 注意：这里不要把 paymentChannel/status/keyword/beforeTime 的复杂可空条件全部塞进 LiteDB Query。
+                // LiteDB.Async 对部分复杂表达式支持不稳定，容易出现 TargetInvocationException。
+                List<TransactionRecordDbo> byTransactionTime;
+                List<TransactionRecordDbo> byCreatedAt;
+
+                if (beforeTime.HasValue)
+                {
+                    var cursorTime = beforeTime.Value;
+
+                    byTransactionTime = await collection.Query()
+                        .Where(t =>
+                            t.TransactionTime >= startDate &&
+                            t.TransactionTime < endDate &&
+                            t.TransactionTime <= cursorTime)
+                        .OrderByDescending(t => t.TransactionTime)
+                        .Limit(queryCount)
+                        .ToListAsync();
+
+                    byCreatedAt = await collection.Query()
+                        .Where(t =>
+                            t.CreatedAt >= startDate &&
+                            t.CreatedAt < endDate &&
+                            t.CreatedAt <= cursorTime)
+                        .OrderByDescending(t => t.CreatedAt)
+                        .Limit(queryCount)
+                        .ToListAsync();
+                }
+                else
+                {
+                    byTransactionTime = await collection.Query()
+                        .Where(t =>
+                            t.TransactionTime >= startDate &&
+                            t.TransactionTime < endDate)
+                        .OrderByDescending(t => t.TransactionTime)
+                        .Limit(queryCount)
+                        .ToListAsync();
+
+                    byCreatedAt = await collection.Query()
+                        .Where(t =>
+                            t.CreatedAt >= startDate &&
+                            t.CreatedAt < endDate)
+                        .OrderByDescending(t => t.CreatedAt)
+                        .Limit(queryCount)
+                        .ToListAsync();
+                }
+
+                var orderedCandidates = byTransactionTime
+                    .Concat(byCreatedAt)
+                    .GroupBy(t => t.Id)
+                    .Select(g => g.First())
+                    .Where(t => !beforeTime.HasValue || IsBeforeCursor(t, beforeTime.Value, beforeId))
+                    .OrderByDescending(t => GetEffectiveTransactionTime(t))
+                    .ThenByDescending(t => t.Id)
+                    .ToList();
+
+                var items = orderedCandidates
+                    .Where(t => MatchesLedgerCondition(t, paymentChannel, status, keyword))
+                    .Take(count)
+                    .ToList();
+
+                var nextCursor = orderedCandidates.LastOrDefault();
+
+                return new CursorPageResult<TransactionRecordDbo>
+                {
+                    Items = items,
+                    HasMore = orderedCandidates.Count >= queryCount,
+                    NextCursorTime = nextCursor == null ? null : GetEffectiveTransactionTime(nextCursor),
+                    NextCursorId = nextCursor?.Id ?? beforeId
+                };
+            }
+            catch (Exception ex)
+            {
+                _log.Info($"台账游标分页查询失败: {ex}");
+                if (ex.InnerException != null)
+                {
+                    _log.Info($"台账游标分页查询内部异常: {ex.InnerException}");
+                }
+
+                return new CursorPageResult<TransactionRecordDbo>();
+            }
+        }
+
+        public async Task<LedgerSummaryDto> GetLedgerSummaryAsync(
+       DateTime startDate,
+       DateTime endDate,
+       PaymentChannel? paymentChannel,
+       PaymentStatus? status,
+       string? keyword)
+        {
+            try
+            {
+                await EnsureTransactionIndexesAsync();
+
+                var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
+
+                // 统计查询先只在数据库层做时间范围过滤。
+                // 渠道、状态、关键词统一在内存过滤，避免 LiteDB 查询表达式过复杂导致异常。
+                var byTransactionTime = await collection.Query()
+                    .Where(t =>
+                        t.TransactionTime >= startDate &&
+                        t.TransactionTime < endDate)
+                    .OrderByDescending(t => t.TransactionTime)
+                    .ToListAsync();
+
+                var byCreatedAt = await collection.Query()
+                    .Where(t =>
+                        t.CreatedAt >= startDate &&
+                        t.CreatedAt < endDate)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .ToListAsync();
+
+                var transactions = byTransactionTime
+                    .Concat(byCreatedAt)
+                    .GroupBy(t => t.Id)
+                    .Select(g => g.First())
+                    .Where(t => MatchesLedgerCondition(t, paymentChannel, status, keyword))
+                    .ToList();
+
+                _log.Info(
+                    $"台账统计仓储结果，筛选后数量:{transactions.Count}，StartDate:{startDate:yyyy-MM-dd HH:mm:ss}，EndDate:{endDate:yyyy-MM-dd HH:mm:ss}，Channel:{paymentChannel?.ToString() ?? "全部"}，Status:{status?.ToString() ?? "全部"}，Keyword:{keyword}");
+
+                return new LedgerSummaryDto
+                {
+                    TotalRevenue = transactions
+                        .Where(t => t.Status == PaymentStatus.Success)
+                        .Sum(t => t.Amount),
+
+                    AlipayRevenue = transactions
+                        .Where(t => t.PaymentChannel == PaymentChannel.Alipay && t.Status == PaymentStatus.Success)
+                        .Sum(t => t.Amount),
+
+                    WeChatRevenue = transactions
+                        .Where(t => t.PaymentChannel == PaymentChannel.WeChat && t.Status == PaymentStatus.Success)
+                        .Sum(t => t.Amount),
+
+                    AlipayCount = transactions.Count(t => t.PaymentChannel == PaymentChannel.Alipay),
+
+                    WeChatCount = transactions.Count(t => t.PaymentChannel == PaymentChannel.WeChat),
+
+                    SuccessCount = transactions.Count(t => t.Status == PaymentStatus.Success),
+
+                    CancelCount = transactions.Count(t => t.Status == PaymentStatus.Cancel)
+                };
+            }
+            catch (Exception ex)
+            {
+                _log.Info($"台账统计查询失败: {ex}");
+                if (ex.InnerException != null)
+                {
+                    _log.Info($"台账统计查询内部异常: {ex.InnerException}");
+                }
+
+                return new LedgerSummaryDto();
+            }
+        }
         public async Task<List<TransactionRecordDbo>> GetTransactionsByUserIdAsync(string userId)
         {
             var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();

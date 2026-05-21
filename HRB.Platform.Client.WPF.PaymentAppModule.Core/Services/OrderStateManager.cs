@@ -32,6 +32,12 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         public void TrackOrder(string orderNumber)
         {
+            if (string.IsNullOrWhiteSpace(orderNumber))
+            {
+                GlobalSettings.CurrentAppContext.CurrentLogger.Info("跳过追踪订单：订单号为空");
+                return;
+            }
+
             lock (_lockObject)
             {
                 _orderNotificationCount[orderNumber] = 0;
@@ -43,6 +49,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         public void UntrackOrder(string orderNumber)
         {
+            if (string.IsNullOrWhiteSpace(orderNumber))
+                return;
+
             lock (_lockObject)
             {
                 _orderNotificationCount.Remove(orderNumber);
@@ -54,6 +63,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         public void MarkSilentCancel(string orderNumber)
         {
+            if (string.IsNullOrWhiteSpace(orderNumber))
+                return;
+
             lock (_lockObject)
             {
                 _silentCancelOrders.Add(orderNumber);
@@ -65,6 +77,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         public bool IsSilentCancel(string orderNumber)
         {
+            if (string.IsNullOrWhiteSpace(orderNumber))
+                return false;
+
             lock (_lockObject)
             {
                 return _silentCancelOrders.Contains(orderNumber);
@@ -76,6 +91,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         public void ClearSilentCancel(string orderNumber)
         {
+            if (string.IsNullOrWhiteSpace(orderNumber))
+                return;
+
             lock (_lockObject)
             {
                 _silentCancelOrders.Remove(orderNumber);
@@ -87,6 +105,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         private bool IsTrackedOrder(string orderNumber)
         {
+            if (string.IsNullOrWhiteSpace(orderNumber))
+                return false;
+
             lock (_lockObject)
             {
                 return _orderNotificationCount.ContainsKey(orderNumber);
@@ -101,6 +122,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             {
                 foreach (var order in scanningOrders)
                 {
+                    if (order == null || string.IsNullOrWhiteSpace(order.OrderNumber))
+                    {
+                        GlobalSettings.CurrentAppContext.CurrentLogger.Info("订单状态检查跳过：订单对象为空或订单号为空");
+                        continue;
+                    }
                     if (IsSilentCancel(order.OrderNumber))
                         continue;
                     // 已经停止追踪的订单不再检查。
@@ -138,6 +164,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         private void CheckAndNotify(TransactionRecord order, double elapsedSeconds, int notifyIntervalSeconds, int maxNotifyCount)
         {
+            if (order == null || string.IsNullOrWhiteSpace(order.OrderNumber))
+                return;
+
             lock (_lockObject)
             {
                 if (!_orderNotificationCount.TryGetValue(order.OrderNumber, out var notificationCount))
@@ -173,6 +202,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         private void TriggerTimeout(TransactionRecord order, DateTime currentTime)
         {
+            if (order == null || string.IsNullOrWhiteSpace(order.OrderNumber))
+                return;
+
             // 快照可能已经过期。
             // 如果订单已经支付成功、真实取消或被其他流程停止追踪，则不再触发超时未支付。
             if (!IsTrackedOrder(order.OrderNumber))

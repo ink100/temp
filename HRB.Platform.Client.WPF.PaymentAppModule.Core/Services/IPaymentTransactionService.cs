@@ -1,6 +1,7 @@
 using HRB.Payment.Core.Events;
 using HRB.Payment.Core.Models;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels;
 using System.Collections.ObjectModel;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
@@ -13,7 +14,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
     public interface IPaymentTransactionService
     {
         /// <summary>
-        /// 当前内存中的交易记录集合（最多保留最近 50 条），供 UI 绑定
+        /// 当前内存中的交易记录集合，供 UI 绑定。
+        /// 默认加载最近 20 条，向下滚动时可继续加载更旧记录。
         /// </summary>
         ObservableCollection<TransactionRecord> Transactions { get; }
 
@@ -21,7 +23,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// 从数据库加载今日交易记录到内存集合
         /// </summary>
         Task LoadTodayTransactionsAsync();
-
+        /// <summary>
+        /// 加载更旧的交易记录，追加到首页列表底部。
+        /// </summary>
+        /// <returns>是否成功加载到新记录</returns>
+        Task<bool> LoadMoreTransactionsAsync();
         /// <summary>
         /// 处理支付开始（扫码）事件。
         /// 包含：重复订单检测、同用户未支付订单标记静默取消、创建新交易记录、启动订单超时追踪。
@@ -50,5 +56,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// 按条件查找内存集合中的交易记录
         /// </summary>
         TransactionRecord? FindTransaction(Func<TransactionRecord, bool> predicate);
+     
+
     }
 }

@@ -81,7 +81,17 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 _silentCancelOrders.Remove(orderNumber);
             }
         }
-
+        /// <summary>
+        /// 判断订单是否仍处于追踪状态。
+        /// 超时未支付后会停止追踪，避免每 3 秒重复触发超时事件。
+        /// </summary>
+        private bool IsTrackedOrder(string orderNumber)
+        {
+            lock (_lockObject)
+            {
+                return _orderNotificationCount.ContainsKey(orderNumber);
+            }
+        }
         /// <summary>
         /// 检查订单状态（由定时器调用）
         /// </summary>
@@ -93,11 +103,14 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 {
                     if (IsSilentCancel(order.OrderNumber))
                         continue;
-
+                    // 已经停止追踪的订单不再检查。
+                    // 例如：订单已经成功、真实取消，或者已经触发过一次“超时未支付”提醒。
+                    if (!IsTrackedOrder(order.OrderNumber))
+                        continue;
                     var elapsedSeconds = (currentTime - order.CreatedAt).TotalSeconds;
 
                     var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
-                    var timeoutSeconds = Math.Clamp(settings.ScanTimeoutSeconds <= 0 ? 120 : settings.ScanTimeoutSeconds, 1, 3600);
+                    var timeoutSeconds = Math.Clamp(settings.ScanTimeoutSeconds <= 0 ? 15 : settings.ScanTimeoutSeconds, 1, 3600);
                     var notifyIntervalSeconds = Math.Clamp(settings.ScanNotPayNotifyIntervalSeconds <= 0 ? 10 : settings.ScanNotPayNotifyIntervalSeconds, 1, timeoutSeconds);
 
                     // 按设置的间隔提醒“扫码未支付”，到达超时时间后停止提醒并进入超时取消。
@@ -127,11 +140,10 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         {
             lock (_lockObject)
             {
-                // 获取当前播报次数
                 if (!_orderNotificationCount.TryGetValue(order.OrderNumber, out var notificationCount))
                 {
-                    notificationCount = 0;
-                    _orderNotificationCount[order.OrderNumber] = 0;
+                    // 订单已经停止追踪，可能已经成功、取消或已经触发过超时未支付提醒。
+                    return;
                 }
 
                 // 提醒间隔、最多次数和超时秒数均可配置。
@@ -161,12 +173,20 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         private void TriggerTimeout(TransactionRecord order, DateTime currentTime)
         {
-            // 标记为静默取消
-            MarkSilentCancel(order.OrderNumber);
+            // 快照可能已经过期。
+            // 如果订单已经支付成功、真实取消或被其他流程停止追踪，则不再触发超时未支付。
+            if (!IsTrackedOrder(order.OrderNumber))
+                return;
 
-            GlobalSettings.CurrentAppContext.CurrentLogger.Error($"订单超时自动取消: {order.OrderNumber}, 已超时 {(currentTime - order.CreatedAt).TotalSeconds:F0} 秒");
+            // 超时未支付不是“取消支付”。
+            // 这里只停止继续追踪，避免后续每 3 秒重复触发超时事件。
+            UntrackOrder(order.OrderNumber);
 
-            // 触发超时事件
+            GlobalSettings.CurrentAppContext.CurrentLogger.Info(
+                $"订单超时未支付: {order.OrderNumber}, 已等待 {(currentTime - order.CreatedAt).TotalSeconds:F0} 秒");
+
+            // 触发“超时未支付”事件。
+            // 注意：该事件不应该再被转成 PaymentCancelled。
             OrderTimeout?.Invoke(this, new OrderTimeoutEventArgs
             {
                 OrderNumber = order.OrderNumber,

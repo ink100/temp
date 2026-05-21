@@ -2,7 +2,8 @@
 using HRB.Platform.Client.Core.Interfaces;
 using HRB.Platform.Client.WPF.Core.Instruments.Abstractions;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels;
-
+using LiteDB;
+using System.Threading;
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
 {
 
@@ -12,6 +13,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
         //private readonly PaymentDbContext _CurrentDbContext;
 
         private readonly IHrbLogger _log;
+        private readonly SemaphoreSlim _transactionIndexLock = new(1, 1);
+        private bool _transactionIndexesReady;
 
         public PaymentRepository(PaymentDbContext dbContext) : base(dbContext)
         {
@@ -112,7 +115,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
                 return null;
             }
         }
-
+        
         /// <summary>
         /// 获取所有支付宝配置
         /// </summary>
@@ -284,7 +287,58 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
         #endregion
 
         #region 交易记录管理
+        private async Task EnsureTransactionIndexesAsync()
+        {
+            if (_transactionIndexesReady)
+                return;
 
+            await _transactionIndexLock.WaitAsync();
+
+            try
+            {
+                if (_transactionIndexesReady)
+                    return;
+
+                var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
+
+                await collection.EnsureIndexAsync(t => t.OrderNumber);
+                await collection.EnsureIndexAsync(t => t.TransactionTime);
+                await collection.EnsureIndexAsync(t => t.CreatedAt);
+                await collection.EnsureIndexAsync(t => t.UserId);
+                await collection.EnsureIndexAsync(t => t.PaymentChannel);
+
+                _transactionIndexesReady = true;
+            }
+            catch (Exception ex)
+            {
+                _log.Info($"初始化交易记录索引失败: {ex.Message}");
+            }
+            finally
+            {
+                _transactionIndexLock.Release();
+            }
+        }
+
+        private static DateTime GetEffectiveTransactionTime(TransactionRecordDbo transaction)
+        {
+            return transaction.TransactionTime == default
+                ? transaction.CreatedAt
+                : transaction.TransactionTime;
+        }
+
+        private static List<TransactionRecordDbo> MergeAndTakeRecent(
+            IEnumerable<TransactionRecordDbo> first,
+            IEnumerable<TransactionRecordDbo> second,
+            int count)
+        {
+            return first
+                .Concat(second)
+                .GroupBy(t => t.Id)
+                .Select(g => g.First())
+                .OrderByDescending(GetEffectiveTransactionTime)
+                .Take(count)
+                .ToList();
+        }
         //  private const string TRANSACTION_COLLECTION_NAME = "Transactions";
 
         /// <summary>
@@ -294,9 +348,27 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
         {
             try
             {
+                if (count <= 0)
+                    return new List<TransactionRecordDbo>();
+
+                await EnsureTransactionIndexesAsync();
+
                 var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
-                var transactions = await collection.FindAllAsync();
-                return transactions.OrderByDescending(t => t.TransactionTime).Take(count).ToList();
+
+                // 首页默认 20 条。这里取稍多一点候选，兼容 TransactionTime 为空但 CreatedAt 有值的旧数据。
+                var queryCount = Math.Max(count * 2, 40);
+
+                var byTransactionTime = await collection.Query()
+                    .OrderByDescending(t => t.TransactionTime)
+                    .Limit(queryCount)
+                    .ToListAsync();
+
+                var byCreatedAt = await collection.Query()
+                    .OrderByDescending(t => t.CreatedAt)
+                    .Limit(queryCount)
+                    .ToListAsync();
+
+                return MergeAndTakeRecent(byTransactionTime, byCreatedAt, count);
             }
             catch (Exception ex)
             {
@@ -322,7 +394,43 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
                 return new List<TransactionRecordDbo>();
             }
         }
+        public async Task<List<TransactionRecordDbo>> GetRecentTransactionsByDateRangeAsync(
+    DateTime startDate,
+    DateTime endDate,
+    int count)
+        {
+            try
+            {
+                if (count <= 0)
+                    return new List<TransactionRecordDbo>();
 
+                await EnsureTransactionIndexesAsync();
+
+                var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
+
+                // 首页默认 20 条。这里取稍多候选，兼容 TransactionTime 和 CreatedAt 两种时间字段。
+                var queryCount = Math.Max(count * 2, 40);
+
+                var byTransactionTime = await collection.Query()
+                    .Where(t => t.TransactionTime >= startDate && t.TransactionTime < endDate)
+                    .OrderByDescending(t => t.TransactionTime)
+                    .Limit(queryCount)
+                    .ToListAsync();
+
+                var byCreatedAt = await collection.Query()
+                    .Where(t => t.CreatedAt >= startDate && t.CreatedAt < endDate)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .Limit(queryCount)
+                    .ToListAsync();
+
+                return MergeAndTakeRecent(byTransactionTime, byCreatedAt, count);
+            }
+            catch (Exception ex)
+            {
+                _log.Info($"根据日期范围获取最近交易记录失败: {ex.Message}");
+                return new List<TransactionRecordDbo>();
+            }
+        }
         /// <summary>
         /// 获取所有交易记录
         /// </summary>
@@ -493,25 +601,46 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
         /// “上次未支付”必须区分支付渠道，
         /// 否则可能出现微信记录影响支付宝、支付宝记录影响微信的问题。
         /// </summary>
-        public async Task<TransactionRecordDbo> GetOrderLastOrderByUserIdAndChannelAsync(
-            string userId,
-            PaymentChannel paymentChannel)
+        public async Task<TransactionRecordDbo?> GetOrderLastOrderByUserIdAndChannelAsync(
+     string userId,
+     PaymentChannel paymentChannel)
         {
-            if (string.IsNullOrWhiteSpace(userId))
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userId))
+                    return null;
+
+                await EnsureTransactionIndexesAsync();
+
+                var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
+
+                // 只取少量候选，避免每次扫码都查出该用户该渠道的全部历史订单。
+                const int candidateCount = 20;
+
+                var byTransactionTime = await collection.Query()
+                    .Where(c => c.UserId == userId && c.PaymentChannel == paymentChannel)
+                    .OrderByDescending(c => c.TransactionTime)
+                    .Limit(candidateCount)
+                    .ToListAsync();
+
+                var byCreatedAt = await collection.Query()
+                    .Where(c => c.UserId == userId && c.PaymentChannel == paymentChannel)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .Limit(candidateCount)
+                    .ToListAsync();
+
+                return byTransactionTime
+                    .Concat(byCreatedAt)
+                    .GroupBy(c => c.Id)
+                    .Select(g => g.First())
+                    .OrderByDescending(GetEffectiveTransactionTime)
+                    .FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _log.Info($"获取指定用户指定渠道最新订单失败: {ex.Message}");
                 return null;
-
-            var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
-
-            var list = await collection.FindAsync(c =>
-                c.UserId == userId &&
-                c.PaymentChannel == paymentChannel);
-
-            return list
-                .OrderByDescending(c =>
-                    c.TransactionTime == default
-                        ? c.CreatedAt
-                        : c.TransactionTime)
-                .FirstOrDefault();
+            }
         }
         #endregion
 
@@ -710,6 +839,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
                 return false;
             }
         }
+
+       
 
         #endregion
     }

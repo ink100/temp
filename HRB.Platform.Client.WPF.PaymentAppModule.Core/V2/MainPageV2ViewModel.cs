@@ -289,21 +289,34 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             }
         }
 
-        private async void OnPaymentSuccess(PaymentEventArgs args)
+        private void OnPaymentSuccess(PaymentEventArgs args)
         {
-            var result = await _transactionService.HandlePaymentSuccessAsync(args);
+            _ = OnPaymentSuccessAsync(args);
+        }
 
-            // 先标记订单完成，防止旧的扫码未支付语音排队后误播。
-            _voiceService.MarkOrderCompleted(args.OrderNumber);
+        private async Task OnPaymentSuccessAsync(PaymentEventArgs args)
+        {
+            try
+            {
+                var result = await _transactionService.HandlePaymentSuccessAsync(args);
 
-            if (!result.StateChanged)
-                return;
+                // 先标记订单完成，防止旧的扫码未支付语音排队后误播。
+                _voiceService.MarkOrderCompleted(args.OrderNumber);
 
-            _ = _httpNotificationService.SendPaymentNotificationAsync(args);
+                if (!result.StateChanged)
+                    return;
 
-            var settings = _appContext.CurrentSettings;
-            if (settings.IsPaymentSuccessVoiceEnabled)
-                _ = _voiceService.PlayPaymentSuccessAsync(args.Amount, args.PaymentChannel, args.OrderNumber);
+                _ = _httpNotificationService.SendPaymentNotificationAsync(args);
+
+                var settings = _appContext.CurrentSettings;
+                if (settings.IsPaymentSuccessVoiceEnabled)
+                    _ = _voiceService.PlayPaymentSuccessAsync(args.Amount, args.PaymentChannel, args.OrderNumber);
+            }
+            catch (Exception ex)
+            {
+                GlobalSettings.CurrentAppContext.CurrentLogger.Error(
+                    $"处理支付成功事件失败，订单号:{args.OrderNumber}，渠道:{args.PaymentChannel}，异常:{ex.Message}");
+            }
         }
 
         private bool ShouldPlayNickname(PaymentEventArgs args)
@@ -332,21 +345,18 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
 
         private void OnOrderTimeout(object? sender, OrderTimeoutEventArgs e)
         {
-            // 超时取消是静默取消，也要先标记订单完成。
-            // 否则如果“扫码未支付”语音已经进入播放队列，后面仍可能误播。
-            _voiceService.MarkOrderCompleted(e.OrderNumber);
+            // 超时未支付不等于取消支付。
+            // 这里只做提醒，不发布 PaymentCancelled，
+            // 因此界面状态仍保持“扫码中”。
+            var settings = _appContext.CurrentSettings;
 
-            _eventPublisher.PublishPaymentCancelled(new PaymentEventArgs
+            if (settings.IsScanNotPayVoiceEnabled)
             {
-                OrderNumber = e.OrderNumber,
-                UserId = e.UserId,
-                DisplayName = e.DisplayName,
-                Amount = e.Amount,
-                PaymentChannel = e.PaymentChannel,
-                Remarks = e.Remarks,
-                PayTime = PcHelper.GetNetNowTime(),
-                Status = PaymentStatus.Cancel
-            });
+                _ = _voiceService.PlayScanNotPayAsync(e.OrderNumber);
+            }
+
+            GlobalSettings.CurrentAppContext.CurrentLogger.Info(
+                $"订单超时未支付提醒已触发，订单号:{e.OrderNumber}，渠道:{e.PaymentChannel}");
         }
 
         #endregion

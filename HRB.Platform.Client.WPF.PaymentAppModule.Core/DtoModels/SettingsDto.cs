@@ -84,9 +84,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
         public bool IsScanNotPayVoiceEnabled { get; set; } = true;
 
         /// <summary>
-        /// 扫码后多少秒仍未支付，判定为超时未支付，正式默认 120 秒。
+        /// 扫码后多少秒仍未支付，判定为超时未支付，正式默认 10 秒。
         /// </summary>
-        public int ScanTimeoutSeconds { get; set; } = 120;
+        public int ScanTimeoutSeconds { get; set; } = 10;
 
         /// <summary>
         /// 扫码未支付提醒间隔秒数

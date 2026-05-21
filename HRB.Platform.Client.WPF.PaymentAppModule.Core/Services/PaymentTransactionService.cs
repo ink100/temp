@@ -17,7 +17,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
     /// </summary>
     public sealed class PaymentTransactionService : IPaymentTransactionService
     {
-        private const int MaxTransactionCount = 50;
+        private const int MaxTransactionCount = 20;
 
         private readonly IPaymentRepository _repository;
         private readonly IOrderStateManager _orderStateManager;
@@ -45,19 +45,19 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             var today = DateTime.Today;
             var tomorrow = today.AddDays(1);
 
-            // 1. 查询当天记录
-            var todayRecords = await _repository.GetTransactionsByDateRangeAsync(today, tomorrow);
-            var todayCount = todayRecords?.Count ?? 0;
+            // 1. 首页默认只查最近 20 条当天记录，不再查询当天全部记录。
+            var todayRecords = await _repository.GetRecentTransactionsByDateRangeAsync(
+                today,
+                tomorrow,
+                MaxTransactionCount);
 
             var mergedRecords = todayRecords?.ToList() ?? new List<TransactionRecordDbo>();
 
-            // 2. 当天不足 50 条时，用最近历史记录补足
-            var recentCount = 0;
-
+            // 2. 当天不足 20 条时，用最近历史记录补足。
+            // GetRecentTransactionsAsync 内部已经改为限量查询，不再 FindAllAsync。
             if (mergedRecords.Count < MaxTransactionCount)
             {
                 var recentRecords = await _repository.GetRecentTransactionsAsync(MaxTransactionCount);
-                recentCount = recentRecords?.Count ?? 0;
 
                 mergedRecords = mergedRecords
                     .Concat(recentRecords ?? new List<TransactionRecordDbo>())
@@ -66,36 +66,18 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     .ToList();
             }
 
-            // 3. 最终按时间倒序，最多保留 50 条
+            // 3. 最终仍保持原来的业务规则：按有效交易时间倒序，最多保留 20 条。
             var finalRecords = mergedRecords
-                .OrderByDescending(t =>
-                    t.TransactionTime == default
-                        ? t.CreatedAt
-                        : t.TransactionTime)
+                .OrderByDescending(t => t.TransactionTime == default ? t.CreatedAt : t.TransactionTime)
                 .Take(MaxTransactionCount)
                 .ToList();
 
-            // 4. 写入首页集合
+            // 4. 写入首页集合。
             Transactions.Clear();
-
             foreach (var dbo in finalRecords)
             {
                 Transactions.Add(dbo.ToModel());
             }
-
-           /* // 5. 临时诊断弹窗
-            System.Windows.Application.Current?.Dispatcher.Invoke(() =>
-            {
-                System.Windows.MessageBox.Show(
-                    $"首页记录加载诊断：\n\n" +
-                    $"当天记录数：{todayCount}\n" +
-                    $"最近历史查询数：{recentCount}\n" +
-                    $"最终准备展示数：{finalRecords.Count}\n" +
-                    $"Transactions 实际内存数：{Transactions.Count}",
-                    "记录加载诊断",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Information);
-            });*/
         }
         /// <summary>
         /// 处理支付开始事件。
@@ -352,7 +334,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         private int GetScanTimeoutSeconds()
         {
             var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
-            var seconds = settings.ScanTimeoutSeconds <= 0 ? 120 : settings.ScanTimeoutSeconds;
+            var seconds = settings.ScanTimeoutSeconds <= 0 ? 10 : settings.ScanTimeoutSeconds;
             return Math.Clamp(seconds, 1, 3600);
         }
 

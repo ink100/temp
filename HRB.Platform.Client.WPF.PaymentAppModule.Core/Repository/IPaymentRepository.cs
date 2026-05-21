@@ -106,7 +106,18 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
         /// <param name="endDate">结束日期</param>
         /// <returns>交易记录列表</returns>
         Task<List<TransactionRecordDbo>> GetTransactionsByDateRangeAsync(DateTime startDate, DateTime endDate);
-
+        /// <summary>
+        /// 根据日期范围获取最近的交易记录。
+        /// 用于首页加载，避免为了显示少量记录而查询当天全部订单。
+        /// </summary>
+        /// <param name="startDate">开始日期</param>
+        /// <param name="endDate">结束日期</param>
+        /// <param name="count">获取数量</param>
+        /// <returns>交易记录列表</returns>
+        Task<List<TransactionRecordDbo>> GetRecentTransactionsByDateRangeAsync(
+            DateTime startDate,
+            DateTime endDate,
+            int count);
         /// <summary>
         /// 获取所有交易记录
         /// </summary>

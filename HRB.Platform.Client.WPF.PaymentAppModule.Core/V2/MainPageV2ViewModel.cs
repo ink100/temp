@@ -6,6 +6,7 @@ using HRB.Payment.Message.Core.BusEvents;
 using HRB.Platform.Client.Core.ExtensionFunctions;
 using HRB.Platform.Client.WPF.Core.Services.IServices;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Services;
@@ -18,6 +19,7 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
 {
+
     /// <summary>
     /// 2.0 主页 ViewModel — 纯 UI 壳 + 事件路由。
     ///
@@ -94,7 +96,15 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
                 }
             }
         } = 60;
+        private void OnPaymentDisplaySettingsChanged()
+        {
+            PaymentAmountColorHelper.ClearCache();
 
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                CollectionViewSource.GetDefaultView(TransactionRecords)?.Refresh();
+            });
+        }
         public double AmountFontSize
         {
             get;

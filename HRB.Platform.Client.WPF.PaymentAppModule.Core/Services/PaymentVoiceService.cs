@@ -133,6 +133,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             await _playLock.WaitAsync();
             try
             {
+                ApplySpeechSpeed();
                 await playAction();
             }
             catch (Exception ex)
@@ -143,6 +144,22 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             {
                 _playLock.Release();
             }
+        }
+        private void ApplySpeechSpeed()
+        {
+            var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
+            var rate = Math.Clamp(settings.TtsRate <= 0 ? 50 : settings.TtsRate, 0,200);
+
+         
+
+            // 0 = 慢速，大约 0.6 倍速
+            // 50 = 正常语速，1.0 倍速
+            // 200 = 最快，大约 2.0 倍速
+            var speedRatio = rate <= 50
+                ? 0.6 + rate * 0.008
+                : 1.0 + (rate - 50) / 150.0;
+
+            _speechService.SpeedRatio = speedRatio;
         }
 
         private async Task PlayRepeatedAsync(Func<Task> playOneRound, int repeatCount)

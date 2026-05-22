@@ -38,7 +38,16 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         {
             var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
             _option.Text = CleanTextChineseOnly(hint);
-            _option.Rate = Math.Clamp(settings.TtsRate, -50, 100);
+            var uiRate = Math.Clamp(settings.TtsRate, 0, 200);
+
+            // 界面语速是 0% - 200%，其中 50% 表示正常音速。
+            // Edge TTS 的 Rate 使用 -50 到 100：
+            // 0%   -> -50（慢）
+            // 50%  -> 0（正常）
+            // 200% -> 100（快）
+            _option.Rate = uiRate <= 50
+                ? uiRate - 50
+                : (int)Math.Round((uiRate - 50) * 100.0 / 150.0);
             _option.Volume = (float)(Math.Clamp(settings.TtsVolume, 0, 100) / 100.0);
         }
 

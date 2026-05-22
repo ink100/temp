@@ -1,15 +1,16 @@
+﻿using Edge_tts_sharp;
 using HRB.Payment.Core.Services;
 using HRB.Platform.Client.Core.ExtensionFunctions;
 using HRB.Platform.Client.WPF.Core.Services.IServices;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Abstractions;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.DboModels;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Extensions;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Services;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels;
-using Edge_tts_sharp;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -17,14 +18,14 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using MediaBrush = System.Windows.Media.Brush;
-using WinForms = System.Windows.Forms;
+using Application = System.Windows.Application;
+using Brushes = System.Windows.Media.Brushes;
+using Clipboard = System.Windows.Clipboard;
 using Color = System.Windows.Media.Color;
 using ColorConverter = System.Windows.Media.ColorConverter;
-using Brushes = System.Windows.Media.Brushes;
-using Application = System.Windows.Application;
+using MediaBrush = System.Windows.Media.Brush;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
-using Clipboard = System.Windows.Clipboard;
+using WinForms = System.Windows.Forms;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
 {
@@ -61,6 +62,19 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
         private readonly IPaymentVoiceService _paymentVoiceService;
         private bool _isNotificationEnabled;
         private bool _isLoadingGeneralSettings;
+
+        private const string DefaultAlipayAmountColor = "#3E86FD";
+        private const string DefaultAlipayFailedAmountColor = "#F01F1B";
+        private const string DefaultWeChatAmountColor = "#00897B";
+        private const string DefaultWeChatFailedAmountColor = "#F01F1B";
+        private enum AmountColorTarget
+        {
+            Legacy,
+            AlipayAmount,
+            AlipayFailedAmount,
+            WeChatAmount,
+            WeChatFailedAmount
+        }
 
         private IEnumerable<IChannelSettingsContributor> AllContributors =>
             [_alipayContributor, _weChatContributor];
@@ -285,18 +299,20 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             get;
             set
             {
-                var safeValue = Math.Clamp(value, -50, 100);
+                var safeValue = Math.Clamp(value, 0, 200);
                 if (SetProperty(ref field, safeValue) && !_isLoadingGeneralSettings)
                     SaveGeneralSettings();
             }
-        }
+        } = 50;
+
+        
 
         public int TtsVolume
         {
             get;
             set
             {
-                var safeValue = Math.Clamp(value, 0, 100);
+                var safeValue = Math.Clamp(value, 0, 200);
                 if (SetProperty(ref field, safeValue) && !_isLoadingGeneralSettings)
                     SaveGeneralSettings();
             }
@@ -318,9 +334,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             get;
             set
             {
-                if (SetProperty(ref field, NormalizeColorHex(value)) && !_isLoadingGeneralSettings)
+                if (SetProperty(ref field, NormalizeColorHex(value, "#F01F1B")) && !_isLoadingGeneralSettings)
                 {
-                    AmountColorPreviewBrush = BuildBrush(field);
+                    AmountColorPreviewBrush = BuildBrush(field, "#F01F1B");
                     SaveGeneralSettings();
                 }
             }
@@ -330,7 +346,83 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
         {
             get;
             set => SetProperty(ref field, value);
-        } = Brushes.Red;
+        } = BuildBrush("#F01F1B", "#F01F1B");
+
+        public string AlipayAmountColorHex
+        {
+            get;
+            set
+            {
+                if (SetProperty(ref field, NormalizeColorHex(value, DefaultAlipayAmountColor)) && !_isLoadingGeneralSettings)
+                {
+                    AlipayAmountColorPreviewBrush = BuildBrush(field, DefaultAlipayAmountColor);
+                    SaveGeneralSettings();
+                }
+            }
+        } = DefaultAlipayAmountColor;
+
+        public MediaBrush AlipayAmountColorPreviewBrush
+        {
+            get;
+            set => SetProperty(ref field, value);
+        } = BuildBrush(DefaultAlipayAmountColor, DefaultAlipayAmountColor);
+
+        public string AlipayFailedAmountColorHex
+        {
+            get;
+            set
+            {
+                if (SetProperty(ref field, NormalizeColorHex(value, "#F01F1B")) && !_isLoadingGeneralSettings)
+                {
+                    AlipayFailedAmountColorPreviewBrush = BuildBrush(field, "#F01F1B");
+                    SaveGeneralSettings();
+                }
+            }
+        } = "#F01F1B";
+
+        public MediaBrush AlipayFailedAmountColorPreviewBrush
+        {
+            get;
+            set => SetProperty(ref field, value);
+        } = BuildBrush("#F01F1B", "#F01F1B");
+
+        public string WeChatAmountColorHex
+        {
+            get;
+            set
+            {
+                if (SetProperty(ref field, NormalizeColorHex(value, DefaultWeChatAmountColor)) && !_isLoadingGeneralSettings)
+                {
+                    WeChatAmountColorPreviewBrush = BuildBrush(field, DefaultWeChatAmountColor);
+                    SaveGeneralSettings();
+                }
+            }
+        } = DefaultWeChatAmountColor;
+
+        public MediaBrush WeChatAmountColorPreviewBrush
+        {
+            get;
+            set => SetProperty(ref field, value);
+        } = BuildBrush(DefaultWeChatAmountColor, DefaultWeChatAmountColor);
+
+        public string WeChatFailedAmountColorHex
+        {
+            get;
+            set
+            {
+                if (SetProperty(ref field, NormalizeColorHex(value, "#F01F1B")) && !_isLoadingGeneralSettings)
+                {
+                    WeChatFailedAmountColorPreviewBrush = BuildBrush(field, "#F01F1B");
+                    SaveGeneralSettings();
+                }
+            }
+        } = "#F01F1B";
+
+        public MediaBrush WeChatFailedAmountColorPreviewBrush
+        {
+            get;
+            set => SetProperty(ref field, value);
+        } = BuildBrush("#F01F1B", "#F01F1B");
 
         // 通知
         public string NotificationUrl { get; set => SetProperty(ref field, value); } = string.Empty;
@@ -385,6 +477,10 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
         public ICommand SyncSystemTimeCommand { get; }
         public ICommand TestVoiceCommand { get; }
         public ICommand ChooseAmountColorCommand { get; }
+        public ICommand ChooseAlipayAmountColorCommand { get; }
+        public ICommand ChooseAlipayFailedAmountColorCommand { get; }
+        public ICommand ChooseWeChatAmountColorCommand { get; }
+        public ICommand ChooseWeChatFailedAmountColorCommand { get; }
 
         public ICommand ConnectMessageCenterCommand { get; }
 
@@ -434,6 +530,10 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             SyncSystemTimeCommand = new DelegateCommand(async () => await SyncSystemTimeNowAsync());
             TestVoiceCommand = new DelegateCommand(async () => await TestVoiceAsync());
             ChooseAmountColorCommand = new DelegateCommand(ChooseAmountColor);
+            ChooseAlipayAmountColorCommand = new DelegateCommand(() => ChooseAmountColor(AmountColorTarget.AlipayAmount));
+            ChooseAlipayFailedAmountColorCommand = new DelegateCommand(() => ChooseAmountColor(AmountColorTarget.AlipayFailedAmount));
+            ChooseWeChatAmountColorCommand = new DelegateCommand(() => ChooseAmountColor(AmountColorTarget.WeChatAmount));
+            ChooseWeChatFailedAmountColorCommand = new DelegateCommand(() => ChooseAmountColor(AmountColorTarget.WeChatFailedAmount));
 
             ConnectMessageCenterCommand = new DelegateCommand(() =>
             {
@@ -546,11 +646,26 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
                 PaymentCancelledVoiceRepeatCount = Math.Clamp(settings.PaymentCancelledVoiceRepeatCount, 1, 10);
                 IsPaymentSuccessVoiceEnabled = settings.IsPaymentSuccessVoiceEnabled;
                 SelectedTtsVoiceName = settings.TtsVoiceName;
-                TtsRate = Math.Clamp(settings.TtsRate, -50, 100);
+                TtsRate = Math.Clamp(settings.TtsRate, 0, 200);
                 TtsVolume = Math.Clamp(settings.TtsVolume, 0, 100);
                 DisplayFontSize = Math.Clamp(settings.FontSize, 24, 96);
-                AmountColorHex = NormalizeColorHex(settings.AmountColorHex);
-                AmountColorPreviewBrush = BuildBrush(AmountColorHex);
+                AmountColorHex = NormalizeColorHex(settings.AmountColorHex, "#F01F1B");
+                AmountColorPreviewBrush = BuildBrush(AmountColorHex, "#F01F1B");
+                AlipayAmountColorHex = NormalizeColorHex(settings.AlipayAmountColorHex, DefaultAlipayAmountColor);
+                AlipayAmountColorPreviewBrush = BuildBrush(AlipayAmountColorHex, DefaultAlipayAmountColor);
+                AlipayFailedAmountColorHex = NormalizeColorHex(settings.AlipayFailedAmountColorHex, "#F01F1B");
+                AlipayFailedAmountColorPreviewBrush = BuildBrush(AlipayFailedAmountColorHex, "#F01F1B");
+                WeChatAmountColorHex = NormalizeColorHex(settings.WeChatAmountColorHex, DefaultWeChatAmountColor);
+                WeChatAmountColorPreviewBrush = BuildBrush(WeChatAmountColorHex, DefaultWeChatAmountColor);
+                WeChatFailedAmountColorHex = NormalizeColorHex(settings.WeChatFailedAmountColorHex, "#F01F1B");
+                WeChatFailedAmountColorPreviewBrush = BuildBrush(WeChatFailedAmountColorHex, "#F01F1B");
+
+                PaymentAmountColorHelper.ApplySettings(
+                    AlipayAmountColorHex,
+                    AlipayFailedAmountColorHex,
+                    WeChatAmountColorHex,
+                    WeChatFailedAmountColorHex,
+                    AmountColorHex);
 
                 // 仅在任务计划程序实际状态和配置不一致时，同步一次配置。
                 if (settings.IsAutoStartEnabled != actualAutoStartEnabled)
@@ -585,12 +700,24 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             settings.PaymentCancelledVoiceRepeatCount = Math.Clamp(PaymentCancelledVoiceRepeatCount, 1, 10);
             settings.IsPaymentSuccessVoiceEnabled = IsPaymentSuccessVoiceEnabled;
             settings.TtsVoiceName = SelectedTtsVoiceName ?? string.Empty;
-            settings.TtsRate = Math.Clamp(TtsRate, -50, 100);
+            settings.TtsRate = Math.Clamp(TtsRate, 0, 200);
             settings.TtsVolume = Math.Clamp(TtsVolume, 0, 100);
             settings.FontSize = Math.Clamp(DisplayFontSize, 24, 96);
-            settings.AmountColorHex = NormalizeColorHex(AmountColorHex);
+            settings.AmountColorHex = NormalizeColorHex(AmountColorHex, "#F01F1B");
+            settings.AlipayAmountColorHex = NormalizeColorHex(AlipayAmountColorHex, DefaultAlipayAmountColor);
+            settings.AlipayFailedAmountColorHex = NormalizeColorHex(AlipayFailedAmountColorHex, "#F01F1B");
+            settings.WeChatAmountColorHex = NormalizeColorHex(WeChatAmountColorHex, DefaultWeChatAmountColor);
+            settings.WeChatFailedAmountColorHex = NormalizeColorHex(WeChatFailedAmountColorHex, "#F01F1B");
             settings.LastUpdateDateTime = DateTime.Now;
             _appContext.SaveCurrentSettings(settings);
+            PaymentAmountColorHelper.ApplySettings(
+                settings.AlipayAmountColorHex,
+                settings.AlipayFailedAmountColorHex,
+                settings.WeChatAmountColorHex,
+                settings.WeChatFailedAmountColorHex,
+                settings.AmountColorHex);
+
+            PaymentDisplaySettingsChangedNotifier.NotifyChanged();
         }
 
 
@@ -628,11 +755,12 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
         private async Task TestVoiceAsync()
         {
             SaveGeneralSettings();
-            await _paymentVoiceService.PlayPaymentStartedWithBeforeNotPayAsync(HRB.Payment.Core.Models.PaymentChannel.Alipay, "测试用户");
-            await _paymentVoiceService.PlayPaymentSuccessAsync(12.34m, HRB.Payment.Core.Models.PaymentChannel.Alipay);
+            await _paymentVoiceService.PlayPaymentSuccessAsync(12.34m, HRB.Payment.Core.Models.PaymentChannel.Alipay, "VOICE_TEST");
         }
 
-        private void ChooseAmountColor()
+        private void ChooseAmountColor() => ChooseAmountColor(AmountColorTarget.Legacy);
+
+        private void ChooseAmountColor(AmountColorTarget target)
         {
             try
             {
@@ -642,13 +770,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
                     AnyColor = true
                 };
 
-                var currentColor = TryParseDrawingColor(AmountColorHex);
+                var currentColor = TryParseDrawingColor(GetAmountColorHex(target), GetAmountColorFallback(target));
                 if (currentColor != null)
                     dialog.Color = currentColor.Value;
 
                 if (dialog.ShowDialog() == WinForms.DialogResult.OK)
                 {
-                    AmountColorHex = $"#{dialog.Color.R:X2}{dialog.Color.G:X2}{dialog.Color.B:X2}";
+                    SetAmountColorHex(target, $"#{dialog.Color.R:X2}{dialog.Color.G:X2}{dialog.Color.B:X2}");
                 }
             }
             catch (Exception ex)
@@ -657,11 +785,51 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             }
         }
 
-        private static System.Drawing.Color? TryParseDrawingColor(string? colorHex)
+        private string GetAmountColorHex(AmountColorTarget target) => target switch
+        {
+            AmountColorTarget.AlipayAmount => AlipayAmountColorHex,
+            AmountColorTarget.AlipayFailedAmount => AlipayFailedAmountColorHex,
+            AmountColorTarget.WeChatAmount => WeChatAmountColorHex,
+            AmountColorTarget.WeChatFailedAmount => WeChatFailedAmountColorHex,
+            _ => AmountColorHex
+        };
+
+        private static string GetAmountColorFallback(AmountColorTarget target) => target switch
+        {
+            AmountColorTarget.AlipayAmount => DefaultAlipayAmountColor,
+            AmountColorTarget.AlipayFailedAmount => "#F01F1B",
+            AmountColorTarget.WeChatAmount => DefaultWeChatAmountColor,
+            AmountColorTarget.WeChatFailedAmount => "#F01F1B",
+            _ => "#F01F1B"
+        };
+
+        private void SetAmountColorHex(AmountColorTarget target, string colorHex)
+        {
+            switch (target)
+            {
+                case AmountColorTarget.AlipayAmount:
+                    AlipayAmountColorHex = colorHex;
+                    break;
+                case AmountColorTarget.AlipayFailedAmount:
+                    AlipayFailedAmountColorHex = colorHex;
+                    break;
+                case AmountColorTarget.WeChatAmount:
+                    WeChatAmountColorHex = colorHex;
+                    break;
+                case AmountColorTarget.WeChatFailedAmount:
+                    WeChatFailedAmountColorHex = colorHex;
+                    break;
+                default:
+                    AmountColorHex = colorHex;
+                    break;
+            }
+        }
+
+        private static System.Drawing.Color? TryParseDrawingColor(string? colorHex, string fallback = "#F01F1B")
         {
             try
             {
-                var color = (Color)ColorConverter.ConvertFromString(NormalizeColorHex(colorHex));
+                var color = (Color)ColorConverter.ConvertFromString(NormalizeColorHex(colorHex, fallback));
                 return System.Drawing.Color.FromArgb(color.R, color.G, color.B);
             }
             catch
@@ -670,10 +838,14 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             }
         }
 
-        private static string NormalizeColorHex(string? colorHex)
+        private static string NormalizeColorHex(string? colorHex, string fallback = "#F01F1B")
         {
+            fallback = string.IsNullOrWhiteSpace(fallback) ? "#F01F1B" : fallback.Trim();
+            if (!fallback.StartsWith("#"))
+                fallback = "#" + fallback;
+
             if (string.IsNullOrWhiteSpace(colorHex))
-                return "#F01F1B";
+                return fallback.ToUpperInvariant();
 
             var value = colorHex.Trim();
             if (!value.StartsWith("#"))
@@ -686,19 +858,19 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             }
             catch
             {
-                return "#F01F1B";
+                return fallback.ToUpperInvariant();
             }
         }
 
-        private static MediaBrush BuildBrush(string? colorHex)
+        private static MediaBrush BuildBrush(string? colorHex, string fallback = "#F01F1B")
         {
             try
             {
-                return new SolidColorBrush((Color)ColorConverter.ConvertFromString(NormalizeColorHex(colorHex)));
+                return new SolidColorBrush((Color)ColorConverter.ConvertFromString(NormalizeColorHex(colorHex, fallback)));
             }
             catch
             {
-                return Brushes.Red;
+                return new SolidColorBrush((Color)ColorConverter.ConvertFromString(NormalizeColorHex(fallback)));
             }
         }
 

@@ -1,0 +1,730 @@
+﻿<models:BaseRegionUserControl x:Class="HRB.Platform.Client.WPF.PaymentAppModule.Views.V2.SettingsPageV2"
+                              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                              xmlns:converters="clr-namespace:HRB.Platform.Client.WPF.PaymentAppModule.Core.Converters;assembly=HRB.Platform.Client.WPF.PaymentAppModule.Core"
+                              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                              xmlns:models="clr-namespace:HRB.Platform.Client.WPF.Core.Models;assembly=HRB.Platform.Client.WPF.Core"
+                              d:DesignHeight="1080"
+                              d:DesignWidth="1920"
+                              mc:Ignorable="d">
+    <UserControl.Resources>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+        <!--  统一按钮样式  -->
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.9" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--  激活状态指示器样式  -->
+        <Style x:Key="ActivationStatusIndicatorStyle" TargetType="Ellipse">
+            <Setter Property="Fill" Value="#DC3545" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsActivated}" Value="True">
+                    <Setter Property="Fill" Value="#4CAF50" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--  开关样式 (CheckBox)  -->
+        <Style x:Key="ToggleSwitchCheckBox" TargetType="CheckBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Width="60" Height="30">
+                            <Border x:Name="SwitchBorder" Background="#CCCCCC" CornerRadius="15" />
+                            <Ellipse x:Name="SwitchThumb"
+                                     Width="24"
+                                     Height="24"
+                                     Margin="3,0,0,0"
+                                     HorizontalAlignment="Left"
+                                     Fill="White" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="SwitchBorder" Property="Background" Value="#4CAF50" />
+                                <Setter TargetName="SwitchThumb" Property="HorizontalAlignment" Value="Right" />
+                                <Setter TargetName="SwitchThumb" Property="Margin" Value="0,0,3,0" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="SwitchBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--  开关样式 (Button — 用于动态渠道设置项，通过 Command 触发)  -->
+        <Style x:Key="ToggleSwitchButton" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Width="60" Height="30">
+                            <Border x:Name="SwitchBorder" Background="#CCCCCC" CornerRadius="15" />
+                            <Ellipse x:Name="SwitchThumb"
+                                     Width="24"
+                                     Height="24"
+                                     Margin="3,0,0,0"
+                                     HorizontalAlignment="Left"
+                                     Fill="White" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsToggleOn}" Value="True">
+                                <Setter TargetName="SwitchBorder" Property="Background" Value="#4CAF50" />
+                                <Setter TargetName="SwitchThumb" Property="HorizontalAlignment" Value="Right" />
+                                <Setter TargetName="SwitchThumb" Property="Margin" Value="0,0,3,0" />
+                            </DataTrigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="SwitchBorder" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--  文本输入框样式  -->
+        <Style x:Key="TextBoxStyle" TargetType="TextBox">
+            <Setter Property="BorderBrush" Value="#CCCCCC" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Style.Triggers>
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="#0078D7" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--  顶部标题栏  -->
+        <Grid Grid.Row="0" Background="#0078D7">
+            <TextBlock Margin="20,0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       FontSize="24"
+                       Foreground="White"
+                       Text="系统设置" />
+
+            <StackPanel Margin="0,0,20,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                <Button Background="#28A745"
+                        Command="{Binding GoBackCommand}"
+                        Content="返回主页"
+                        Style="{StaticResource ButtonStyle}" />
+                <Button Margin="12,0,0,0"
+                        Background="#DC3545"
+                        Command="{Binding ExitCommand}"
+                        Content="退出"
+                        Style="{StaticResource ButtonStyle}" />
+                <!--<Button Margin="12,0,0,0"
+                        Background="#DC3545"
+                        Command="{Binding ConnectMessageCenterCommand}"
+                        Content="Connect"
+                        Style="{StaticResource ButtonStyle}" />-->
+
+
+
+            </StackPanel>
+        </Grid>
+
+        <!--  主内容区域  -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="40" HorizontalAlignment="Center">
+
+                <!--  激活状态卡片  -->
+                <Border Margin="0,0,0,30"
+                        Padding="30"
+                        Background="#F5F5F5"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal">
+                            <TextBlock FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="#333333"
+                                       Text="激活状态" />
+                            <Ellipse Width="16"
+                                     Height="16"
+                                     Margin="15,0,0,0"
+                                     VerticalAlignment="Center"
+                                     Style="{StaticResource ActivationStatusIndicatorStyle}" />
+                        </StackPanel>
+
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       FontSize="16"
+                                       Foreground="#666666"
+                                       Text="当前状态：" />
+                            <TextBlock Grid.Column="1"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       Foreground="#0078D7"
+                                       Text="{Binding ActivationStatus}" />
+                        </Grid>
+
+                        <Grid Grid.Row="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       FontSize="16"
+                                       Foreground="#666666"
+                                       Text="到期时间：" />
+                            <TextBlock Grid.Column="1"
+                                       FontSize="16"
+                                       Foreground="#333333"
+                                       Text="{Binding ExpiresAt}" />
+                        </Grid>
+
+                        <Grid Grid.Row="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       FontSize="16"
+                                       Foreground="#666666"
+                                       Text="剩余天数：" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <TextBlock FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="#00A152"
+                                           Text="{Binding RemainingDays}" />
+                                <TextBlock Margin="5,0,0,0"
+                                           FontSize="16"
+                                           Foreground="#333333"
+                                           Text="天" />
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!--  支付渠道设置卡片 (动态聚合)  -->
+                <Border Margin="0,0,0,30"
+                        Padding="30"
+                        Background="#F5F5F5"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="#333333"
+                                   Text="支付渠道设置" />
+
+                        <ItemsControl Margin="0,20,0,0" ItemsSource="{Binding ChannelSettings}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock FontSize="16"
+                                                       FontWeight="Bold"
+                                                       Foreground="#333333"
+                                                       Text="{Binding Label}" />
+                                            <!--  禁用提示  -->
+                                            <TextBlock Margin="0,3,0,0"
+                                                       FontSize="11"
+                                                       Foreground="#999999"
+                                                       Text="{Binding DisabledHint}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <Button Grid.Column="1"
+                                                VerticalAlignment="Center"
+                                                Command="{Binding DataContext.ToggleChannelSettingCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                IsEnabled="{Binding IsEnabled}"
+                                                Style="{StaticResource ToggleSwitchButton}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!--  通用设置卡片 (店铺信息 + 开机自启动)  -->
+                <Border Margin="0,0,0,30"
+                        Padding="30"
+                        Background="#F5F5F5"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="15" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="#333333"
+                                   Text="通用设置" />
+
+                        <!--  店铺名称  -->
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       FontSize="16"
+                                       Foreground="#666666"
+                                       Text="店铺名称：" />
+                            <TextBox Grid.Column="1"
+                                     Padding="10"
+                                     FontSize="14"
+                                     Style="{StaticResource TextBoxStyle}"
+                                     Text="{Binding StoreName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+
+                        <!--  维护联系方式  -->
+                        <Grid Grid.Row="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       FontSize="16"
+                                       Foreground="#666666"
+                                       Text="维护联系方式：" />
+                            <TextBox Grid.Column="1"
+                                     Padding="10"
+                                     FontSize="14"
+                                     Style="{StaticResource TextBoxStyle}"
+                                     Text="{Binding MaintenanceContact, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+
+                        <!--  开机自启动  -->
+                        <Grid Grid.Row="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="#333333"
+                                           Text="开机自启动" />
+                                <TextBlock Margin="0,5,0,0"
+                                           FontSize="12"
+                                           Foreground="#999999"
+                                           Text="启用后，系统启动时自动运行收银台程序" />
+                            </StackPanel>
+                            <CheckBox Grid.Column="1"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{Binding IsAutoStartEnabled, Mode=TwoWay}"
+                                      Style="{StaticResource ToggleSwitchCheckBox}" />
+                        </Grid>
+
+                        <!--  自动滚动至最新记录  -->
+                        <Grid Grid.Row="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="#333333"
+                                           Text="自动滚动至最新记录" />
+                                <TextBlock Margin="0,5,0,0"
+                                           FontSize="12"
+                                           Foreground="#999999"
+                                           Text="启用后，新交易加入列表时自动回到顶部；手动查看历史记录时会暂停 5 秒" />
+                            </StackPanel>
+                            <CheckBox Grid.Column="1"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{Binding IsAutoScrollToLatestEnabled, Mode=TwoWay}"
+                                      Style="{StaticResource ToggleSwitchCheckBox}" />
+                        </Grid>
+
+                        <!--  自动同步 Windows 系统时间  -->
+                        <Grid Grid.Row="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="#333333"
+                                           Text="自动同步系统时间" />
+                                <TextBlock Margin="0,5,0,0"
+                                           FontSize="12"
+                                           Foreground="#999999"
+                                           Text="启用后，每天凌晨 1 点自动调用 Windows 时间同步；也可以点击右侧按钮立即同步" />
+                                <TextBlock Margin="0,5,0,0"
+                                           FontSize="12"
+                                           Foreground="#666666"
+                                           Text="{Binding LastSystemTimeSyncText}"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Button Grid.Column="1"
+                                    Margin="15,0,15,0"
+                                    Background="#0078D7"
+                                    Command="{Binding SyncSystemTimeCommand}"
+                                    Content="立即同步"
+                                    IsEnabled="{Binding IsSyncingSystemTime, Converter={StaticResource InverseBooleanConverter}}"
+                                    Style="{StaticResource ButtonStyle}" />
+                            <CheckBox Grid.Column="2"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{Binding IsAutoSyncSystemTimeEnabled, Mode=TwoWay}"
+                                      Style="{StaticResource ToggleSwitchCheckBox}" />
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!--  消息通知设置卡片  -->
+                <Border Margin="0,0,0,30"
+                        Padding="30"
+                        Background="#F5F5F5"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="15" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="#333333"
+                                   Text="消息通知设置" />
+
+                        <!--  通知接口 URL  -->
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       FontSize="16"
+                                       Foreground="#666666"
+                                       Text="通知接口URL：" />
+                            <TextBox Grid.Column="1"
+                                     Padding="10"
+                                     FontSize="14"
+                                     Style="{StaticResource TextBoxStyle}"
+                                     Text="{Binding NotificationUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+
+                        <!--  启用通知开关  -->
+                        <Grid Grid.Row="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="#333333"
+                                           Text="启用消息通知" />
+                                <TextBlock Margin="0,5,0,0"
+                                           FontSize="12"
+                                           Foreground="#999999"
+                                           Text="启用后，支付事件将推送到上方配置的接口地址（数据已脱敏）" />
+                            </StackPanel>
+                            <CheckBox Grid.Column="1"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{Binding IsNotificationEnabled, Mode=TwoWay}"
+                                      Style="{StaticResource ToggleSwitchCheckBox}" />
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!--  机器序列号卡片  -->
+                <Border Margin="0,0,0,30"
+                        Padding="30"
+                        Background="#F5F5F5"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="#333333"
+                                   Text="机器序列号" />
+
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Padding="15"
+                                    Background="White"
+                                    BorderBrush="#E0E0E0"
+                                    BorderThickness="1"
+                                    CornerRadius="4">
+                                <TextBox FontFamily="Consolas"
+                                         FontSize="16"
+                                         Foreground="#333333"
+                                         IsReadOnly="True"
+                                         Text="{Binding MachineSN}"
+                                         TextWrapping="Wrap" />
+                            </Border>
+
+                            <Button Grid.Column="1"
+                                    Margin="15,0,0,0"
+                                    Background="#4CAF50"
+                                    Command="{Binding CopySNCommand}"
+                                    Content="复制"
+                                    Style="{StaticResource ButtonStyle}" />
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!--  激活操作卡片  -->
+                <Border Margin="0,0,0,30"
+                        Padding="30"
+                        Background="#F5F5F5"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="15" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="#333333"
+                                   Text="激活操作" />
+
+                        <Button Grid.Row="2"
+                                Height="60"
+                                Background="#0078D7"
+                                Command="{Binding SelectKeyFileCommand}"
+                                Content="选择激活文件 (.key)"
+                                Style="{StaticResource ButtonStyle}" />
+
+                        <Border Grid.Row="4"
+                                Padding="15"
+                                Background="White"
+                                BorderBrush="#E0E0E0"
+                                BorderThickness="1"
+                                CornerRadius="4">
+                            <TextBlock FontFamily="Consolas"
+                                       FontSize="14"
+                                       Foreground="#666666"
+                                       Text="{Binding LicenseFilePath, FallbackValue='未选择激活文件'}"
+                                       TextTrimming="CharacterEllipsis"
+                                       ToolTip="{Binding LicenseFilePath}" />
+                        </Border>
+
+                        <Button Grid.Row="6"
+                                Height="60"
+                                Background="#4CAF50"
+                                Command="{Binding ActivateCommand}"
+                                IsEnabled="{Binding IsActivating, Converter={StaticResource InverseBooleanConverter}}"
+                                Style="{StaticResource ButtonStyle}">
+                            <Grid>
+                                <TextBlock FontSize="20"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           Text="激活软件"
+                                           Visibility="{Binding IsActivating, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}" />
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding IsActivating, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="激活中..." />
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!--  文档与版本信息卡片  -->
+                <Border Margin="0,0,0,30"
+                        Padding="30"
+                        Background="#F5F5F5"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="15" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="#333333"
+                                   Text="文档与版本信息" />
+
+                        <StackPanel Grid.Row="2" Orientation="Horizontal">
+                            <Button Height="50"
+                                    MinWidth="200"
+                                    Background="#FF9800"
+                                    Command="{Binding ShowDisclaimerCommand}"
+                                    Content="查看免责条款与知情同意书"
+                                    Style="{StaticResource ButtonStyle}" />
+                            <Button Height="50"
+                                    MinWidth="200"
+                                    Margin="15,0"
+                                    Background="#2196F3"
+                                    Command="{Binding ShowNotificationConsentCommand}"
+                                    Content="查看支付消息通知服务知情同意书"
+                                    Style="{StaticResource ButtonStyle}" />
+                        </StackPanel>
+
+                        <Grid Grid.Row="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       FontSize="16"
+                                       Foreground="#666666"
+                                       Text="软件版本号：" />
+                            <TextBlock Grid.Column="1"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       Foreground="#0078D7"
+                                       Text="{Binding AppVersion}" />
+                        </Grid>
+
+                        <TextBlock Grid.Row="6"
+                                   FontSize="12"
+                                   Foreground="#999999"
+                                   Text="点击上方按钮可查看相关法律文档和条款" />
+                    </Grid>
+                </Border>
+
+                <!--  使用说明  -->
+                <Border Padding="30"
+                        Background="#FFF9E6"
+                        BorderBrush="#FFE082"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="#F57C00"
+                                   Text="使用说明" />
+                        <TextBlock Margin="0,15,0,0"
+                                   FontSize="14"
+                                   Foreground="#666666"
+                                   LineHeight="24"
+                                   TextWrapping="Wrap">
+                            <Run Text="1. 复制上方的序列号" />
+                            <LineBreak />
+                            <Run Text="2. 将序列号提供给管理员，获取激活文件（.key）" />
+                            <LineBreak />
+                            <Run Text="3. 点击[选择激活文件]按钮，选择获取的 .key 文件" />
+                            <LineBreak />
+                            <Run Text="4. 点击[激活软件]按钮完成激活" />
+                            <LineBreak />
+                            <LineBreak />
+                            <Run FontWeight="Bold" Foreground="#DC3545" Text="注意：激活需要网络连接以验证时间，请确保网络畅通" />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</models:BaseRegionUserControl>

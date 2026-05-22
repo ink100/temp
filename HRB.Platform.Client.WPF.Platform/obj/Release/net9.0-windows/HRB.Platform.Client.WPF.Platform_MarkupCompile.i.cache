@@ -16,5 +16,5 @@ TRACE;RELEASE;NET;NET9_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_
 345872714254
 Themes\Dark\Colors.xaml;Themes\Dark\Theme.xaml;Themes\DefaultStyle.xaml;Themes\Generic.xaml;Themes\Light\Colors.xaml;Themes\Light\Theme.xaml;Views\ContentRegion.xaml;Views\WindowShell.xaml;
 
-True
+False
 

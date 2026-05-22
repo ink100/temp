@@ -1,4 +1,4 @@
-using HRB.Platform.Client.Core.Enums;
+﻿using HRB.Platform.Client.Core.Enums;
 using HRB.Platform.Client.Core.Interfaces;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
@@ -133,10 +133,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
         /// </summary>
         public string TtsVoiceName { get; set; } = string.Empty;
 
-        /// <summary>
-        /// TTS 语速百分比，0 为正常，负数变慢，正数变快。
-        /// </summary>
-        public int TtsRate { get; set; } = 0;
+       
 
         /// <summary>
         /// TTS 音量百分比，默认 100。
@@ -144,9 +141,35 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
         public int TtsVolume { get; set; } = 100;
 
         /// <summary>
-        /// 金额显示颜色，十六进制格式，例如 #F01F1B。
+        /// 语音播报速度。
+        /// 0 = 慢速，50 = 正常，200 = 最快。
+        /// </summary>
+        public int TtsRate { get; set; } = 50;
+
+        /// <summary>
+        /// 旧版金额显示颜色，保留兼容旧配置。
         /// </summary>
         public string AmountColorHex { get; set; } = "#F01F1B";
+
+        /// <summary>
+        /// 支付宝收款金额颜色，默认蓝色。
+        /// </summary>
+        public string AlipayAmountColorHex { get; set; } = "#3E86FD";
+
+        /// <summary>
+        /// 支付宝失败金额颜色，默认红色。
+        /// </summary>
+        public string AlipayFailedAmountColorHex { get; set; } = "#F01F1B";
+
+        /// <summary>
+        /// 微信收款金额颜色，默认绿色。
+        /// </summary>
+        public string WeChatAmountColorHex { get; set; } = "#00897B";
+
+        /// <summary>
+        /// 微信失败金额颜色，默认红色。
+        /// </summary>
+        public string WeChatFailedAmountColorHex { get; set; } = "#F01F1B";
 
     }
 

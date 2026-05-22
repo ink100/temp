@@ -184,7 +184,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
 
             // 加载今日数据
             _ = _transactionService.LoadTodayTransactionsAsync();
-
+            
             // 插件状态
             _alipayPlugin.StatusChanged += OnPluginStatusChanged;
             _weChatPlugin.StatusChanged += OnPluginStatusChanged;

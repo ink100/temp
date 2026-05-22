@@ -75,6 +75,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views.V2
             _isProgrammaticScroll = false;
             _isAutoScrollScheduled = false;
             _isAutoScrollSuspendedByUser = false;
+            _isLoadingMoreTransactions = false;
         }
 
         private void AttachTransactionsCollectionChanged()

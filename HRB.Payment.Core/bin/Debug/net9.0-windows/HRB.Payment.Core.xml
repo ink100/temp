@@ -1,0 +1,215 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HRB.Payment.Core</name>
+    </assembly>
+    <members>
+        <member name="T:HRB.Payment.Core.Helpers.AutoStartupHelper">
+            <summary>
+            开机自启动帮助类
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Helpers.AutoStartupHelper.GetExecutablePath">
+            <summary>
+            获取应用程序可执行文件路径
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Helpers.AutoStartupHelper.Enable">
+            <summary>
+            启用开机自启动
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Helpers.AutoStartupHelper.Disable">
+            <summary>
+            禁用开机自启动
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Helpers.AutoStartupHelper.IsEnabled">
+            <summary>
+            检查是否已启用开机自启动
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Helpers.AutoStartupHelper.SetEnabled(System.Boolean)">
+            <summary>
+            设置开机自启动状态
+            </summary>
+        </member>
+        <member name="P:HRB.Payment.Core.Models.TransactionRecord.Status">
+            <summary>
+            支付状态
+            </summary>
+        </member>
+        <member name="P:HRB.Payment.Core.Models.TransactionRecord.LedgerIdentifierDisplay">
+            <summary>
+            台账界面使用的渠道唯一标识。
+            支付宝显示流水单号/订单号；微信显示 wxid。
+            </summary>
+        </member>
+        <member name="P:HRB.Payment.Core.Models.TransactionRecord.StatusDisplay">
+            <summary>
+            状态显示文本
+            </summary>
+        </member>
+        <member name="F:HRB.Payment.Core.RegionNames.ZIndex0Region">
+            <summary>
+            ZIndex最底层，保留层
+            </summary>
+        </member>
+        <member name="F:HRB.Payment.Core.RegionNames.ContentRegion">
+            <summary>
+            内容层
+            </summary>
+        </member>
+        <member name="F:HRB.Payment.Core.RegionNames.TaskNotifyRegion">
+            <summary>
+            任务弹窗层
+            </summary>
+        </member>
+        <member name="F:HRB.Payment.Core.RegionNames.DialogRegion">
+            <summary>
+            弹窗层
+            </summary>
+        </member>
+        <member name="F:HRB.Payment.Core.RegionNames.LoadingRegion">
+            <summary>
+            Loading层
+            </summary>
+        </member>
+        <member name="F:HRB.Payment.Core.RegionNames.ToastRegion">
+            <summary>
+            Toast层
+            </summary>
+        </member>
+        <member name="T:HRB.Payment.Core.Services.AutoStartupService">
+            <summary>
+            开机自启动服务 - 使用 Windows 任务计划程序
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.AutoStartupService.GetExecutablePath">
+            <summary>
+            获取应用程序可执行文件路径
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.AutoStartupService.IsAdministrator">
+            <summary>
+            检查是否以管理员权限运行
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.AutoStartupService.Enable">
+            <summary>
+            启用开机自启动
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.AutoStartupService.Disable">
+            <summary>
+            禁用开机自启动
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.AutoStartupService.IsEnabled">
+            <summary>
+            检查是否已启用开机自启动
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.AutoStartupService.SetEnabled(System.Boolean)">
+            <summary>
+            设置开机自启动状态
+            </summary>
+        </member>
+        <member name="T:HRB.Payment.Core.Services.INumberToSpeechService">
+            <summary>
+            数字转语音播放服务接口
+            </summary>
+        </member>
+        <member name="P:HRB.Payment.Core.Services.INumberToSpeechService.SpeedRatio">
+            <summary>
+            播放速度倍数（1.0为正常速度，大于1.0为加速，小于1.0为减速）
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.INumberToSpeechService.PlayAmountAsync(System.Decimal,HRB.Payment.Core.Models.PaymentChannel)">
+            <summary>
+            播放金额语音
+            </summary>
+            <param name="amount">金额（单位：元）</param>
+            <param name="paymentChannel">支付渠道</param>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.INumberToSpeechService.PlaySoundAsync(System.String)">
+            <summary>
+            播放单个音频文件
+            </summary>
+            <param name="soundName">音频文件名（不含扩展名）</param>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.IPaymentEventPublisher.PublishPaymentStarted(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            发布用户正在支付事件
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.IPaymentEventPublisher.PublishPaymentCancelled(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            发布用户取消支付事件
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.IPaymentEventPublisher.PublishPaymentSuccess(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            发布支付成功事件
+            </summary>
+        </member>
+        <member name="T:HRB.Payment.Core.Services.NumberToSpeechService">
+            <summary>
+            数字转语音播放服务
+            </summary>
+        </member>
+        <member name="P:HRB.Payment.Core.Services.NumberToSpeechService.SpeedRatio">
+            <summary>
+            播放速度倍数（1.0为正常速度，大于1.0为加速，小于1.0为减速）
+            </summary>
+        </member>
+        <member name="F:HRB.Payment.Core.Services.NumberToSpeechService._audioCache">
+            <summary>
+            音频文件缓存（soundName -> byte[]）
+            </summary>
+        </member>
+        <member name="F:HRB.Payment.Core.Services.NumberToSpeechService._cacheLock">
+            <summary>
+            缓存锁
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.NumberToSpeechService.PlayAmountAsync(System.Decimal,HRB.Payment.Core.Models.PaymentChannel)">
+            <summary>
+            播放金额语音
+            </summary>
+            <param name="amount">金额（单位：元）</param>
+            <param name="paymentChannel">支付渠道</param>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.NumberToSpeechService.ConvertAmountToSounds(System.Int64)">
+            <summary>
+            将金额（元）转换为音频文件列表
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.NumberToSpeechService.ConvertNumberToSounds(System.Int64)">
+            <summary>
+            将0-9999的数字转换为音频文件列表
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.NumberToSpeechService.PlaySoundAsync(System.String)">
+            <summary>
+            播放单个音频文件
+            </summary>
+            <param name="soundName">音频文件名（不含扩展名）</param>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.PaymentEventPublisher.PublishPaymentStarted(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            发布用户正在支付事件
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.PaymentEventPublisher.PublishPaymentCancelled(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            发布用户取消支付事件
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Core.Services.PaymentEventPublisher.PublishPaymentSuccess(HRB.Payment.Core.Events.PaymentEventArgs)">
+            <summary>
+            发布支付成功事件
+            </summary>
+        </member>
+    </members>
+</doc>

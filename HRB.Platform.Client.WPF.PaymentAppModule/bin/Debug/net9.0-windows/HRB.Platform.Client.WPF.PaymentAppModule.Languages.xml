@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HRB.Platform.Client.WPF.PaymentAppModule.Languages</name>
+    </assembly>
+    <members>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Languages.LanguageEnums.CN_Name">
+            <summary>
+            中文
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Languages.LanguageEnums.EN_Name">
+            <summary>
+            英文
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Languages.LanguageEnums.Payment_Module_Name">
+            <summary>
+            支付收款码
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Languages.LanguageEnums.Button_OK">
+            <summary>
+            确定
+            </summary>
+        </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Languages.LanguageEnums.Button_Cancel">
+            <summary>
+            取消
+            </summary>
+        </member>
+    </members>
+</doc>

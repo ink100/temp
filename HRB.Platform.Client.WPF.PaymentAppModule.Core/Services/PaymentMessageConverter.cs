@@ -33,9 +33,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     transactionTime = DateTimeOffset.FromUnixTimeSeconds(timestamp).LocalDateTime;
                 }
 
-                var userId = !string.IsNullOrEmpty(paymentMessage.Username)
-                    ? paymentMessage.Username
-                    : paymentMessage.DisplayName;
+                var userId = !string.IsNullOrWhiteSpace(paymentMessage.Username)
+     ? paymentMessage.Username.Trim()
+     : paymentMessage.DisplayName?.Trim() ?? string.Empty;
+
+                var orderNumber = BuildOrderNumber(paymentMessage, paymentChannel, transactionTime, amount);
 
                 // 构建支付事件参数
                 return new PaymentEventArgs
@@ -43,7 +45,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     UserId = userId,
                     DisplayName = paymentMessage.DisplayName,
                     Amount = amount,
-                    OrderNumber = paymentMessage.TransId,
+                    OrderNumber = orderNumber,
                     PaymentChannel = paymentChannel,
                     Remarks = paymentMessage.DisplayName,
                     PayTime = transactionTime,
@@ -54,6 +56,73 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             {
                 GlobalSettings.CurrentAppContext.CurrentLogger.Error($"创建支付事件参数失败: {ex.Message}");
                 return null;
+            }
+        }
+        private static string BuildOrderNumber(
+    PaymentMessage paymentMessage,
+    PaymentChannel paymentChannel,
+    DateTime transactionTime,
+    decimal amount)
+        {
+            // 有真实流水号时，必须优先使用真实流水号。
+            if (!string.IsNullOrWhiteSpace(paymentMessage.TransId))
+                return paymentMessage.TransId.Trim();
+
+            // 没有真实流水号时，只生成临时订单号，且必须带 TMP 前缀，避免和真实流水号混淆。
+            var channelPrefix = paymentChannel switch
+            {
+                PaymentChannel.WeChat => "WX",
+                PaymentChannel.Alipay => "ALI",
+                _ => paymentChannel.ToString().ToUpperInvariant()
+            };
+
+            var userPart = !string.IsNullOrWhiteSpace(paymentMessage.Username)
+                ? paymentMessage.Username.Trim()
+                : paymentMessage.DisplayName?.Trim();
+
+            var safeUserPart = NormalizeOrderPart(userPart, "UNKNOWN");
+
+            // 优先使用微信消息时间戳，保证同一条消息重复处理时临时订单号尽量一致。
+            var timePart = !string.IsNullOrWhiteSpace(paymentMessage.Timestamp)
+                ? paymentMessage.Timestamp.Trim()
+                : transactionTime.ToString("yyyyMMddHHmmssfff");
+
+            var feePart = !string.IsNullOrWhiteSpace(paymentMessage.Fee)
+                ? paymentMessage.Fee.Trim()
+                : Math.Round(amount * 100m, 0).ToString("0");
+
+            var hash = BuildShortHash($"{channelPrefix}|{safeUserPart}|{timePart}|{feePart}|{paymentMessage.DisplayName}");
+
+            return $"TMP_{channelPrefix}_SCAN_{safeUserPart}_{timePart}_{feePart}_{hash}";
+        }
+
+        private static string NormalizeOrderPart(string? value, string fallback)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return fallback;
+
+            var chars = value
+                .Trim()
+                .Select(ch => char.IsLetterOrDigit(ch) ? ch : '_')
+                .ToArray();
+
+            var result = new string(chars);
+
+            return result.Length <= 40
+                ? result
+                : result.Substring(0, 40);
+        }
+
+        private static string BuildShortHash(string value)
+        {
+            unchecked
+            {
+                var hash = 23;
+
+                foreach (var ch in value)
+                    hash = hash * 31 + ch;
+
+                return Math.Abs(hash).ToString("X");
             }
         }
 

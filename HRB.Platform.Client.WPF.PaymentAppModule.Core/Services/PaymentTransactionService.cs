@@ -103,6 +103,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         public async Task<PaymentStartedResult> HandlePaymentStartedAsync(PaymentEventArgs args)
         {
+            if (args == null || string.IsNullOrWhiteSpace(args.OrderNumber))
+            {
+                _log.Error(
+                    $"忽略订单号为空的支付开始事件，渠道:{args?.PaymentChannel}，用户:{args?.UserId}，昵称:{args?.DisplayName}");
+
+                return new PaymentStartedResult { AlreadyExists = true };
+            }
             var existing = FindTransaction(t => t.OrderNumber == args.OrderNumber);
             if (existing != null)
             {
@@ -213,6 +220,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         public async Task<PaymentCompletedResult> HandlePaymentSuccessAsync(PaymentEventArgs args)
         {
+            if (args == null || string.IsNullOrWhiteSpace(args.OrderNumber))
+            {
+                _log.Error(
+                    $"忽略订单号为空的支付成功事件，渠道:{args?.PaymentChannel}，用户:{args?.UserId}，昵称:{args?.DisplayName}");
+
+                return new PaymentCompletedResult { StateChanged = false };
+            }
             _orderStateManager.UntrackOrder(args.OrderNumber);
 
             var transaction = FindTransaction(t => t.OrderNumber == args.OrderNumber);
@@ -253,6 +267,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         public async Task<PaymentCompletedResult> HandlePaymentCancelledAsync(PaymentEventArgs args)
         {
+            if (args == null || string.IsNullOrWhiteSpace(args.OrderNumber))
+            {
+                _log.Error(
+                    $"忽略订单号为空的支付取消事件，渠道:{args?.PaymentChannel}，用户:{args?.UserId}，昵称:{args?.DisplayName}");
+
+                return new PaymentCompletedResult { StateChanged = false };
+            }
             _orderStateManager.UntrackOrder(args.OrderNumber);
 
             bool isSilent = _orderStateManager.IsSilentCancel(args.OrderNumber);
@@ -312,6 +333,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 
         private async Task SaveOrUpdateAsync(PaymentEventArgs args, PaymentStatus status)
         {
+            if (args == null || string.IsNullOrWhiteSpace(args.OrderNumber))
+            {
+                _log.Error(
+                    $"跳过保存订单号为空的交易记录，状态:{status}，渠道:{args?.PaymentChannel}，用户:{args?.UserId}，昵称:{args?.DisplayName}");
+
+                return;
+            }
             try
             {
                 var existing = await _repository.GetTransactionByOrderAsync(args.OrderNumber);

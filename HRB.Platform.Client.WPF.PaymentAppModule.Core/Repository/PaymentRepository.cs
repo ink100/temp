@@ -370,7 +370,246 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
 
             return MatchesKeyword(transaction, keyword);
         }
+        private async Task<List<TransactionRecordDbo>> QueryLedgerCandidatesByTimeAsync(
+    DateTime startDate,
+    DateTime endDate,
+    PaymentChannel? paymentChannel,
+    PaymentStatus? status,
+    DateTime? beforeTime,
+    int queryCount,
+    bool useTransactionTime)
+        {
+            var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
 
+            if (useTransactionTime)
+            {
+                if (beforeTime.HasValue)
+                {
+                    var cursorTime = beforeTime.Value;
+
+                    if (paymentChannel.HasValue && status.HasValue)
+                    {
+                        var channel = paymentChannel.Value;
+                        var st = status.Value;
+
+                        return await collection.Query()
+                            .Where(t =>
+                                t.TransactionTime >= startDate &&
+                                t.TransactionTime < endDate &&
+                                t.TransactionTime <= cursorTime &&
+                                t.PaymentChannel == channel &&
+                                t.Status == st)
+                            .OrderByDescending(t => t.TransactionTime)
+                            .Limit(queryCount)
+                            .ToListAsync();
+                    }
+
+                    if (paymentChannel.HasValue)
+                    {
+                        var channel = paymentChannel.Value;
+
+                        return await collection.Query()
+                            .Where(t =>
+                                t.TransactionTime >= startDate &&
+                                t.TransactionTime < endDate &&
+                                t.TransactionTime <= cursorTime &&
+                                t.PaymentChannel == channel)
+                            .OrderByDescending(t => t.TransactionTime)
+                            .Limit(queryCount)
+                            .ToListAsync();
+                    }
+
+                    if (status.HasValue)
+                    {
+                        var st = status.Value;
+
+                        return await collection.Query()
+                            .Where(t =>
+                                t.TransactionTime >= startDate &&
+                                t.TransactionTime < endDate &&
+                                t.TransactionTime <= cursorTime &&
+                                t.Status == st)
+                            .OrderByDescending(t => t.TransactionTime)
+                            .Limit(queryCount)
+                            .ToListAsync();
+                    }
+
+                    return await collection.Query()
+                        .Where(t =>
+                            t.TransactionTime >= startDate &&
+                            t.TransactionTime < endDate &&
+                            t.TransactionTime <= cursorTime)
+                        .OrderByDescending(t => t.TransactionTime)
+                        .Limit(queryCount)
+                        .ToListAsync();
+                }
+
+                if (paymentChannel.HasValue && status.HasValue)
+                {
+                    var channel = paymentChannel.Value;
+                    var st = status.Value;
+
+                    return await collection.Query()
+                        .Where(t =>
+                            t.TransactionTime >= startDate &&
+                            t.TransactionTime < endDate &&
+                            t.PaymentChannel == channel &&
+                            t.Status == st)
+                        .OrderByDescending(t => t.TransactionTime)
+                        .Limit(queryCount)
+                        .ToListAsync();
+                }
+
+                if (paymentChannel.HasValue)
+                {
+                    var channel = paymentChannel.Value;
+
+                    return await collection.Query()
+                        .Where(t =>
+                            t.TransactionTime >= startDate &&
+                            t.TransactionTime < endDate &&
+                            t.PaymentChannel == channel)
+                        .OrderByDescending(t => t.TransactionTime)
+                        .Limit(queryCount)
+                        .ToListAsync();
+                }
+
+                if (status.HasValue)
+                {
+                    var st = status.Value;
+
+                    return await collection.Query()
+                        .Where(t =>
+                            t.TransactionTime >= startDate &&
+                            t.TransactionTime < endDate &&
+                            t.Status == st)
+                        .OrderByDescending(t => t.TransactionTime)
+                        .Limit(queryCount)
+                        .ToListAsync();
+                }
+
+                return await collection.Query()
+                    .Where(t =>
+                        t.TransactionTime >= startDate &&
+                        t.TransactionTime < endDate)
+                    .OrderByDescending(t => t.TransactionTime)
+                    .Limit(queryCount)
+                    .ToListAsync();
+            }
+
+            if (beforeTime.HasValue)
+            {
+                var cursorTime = beforeTime.Value;
+
+                if (paymentChannel.HasValue && status.HasValue)
+                {
+                    var channel = paymentChannel.Value;
+                    var st = status.Value;
+
+                    return await collection.Query()
+                        .Where(t =>
+                            t.CreatedAt >= startDate &&
+                            t.CreatedAt < endDate &&
+                            t.CreatedAt <= cursorTime &&
+                            t.PaymentChannel == channel &&
+                            t.Status == st)
+                        .OrderByDescending(t => t.CreatedAt)
+                        .Limit(queryCount)
+                        .ToListAsync();
+                }
+
+                if (paymentChannel.HasValue)
+                {
+                    var channel = paymentChannel.Value;
+
+                    return await collection.Query()
+                        .Where(t =>
+                            t.CreatedAt >= startDate &&
+                            t.CreatedAt < endDate &&
+                            t.CreatedAt <= cursorTime &&
+                            t.PaymentChannel == channel)
+                        .OrderByDescending(t => t.CreatedAt)
+                        .Limit(queryCount)
+                        .ToListAsync();
+                }
+
+                if (status.HasValue)
+                {
+                    var st = status.Value;
+
+                    return await collection.Query()
+                        .Where(t =>
+                            t.CreatedAt >= startDate &&
+                            t.CreatedAt < endDate &&
+                            t.CreatedAt <= cursorTime &&
+                            t.Status == st)
+                        .OrderByDescending(t => t.CreatedAt)
+                        .Limit(queryCount)
+                        .ToListAsync();
+                }
+
+                return await collection.Query()
+                    .Where(t =>
+                        t.CreatedAt >= startDate &&
+                        t.CreatedAt < endDate &&
+                        t.CreatedAt <= cursorTime)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .Limit(queryCount)
+                    .ToListAsync();
+            }
+
+            if (paymentChannel.HasValue && status.HasValue)
+            {
+                var channel = paymentChannel.Value;
+                var st = status.Value;
+
+                return await collection.Query()
+                    .Where(t =>
+                        t.CreatedAt >= startDate &&
+                        t.CreatedAt < endDate &&
+                        t.PaymentChannel == channel &&
+                        t.Status == st)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .Limit(queryCount)
+                    .ToListAsync();
+            }
+
+            if (paymentChannel.HasValue)
+            {
+                var channel = paymentChannel.Value;
+
+                return await collection.Query()
+                    .Where(t =>
+                        t.CreatedAt >= startDate &&
+                        t.CreatedAt < endDate &&
+                        t.PaymentChannel == channel)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .Limit(queryCount)
+                    .ToListAsync();
+            }
+
+            if (status.HasValue)
+            {
+                var st = status.Value;
+
+                return await collection.Query()
+                    .Where(t =>
+                        t.CreatedAt >= startDate &&
+                        t.CreatedAt < endDate &&
+                        t.Status == st)
+                    .OrderByDescending(t => t.CreatedAt)
+                    .Limit(queryCount)
+                    .ToListAsync();
+            }
+
+            return await collection.Query()
+                .Where(t =>
+                    t.CreatedAt >= startDate &&
+                    t.CreatedAt < endDate)
+                .OrderByDescending(t => t.CreatedAt)
+                .Limit(queryCount)
+                .ToListAsync();
+        }
         private static List<TransactionRecordDbo> MergeAndTakeRecent(
      IEnumerable<TransactionRecordDbo> first,
      IEnumerable<TransactionRecordDbo> second,
@@ -667,14 +906,14 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
         /// <param name="userId"></param>
         /// <returns></returns>
         public async Task<CursorPageResult<TransactionRecordDbo>> GetLedgerTransactionsBeforeAsync(
-     DateTime startDate,
-     DateTime endDate,
-     PaymentChannel? paymentChannel,
-     PaymentStatus? status,
-     string? keyword,
-     DateTime? beforeTime,
-     int beforeId,
-     int count)
+    DateTime startDate,
+    DateTime endDate,
+    PaymentChannel? paymentChannel,
+    PaymentStatus? status,
+    string? keyword,
+    DateTime? beforeTime,
+    int beforeId,
+    int count)
         {
             try
             {
@@ -683,56 +922,27 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
 
                 await EnsureTransactionIndexesAsync();
 
-                var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
+                var queryCount = string.IsNullOrWhiteSpace(keyword)
+                    ? Math.Max(count * 2, 100)
+                    : Math.Max(count * 10, 500);
 
-                // 台账可能带关键词，关键词需要内存匹配，所以候选数要大于页面数量。
-                var queryCount = Math.Max(count * 10, 500);
+                var byTransactionTime = await QueryLedgerCandidatesByTimeAsync(
+                    startDate,
+                    endDate,
+                    paymentChannel,
+                    status,
+                    beforeTime,
+                    queryCount,
+                    useTransactionTime: true);
 
-                // 注意：这里不要把 paymentChannel/status/keyword/beforeTime 的复杂可空条件全部塞进 LiteDB Query。
-                // LiteDB.Async 对部分复杂表达式支持不稳定，容易出现 TargetInvocationException。
-                List<TransactionRecordDbo> byTransactionTime;
-                List<TransactionRecordDbo> byCreatedAt;
-
-                if (beforeTime.HasValue)
-                {
-                    var cursorTime = beforeTime.Value;
-
-                    byTransactionTime = await collection.Query()
-                        .Where(t =>
-                            t.TransactionTime >= startDate &&
-                            t.TransactionTime < endDate &&
-                            t.TransactionTime <= cursorTime)
-                        .OrderByDescending(t => t.TransactionTime)
-                        .Limit(queryCount)
-                        .ToListAsync();
-
-                    byCreatedAt = await collection.Query()
-                        .Where(t =>
-                            t.CreatedAt >= startDate &&
-                            t.CreatedAt < endDate &&
-                            t.CreatedAt <= cursorTime)
-                        .OrderByDescending(t => t.CreatedAt)
-                        .Limit(queryCount)
-                        .ToListAsync();
-                }
-                else
-                {
-                    byTransactionTime = await collection.Query()
-                        .Where(t =>
-                            t.TransactionTime >= startDate &&
-                            t.TransactionTime < endDate)
-                        .OrderByDescending(t => t.TransactionTime)
-                        .Limit(queryCount)
-                        .ToListAsync();
-
-                    byCreatedAt = await collection.Query()
-                        .Where(t =>
-                            t.CreatedAt >= startDate &&
-                            t.CreatedAt < endDate)
-                        .OrderByDescending(t => t.CreatedAt)
-                        .Limit(queryCount)
-                        .ToListAsync();
-                }
+                var byCreatedAt = await QueryLedgerCandidatesByTimeAsync(
+                    startDate,
+                    endDate,
+                    paymentChannel,
+                    status,
+                    beforeTime,
+                    queryCount,
+                    useTransactionTime: false);
 
                 var orderedCandidates = byTransactionTime
                     .Concat(byCreatedAt)
@@ -743,19 +953,48 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
                     .ThenByDescending(t => t.Id)
                     .ToList();
 
-                var items = orderedCandidates
-                    .Where(t => MatchesLedgerCondition(t, paymentChannel, status, keyword))
+                var matchedItems = orderedCandidates
+                    .Where(t => MatchesKeyword(t, keyword))
+                    .ToList();
+
+                var items = matchedItems
                     .Take(count)
                     .ToList();
 
-                var nextCursor = orderedCandidates.LastOrDefault();
+                DateTime? nextCursorTime = null;
+                var nextCursorId = beforeId;
+                var hasMore = false;
+
+                if (items.Count >= count)
+                {
+                    var lastReturned = items.Last();
+
+                    nextCursorTime = GetEffectiveTransactionTime(lastReturned);
+                    nextCursorId = lastReturned.Id;
+
+                    hasMore =
+                        orderedCandidates.Any(t => IsBeforeCursor(t, nextCursorTime.Value, nextCursorId)) ||
+                        orderedCandidates.Count >= queryCount;
+                }
+                else
+                {
+                    var lastScanned = orderedCandidates.LastOrDefault();
+
+                    if (lastScanned != null)
+                    {
+                        nextCursorTime = GetEffectiveTransactionTime(lastScanned);
+                        nextCursorId = lastScanned.Id;
+                    }
+
+                    hasMore = orderedCandidates.Count >= queryCount;
+                }
 
                 return new CursorPageResult<TransactionRecordDbo>
                 {
                     Items = items,
-                    HasMore = orderedCandidates.Count >= queryCount,
-                    NextCursorTime = nextCursor == null ? null : GetEffectiveTransactionTime(nextCursor),
-                    NextCursorId = nextCursor?.Id ?? beforeId
+                    HasMore = hasMore,
+                    NextCursorTime = nextCursorTime,
+                    NextCursorId = nextCursorId
                 };
             }
             catch (Exception ex)
@@ -769,41 +1008,42 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
                 return new CursorPageResult<TransactionRecordDbo>();
             }
         }
-
         public async Task<LedgerSummaryDto> GetLedgerSummaryAsync(
-       DateTime startDate,
-       DateTime endDate,
-       PaymentChannel? paymentChannel,
-       PaymentStatus? status,
-       string? keyword)
+    DateTime startDate,
+    DateTime endDate,
+    PaymentChannel? paymentChannel,
+    PaymentStatus? status,
+    string? keyword)
         {
             try
             {
                 await EnsureTransactionIndexesAsync();
 
-                var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();
+                const int summaryQueryLimit = 100000;
 
-                // 统计查询先只在数据库层做时间范围过滤。
-                // 渠道、状态、关键词统一在内存过滤，避免 LiteDB 查询表达式过复杂导致异常。
-                var byTransactionTime = await collection.Query()
-                    .Where(t =>
-                        t.TransactionTime >= startDate &&
-                        t.TransactionTime < endDate)
-                    .OrderByDescending(t => t.TransactionTime)
-                    .ToListAsync();
+                var byTransactionTime = await QueryLedgerCandidatesByTimeAsync(
+                    startDate,
+                    endDate,
+                    paymentChannel,
+                    status,
+                    beforeTime: null,
+                    queryCount: summaryQueryLimit,
+                    useTransactionTime: true);
 
-                var byCreatedAt = await collection.Query()
-                    .Where(t =>
-                        t.CreatedAt >= startDate &&
-                        t.CreatedAt < endDate)
-                    .OrderByDescending(t => t.CreatedAt)
-                    .ToListAsync();
+                var byCreatedAt = await QueryLedgerCandidatesByTimeAsync(
+                    startDate,
+                    endDate,
+                    paymentChannel,
+                    status,
+                    beforeTime: null,
+                    queryCount: summaryQueryLimit,
+                    useTransactionTime: false);
 
                 var transactions = byTransactionTime
                     .Concat(byCreatedAt)
                     .GroupBy(t => t.Id)
                     .Select(g => g.First())
-                    .Where(t => MatchesLedgerCondition(t, paymentChannel, status, keyword))
+                    .Where(t => MatchesKeyword(t, keyword))
                     .ToList();
 
                 _log.Info(
@@ -843,6 +1083,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository
                 return new LedgerSummaryDto();
             }
         }
+
         public async Task<List<TransactionRecordDbo>> GetTransactionsByUserIdAsync(string userId)
         {
             var collection = _CurrentDbContext.GetCollection<TransactionRecordDbo>();

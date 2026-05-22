@@ -240,7 +240,10 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
             try
             {
                 var totalAdded = 0;
-                var maxAttempts = isInitialLoad ? 10 : 3;
+
+                // 筛选后命中记录可能比较稀疏，不能查到几条就停止。
+                // 初次加载尽量补足 50 条；滚动加载也尽量补足 50 条。
+                var maxAttempts = isInitialLoad ? 20 : 10;
 
                 for (var attempt = 0; attempt < maxAttempts; attempt++)
                 {
@@ -276,8 +279,17 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
 
                     _hasMoreTransactions = result.HasMore;
 
-                    if (totalAdded > 0 || !_hasMoreTransactions)
+                    if (totalAdded >= LedgerPageSize)
                         break;
+
+                    if (!_hasMoreTransactions)
+                        break;
+
+                    if (!result.NextCursorTime.HasValue)
+                    {
+                        _hasMoreTransactions = false;
+                        break;
+                    }
                 }
 
                 return totalAdded > 0;

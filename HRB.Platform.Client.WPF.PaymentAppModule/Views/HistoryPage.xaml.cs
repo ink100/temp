@@ -28,10 +28,27 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            _scrollViewer ??= FindVisualChild<ScrollViewer>(this);
+            if (_scrollViewer != null)
+                _scrollViewer.ScrollChanged -= OnScrollChanged;
+
+            // 优先绑定台账 DataGrid 内部的 ScrollViewer。
+            var dataGrid = FindVisualChild<DataGrid>(this);
+            _scrollViewer = dataGrid == null
+                ? FindVisualChild<ScrollViewer>(this)
+                : FindVisualChild<ScrollViewer>(dataGrid);
 
             if (_scrollViewer != null)
+            {
                 _scrollViewer.ScrollChanged += OnScrollChanged;
+
+                GlobalSettings.CurrentAppContext.CurrentLogger.Info(
+                    "台账滚动监听已绑定");
+            }
+            else
+            {
+                GlobalSettings.CurrentAppContext.CurrentLogger.Info(
+                    "台账滚动监听绑定失败：未找到 ScrollViewer");
+            }
         }
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
@@ -55,8 +72,14 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views
 
             var remaining = e.ExtentHeight - e.VerticalOffset - e.ViewportHeight;
 
+            GlobalSettings.CurrentAppContext.CurrentLogger.Info(
+                $"台账滚动检查，Offset:{e.VerticalOffset:F2}，Viewport:{e.ViewportHeight:F2}，Extent:{e.ExtentHeight:F2}，Remaining:{remaining:F2}");
+
             if (remaining > 3)
                 return;
+
+            GlobalSettings.CurrentAppContext.CurrentLogger.Info(
+                "台账滚动到底部，准备加载更多");
 
             _ = LoadMoreAsync();
         }
@@ -73,7 +96,15 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Views
 
             try
             {
-                await vm.LoadMoreTransactionsAsync();
+                var loaded = await vm.LoadMoreTransactionsAsync();
+
+                GlobalSettings.CurrentAppContext.CurrentLogger.Info(
+                    $"台账滚动加载完成，是否加载到数据:{loaded}");
+            }
+            catch (Exception ex)
+            {
+                GlobalSettings.CurrentAppContext.CurrentLogger.Error(
+                    $"台账滚动加载更多异常:{ex}");
             }
             finally
             {

@@ -1,4 +1,4 @@
-using HRB.Payment.Core.Models;
+﻿using HRB.Payment.Core.Models;
 using HRB.Platform.Client.Core.Interfaces;
 using NAudio.Wave;
 using System;
@@ -19,6 +19,14 @@ namespace HRB.Payment.Core.Services
         /// 播放速度倍数（1.0为正常速度，大于1.0为加速，小于1.0为减速）
         /// </summary>
         public double SpeedRatio { get; set; } = 1.0;
+
+        private double GetSafeSpeedRatio()
+        {
+            // 播放本地金额 mp3 时使用。
+            // 50% 会由 PaymentVoiceService 映射成 1.0；
+            // 这里再做一次保护，避免异常配置导致播放失败。
+            return Math.Clamp(SpeedRatio, 0.5, 2.0);
+        }
 
         /// <summary>
         /// 音频文件缓存（soundName -> byte[]）
@@ -309,21 +317,12 @@ namespace HRB.Payment.Core.Services
 
                 using (reader)
                 {
-                    // 如果需要变速，使用重采样（会改变音调，但实现简单可靠）
-                    IWaveProvider waveProvider = reader;
-                    MediaFoundationResampler? resampler = null;
-
-                    if (Math.Abs(SpeedRatio - 1.0) > 0.01)
-                    {
-                        // 通过改变采样率实现变速
-                        var outFormat = new WaveFormat(
-                            (int)(reader.WaveFormat.SampleRate * SpeedRatio),
-                            reader.WaveFormat.BitsPerSample,
-                            reader.WaveFormat.Channels);
-
-                        resampler = new MediaFoundationResampler(reader, outFormat);
-                        waveProvider = resampler;
-                    }
+                    // 如果需要变速，使用采样率标记方式改变播放速度。
+                    // 该方式只影响当前音频播放，不重新生成 mp3，也不会频繁占用 CPU。
+                    var safeSpeedRatio = GetSafeSpeedRatio();
+                    IWaveProvider waveProvider = Math.Abs(safeSpeedRatio - 1.0) > 0.01
+                        ? new SpeedWaveProvider(reader, safeSpeedRatio)
+                        : reader;
 
                     // 创建播放设备
                     using var outputDevice = new WaveOutEvent();
@@ -348,9 +347,6 @@ namespace HRB.Payment.Core.Services
 
                     // 等待播放完成
                     await tcs.Task;
-
-                    // 清理重采样器
-                    resampler?.Dispose();
                 }
             }
             catch
@@ -358,9 +354,36 @@ namespace HRB.Payment.Core.Services
                 // 静默处理错误，避免影响主流程
             }
         }
+        /// <summary>
+        /// 通过调整 WaveFormat 的采样率标记实现简单变速播放。
+        /// 注意：这种方式会同时改变音调，但对金额提示音足够稳定，性能开销低。
+        /// </summary>
+        private sealed class SpeedWaveProvider : IWaveProvider
+        {
+            private readonly IWaveProvider _source;
+            private readonly WaveFormat _waveFormat;
+
+            public SpeedWaveProvider(IWaveProvider source, double speedRatio)
+            {
+                _source = source ?? throw new ArgumentNullException(nameof(source));
+
+                var sourceFormat = source.WaveFormat;
+                var sampleRate = (int)Math.Round(sourceFormat.SampleRate * speedRatio);
+                sampleRate = Math.Clamp(sampleRate, 8000, 192000);
+
+                _waveFormat = new WaveFormat(
+                    sampleRate,
+                    sourceFormat.BitsPerSample,
+                    sourceFormat.Channels);
+            }
+
+            public WaveFormat WaveFormat => _waveFormat;
+
+            public int Read(byte[] buffer, int offset, int count)
+            {
+                return _source.Read(buffer, offset, count);
+            }
+        }
     }
-
-
-
 }
 

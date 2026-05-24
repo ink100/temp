@@ -1,4 +1,4 @@
-﻿<models:BaseRegionUserControl x:Class="HRB.Platform.Client.WPF.PaymentAppModule.Views.V2.MainPageV2"
+<models:BaseRegionUserControl x:Class="HRB.Platform.Client.WPF.PaymentAppModule.Views.V2.MainPageV2"
                               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                               xmlns:controlExtensions="clr-namespace:HRB.Platform.Client.WPF.PaymentAppModule.Core.ControlExtensions;assembly=HRB.Platform.Client.WPF.PaymentAppModule.Core"
@@ -14,16 +14,20 @@
                               mc:Ignorable="d">
     <UserControl.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:PaymentAmountBrushConverter x:Key="PaymentAmountBrushConverter" />
+
         <Style x:Key="DataGridTextColumnStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#333333" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
+
         <Style x:Key="DataGridAmountStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
+
         <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="FontSize" Value="22" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -36,6 +40,7 @@
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="MinHeight" Value="60" />
         </Style>
+
         <Style x:Key="HoverButtonStyle" TargetType="Button">
             <Setter Property="Padding" Value="12,8" />
             <Setter Property="BorderThickness" Value="0" />
@@ -47,7 +52,9 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" CornerRadius="6">
+                        <Border Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
@@ -59,6 +66,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
         <Style x:Key="StatusIndicatorStyle" TargetType="Ellipse">
             <Setter Property="Fill" Value="#DC3545" />
             <Style.Triggers>
@@ -68,6 +76,7 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
+
     <Grid Background="White">
         <Grid.RowDefinitions>
             <RowDefinition Height="100" />
@@ -75,9 +84,8 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!--  Row 0: 头部栏  -->
+        <!-- Row 0: 头部栏 -->
         <Grid Grid.Row="0" Background="Transparent">
-
             <TextBlock Margin="20,0,0,0"
                        VerticalAlignment="Center"
                        FontSize="{Binding BaseFontSize}"
@@ -110,8 +118,7 @@
                     Background="#CCFFFFFF"
                     CornerRadius="8">
                 <StackPanel Orientation="Horizontal">
-
-                    <!--  插件状态面板 (始终显示)  -->
+                    <!-- 插件状态面板（始终显示） -->
                     <Border Margin="0,0,10,0"
                             Padding="8"
                             Background="#CCFFFFFF"
@@ -138,6 +145,7 @@
                                            Foreground="#666666"
                                            Text="{Binding AlipayStatusMessage}" />
                             </StackPanel>
+
                             <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
                                 <Ellipse Width="10" Height="10" VerticalAlignment="Center">
                                     <Ellipse.Style>
@@ -162,7 +170,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!--  字体大小 + 导航按钮  -->
+                    <!-- 字体大小 + 导航按钮 -->
                     <StackPanel Orientation="Horizontal">
                         <Button Background="#6C757D"
                                 Command="{Binding SetSmallFontCommand}"
@@ -178,10 +186,12 @@
                                 Command="{Binding SetLargeFontCommand}"
                                 Content="大"
                                 Style="{StaticResource HoverButtonStyle}" />
+
                         <Border Width="2"
                                 Height="30"
                                 Margin="15,0"
                                 Background="#CCCCCC" />
+
                         <Button Background="#28A745"
                                 Command="{Binding NavigateToHistoryCommand}"
                                 Content="查询"
@@ -201,7 +211,7 @@
             </Border>
         </Grid>
 
-        <!--  Row 1: 交易记录表格  -->
+        <!-- Row 1: 交易记录表格 -->
         <Grid Grid.Row="1" Margin="20,0,20,20">
             <DataGrid x:Name="TransactionsDataGrid"
                       EnableRowVirtualization="True"
@@ -232,6 +242,7 @@
                                         ElementStyle="{StaticResource DataGridTextColumnStyle}"
                                         Header="时间"
                                         HeaderStyle="{StaticResource DataGridColumnHeaderStyle}" />
+
                     <DataGridTemplateColumn Width="1.5*" Header="支付渠道">
                         <DataGridTemplateColumn.HeaderStyle>
                             <StaticResource ResourceKey="DataGridColumnHeaderStyle" />
@@ -239,7 +250,8 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
-                                    <Image Width="{Binding DataContext.BaseFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}" VerticalAlignment="Center">
+                                    <Image Width="{Binding DataContext.BaseFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                           VerticalAlignment="Center">
                                         <Image.Style>
                                             <Style TargetType="Image">
                                                 <Style.Triggers>
@@ -253,6 +265,7 @@
                                             </Style>
                                         </Image.Style>
                                     </Image>
+
                                     <TextBlock Margin="10,0"
                                                VerticalAlignment="Center"
                                                FontSize="{Binding DataContext.BaseFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -261,6 +274,7 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
+
                     <DataGridTemplateColumn Width="0.5*" Header="状态">
                         <DataGridTemplateColumn.HeaderStyle>
                             <StaticResource ResourceKey="DataGridColumnHeaderStyle" />
@@ -268,7 +282,8 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
-                                    <Image Width="{Binding DataContext.AmountFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}" VerticalAlignment="Center">
+                                    <Image Width="{Binding DataContext.AmountFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                           VerticalAlignment="Center">
                                         <Image.Style>
                                             <Style TargetType="Image">
                                                 <Style.Triggers>
@@ -289,6 +304,7 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
+
                     <DataGridTemplateColumn Width="3*" Header="金额">
                         <DataGridTemplateColumn.HeaderStyle>
                             <StaticResource ResourceKey="DataGridColumnHeaderStyle" />
@@ -298,32 +314,27 @@
                                 <TextBlock HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
                                            FontSize="{Binding DataContext.AmountFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                           Text="{Binding AmountDisplay}">
-                                    <TextBlock.Style>
-                                        <Style BasedOn="{StaticResource DataGridAmountStyle}" TargetType="TextBlock">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding PaymentChannel}" Value="Alipay">
-                                                    <Setter Property="Foreground" Value="#F01F1B" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding PaymentChannel}" Value="WeChat">
-                                                    <Setter Property="Foreground" Value="#F01F1B" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
+                                           Text="{Binding AmountDisplay}"
+                                           Style="{StaticResource DataGridAmountStyle}">
+                                    <TextBlock.Foreground>
+                                        <MultiBinding Converter="{StaticResource PaymentAmountBrushConverter}">
+                                            <Binding Path="PaymentChannel" />
+                                            <Binding Path="Status" />
+                                        </MultiBinding>
+                                    </TextBlock.Foreground>
                                 </TextBlock>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <!--  Binding="{Binding Remarks}"  -->
-
+                    <!-- Binding="{Binding Remarks}" -->
                     <DataGridTextColumn Width="2*"
                                         Binding="{Binding DisplayName}"
                                         ElementStyle="{StaticResource DataGridTextColumnStyle}"
                                         Header="昵称"
                                         HeaderStyle="{StaticResource DataGridColumnHeaderStyle}" />
                 </DataGrid.Columns>
+
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Setter Property="Background" Value="White" />
@@ -340,6 +351,7 @@
                         </Style.Triggers>
                     </Style>
                 </DataGrid.RowStyle>
+
                 <DataGrid.CellStyle>
                     <Style TargetType="DataGridCell">
                         <Setter Property="BorderThickness" Value="0" />
@@ -353,7 +365,7 @@
             </DataGrid>
         </Grid>
 
-        <!--  Row 2: 维护联系人  -->
+        <!-- Row 2: 维护联系人 -->
         <StackPanel Grid.Row="2" Orientation="Horizontal">
             <StackPanel.Style>
                 <Style TargetType="StackPanel">

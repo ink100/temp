@@ -13,6 +13,7 @@ using HRB.Platform.Client.WPF.PaymentAppModule.Core.Services;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
@@ -98,13 +99,20 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
         } = 60;
         private void OnPaymentDisplaySettingsChanged()
         {
-            PaymentAmountColorHelper.ClearCache();
+            var settings = _appContext.CurrentSettings;
+            PaymentAmountColorHelper.ApplySettings(
+                settings.AlipayAmountColorHex,
+                settings.AlipayFailedAmountColorHex,
+                settings.WeChatAmountColorHex,
+                settings.WeChatFailedAmountColorHex,
+                settings.AmountColorHex);
 
-            App.Current.Dispatcher.Invoke(() =>
+            Application.Current?.Dispatcher.BeginInvoke(() =>
             {
-                CollectionViewSource.GetDefaultView(TransactionRecords)?.Refresh();
+                CollectionViewSource.GetDefaultView(Transactions)?.Refresh();
             });
         }
+
         public double AmountFontSize
         {
             get;
@@ -175,6 +183,15 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             StoreName = appContext.CurrentSettings.StoreName;
             MaintenanceContact = appContext.CurrentSettings.MaintenanceContact;
             IsAutoScrollToLatestEnabled = appContext.CurrentSettings.IsAutoScrollToLatestEnabled;
+
+            var settings = appContext.CurrentSettings;
+            PaymentAmountColorHelper.ApplySettings(
+                settings.AlipayAmountColorHex,
+                settings.AlipayFailedAmountColorHex,
+                settings.WeChatAmountColorHex,
+                settings.WeChatFailedAmountColorHex,
+                settings.AmountColorHex);
+            PaymentDisplaySettingsChangedNotifier.Changed += OnPaymentDisplaySettingsChanged;
 
             // 命令
             NavigateToHistoryCommand = new DelegateCommand(
@@ -432,6 +449,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
         }
 
         #endregion
+
+        protected override void OnDestroy()
+        {
+            PaymentDisplaySettingsChangedNotifier.Changed -= OnPaymentDisplaySettingsChanged;
+            _alipayPlugin.StatusChanged -= OnPluginStatusChanged;
+            _weChatPlugin.StatusChanged -= OnPluginStatusChanged;
+        }
 
         #region 退出
 

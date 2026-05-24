@@ -196,6 +196,12 @@
             </summary>
             <param name="soundName">音频文件名（不含扩展名）</param>
         </member>
+        <member name="T:HRB.Payment.Core.Services.NumberToSpeechService.SpeedWaveProvider">
+            <summary>
+            通过调整 WaveFormat 的采样率标记实现简单变速播放。
+            注意：这种方式会同时改变音调，但对金额提示音足够稳定，性能开销低。
+            </summary>
+        </member>
         <member name="M:HRB.Payment.Core.Services.PaymentEventPublisher.PublishPaymentStarted(HRB.Payment.Core.Events.PaymentEventArgs)">
             <summary>
             发布用户正在支付事件

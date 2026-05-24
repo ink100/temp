@@ -683,19 +683,40 @@
             TTS 音色名称。为空时使用默认中文音色。
             </summary>
         </member>
-        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.TtsRate">
-            <summary>
-            TTS 语速百分比，0 为正常，负数变慢，正数变快。
-            </summary>
-        </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.TtsVolume">
             <summary>
             TTS 音量百分比，默认 100。
             </summary>
         </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.TtsRate">
+            <summary>
+            语音播报速度。
+            0 = 慢速，50 = 正常，200 = 最快。
+            </summary>
+        </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.AmountColorHex">
             <summary>
-            金额显示颜色，十六进制格式，例如 #F01F1B。
+            旧版金额显示颜色，保留兼容旧配置。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.AlipayAmountColorHex">
+            <summary>
+            支付宝收款金额颜色，默认蓝色。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.AlipayFailedAmountColorHex">
+            <summary>
+            支付宝失败金额颜色，默认红色。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.WeChatAmountColorHex">
+            <summary>
+            微信收款金额颜色，默认绿色。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.WeChatFailedAmountColorHex">
+            <summary>
+            微信失败金额颜色，默认红色。
             </summary>
         </member>
         <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.EnvironmentSettings.USER_AGREEMENT_VERSION">
@@ -772,6 +793,28 @@
             </summary>
             <param name="userId">原始用户ID</param>
             <returns>脱敏后的用户ID（MD5哈希值）</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.PaymentAmountColorHelper">
+            <summary>
+            支付金额颜色辅助类。
+            用于根据支付渠道和状态返回金额显示颜色，并缓存 WPF Brush，避免频繁创建对象。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.PaymentAmountColorHelper.ApplySettings(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            应用设置页保存的金额颜色配置。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.PaymentAmountColorHelper.GetAmountBrush(System.Object,System.Object)">
+            <summary>
+            根据支付渠道和支付状态获取金额颜色。
+            channel 可以传 PaymentChannel、int 或 string；status 可以传枚举、int 或 string。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.PaymentAmountColorHelper.ClearCache">
+            <summary>
+            清空 Brush 缓存。设置颜色变更后调用，确保界面能使用新颜色。
+            </summary>
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin">
              <summary>

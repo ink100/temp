@@ -1,5 +1,7 @@
-using HRB.Payment.Core.Models;
+﻿using HRB.Payment.Core.Models;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers;
 using System.Diagnostics;
+using System.Text;
 using System.Xml.Linq;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
@@ -19,18 +21,28 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(xmlContent))
+                {
+                    WeChatListenerConsoleDebug.Write("XML-EMPTY", "微信 Message XML 为空");
+                    return null;
+                }
+
+                WeChatListenerConsoleDebug.Write("XML-RECV", $"MessageXmlLength={xmlContent.Length}");
+                WeChatListenerConsoleDebug.WriteBlock("XML-RAW", "微信Message XML完整内容", xmlContent);
                 var doc = XDocument.Parse(xmlContent);
                 var sysmsg = doc.Element("sysmsg");
 
                 // 验证消息类型是否为支付消息
                 if (sysmsg == null || sysmsg.Attribute("type")?.Value != "paymsg")
                 {
+                    WeChatListenerConsoleDebug.Write("XML-NOT-PAYMSG", $"Root={doc.Root?.Name.LocalName ?? "null"}, Type={sysmsg?.Attribute("type")?.Value ?? "null"}");
                     return null;
                 }
 
                 var paymsg = sysmsg.Element("paymsg");
                 if (paymsg == null)
                 {
+                    WeChatListenerConsoleDebug.Write("XML-NO-PAYMSG", "sysmsg 中缺少 paymsg 节点");
                     return null;
                 }
 
@@ -43,7 +55,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 }
 
                 // 构建支付消息对象
-                return new PaymentMessage
+                var message = new PaymentMessage
                 {
                     PayMsgType = GetElementValue(paymsg, "PayMsgType"),
                     TransId = GetElementValue(paymsg, "transid"),
@@ -56,9 +68,24 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     Scene = GetElementValue(paymsg, "scene"),
                     Status = status
                 };
+
+                if (IsInvalidEmptyPayMessage(message))
+                {
+                    WeChatListenerConsoleDebug.Write("XML-DROP-EMPTY",
+                        $"丢弃微信空支付消息：Status={message.Status}, TransId={message.TransId}, Fee={message.Fee}, DisplayName={message.DisplayName}, Username={message.Username}, Timestamp={message.Timestamp}");
+                    WeChatListenerConsoleDebug.WriteBlock("XML-DROP-FIELDS", "被丢弃的paymsg字段明细", BuildPayMsgFields(paymsg));
+                    return null;
+                }
+
+                WeChatListenerConsoleDebug.Write("XML-OK",
+                    $"Status={message.Status}, TransId={message.TransId}, Fee={message.Fee}, DisplayName={message.DisplayName}, Username={message.Username}");
+                WeChatListenerConsoleDebug.WriteBlock("XML-FIELDS", "paymsg字段明细", BuildPayMsgFields(paymsg));
+
+                return message;
             }
             catch (Exception ex)
             {
+                WeChatListenerConsoleDebug.WriteException("XML-ERROR", ex, xmlContent);
                 GlobalSettings.CurrentAppContext.CurrentLogger.Error($"XML 解析异常: {ex.Message}");
                 return null;
             }
@@ -74,6 +101,35 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         {
             var element = parent.Element(elementName);
             return element?.Value ?? string.Empty;
+        }
+
+
+        private static bool IsInvalidEmptyPayMessage(PaymentMessage message)
+        {
+            if (message == null)
+                return true;
+
+            var hasOrder = !string.IsNullOrWhiteSpace(message.TransId);
+            var hasUser = !string.IsNullOrWhiteSpace(message.Username) ||
+                          !string.IsNullOrWhiteSpace(message.DisplayName);
+
+            // 金额不参与空数据判断。
+            // 只要存在真实流水号，或存在 wxid/昵称，就继续向后处理。
+            // 只有订单、wxid、昵称都为空时，才认为是 VXModule.Shell 的空 paymsg/状态噪声。
+            return !hasOrder && !hasUser;
+        }
+
+        private string BuildPayMsgFields(XElement paymsg)
+        {
+            var builder = new StringBuilder();
+            foreach (var element in paymsg.Elements())
+            {
+                builder
+                    .Append(element.Name.LocalName)
+                    .Append(" = ")
+                    .AppendLine(element.Value ?? string.Empty);
+            }
+            return builder.ToString();
         }
     }
 }

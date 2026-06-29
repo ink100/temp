@@ -550,6 +550,17 @@
             备注信息
             </summary>
         </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.CursorPageResult`1.NextCursorTime">
+            <summary>
+            下一次继续查询时使用的游标时间。
+            注意：这是本次扫描候选集中的最后一条记录时间，不一定是 Items 里的最后一条。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.CursorPageResult`1.NextCursorId">
+            <summary>
+            下一次继续查询时使用的游标 Id。
+            </summary>
+        </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsAlipayEnabled">
             <summary>
             是否启用支付宝支付
@@ -602,6 +613,12 @@
             是否启用新交易记录自动滚动到顶部
             </summary>
         </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsWeChatListenerConsoleOutputEnabled">
+            <summary>
+            是否开启微信监听控制台输出。
+            默认关闭；仅用于现场排查 VXModule.Shell / 微信收款消息链路。
+            </summary>
+        </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsAutoSyncSystemTimeEnabled">
             <summary>
             是否启用每天凌晨 1 点自动同步 Windows 系统时间
@@ -624,7 +641,7 @@
         </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.ScanTimeoutSeconds">
             <summary>
-            扫码后多少秒仍未支付，判定为超时未支付，正式默认 120 秒。
+            扫码后多少秒仍未支付，判定为超时未支付，正式默认 10 秒。
             </summary>
         </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.ScanNotPayNotifyIntervalSeconds">
@@ -672,19 +689,40 @@
             TTS 音色名称。为空时使用默认中文音色。
             </summary>
         </member>
-        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.TtsRate">
-            <summary>
-            TTS 语速百分比，0 为正常，负数变慢，正数变快。
-            </summary>
-        </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.TtsVolume">
             <summary>
             TTS 音量百分比，默认 100。
             </summary>
         </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.TtsRate">
+            <summary>
+            语音播报速度。
+            0 = 慢速，50 = 正常，200 = 最快。
+            </summary>
+        </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.AmountColorHex">
             <summary>
-            金额显示颜色，十六进制格式，例如 #F01F1B。
+            旧版金额显示颜色，保留兼容旧配置。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.AlipayAmountColorHex">
+            <summary>
+            支付宝收款金额颜色，默认蓝色。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.AlipayFailedAmountColorHex">
+            <summary>
+            支付宝失败金额颜色，默认红色。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.WeChatAmountColorHex">
+            <summary>
+            微信收款金额颜色，默认绿色。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.WeChatFailedAmountColorHex">
+            <summary>
+            微信失败金额颜色，默认红色。
             </summary>
         </member>
         <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.EnvironmentSettings.USER_AGREEMENT_VERSION">
@@ -761,6 +799,41 @@
             </summary>
             <param name="userId">原始用户ID</param>
             <returns>脱敏后的用户ID（MD5哈希值）</returns>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.PaymentAmountColorHelper">
+            <summary>
+            支付金额颜色辅助类。
+            用于根据支付渠道和状态返回金额显示颜色，并缓存 WPF Brush，避免频繁创建对象。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.PaymentAmountColorHelper.ApplySettings(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            应用设置页保存的金额颜色配置。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.PaymentAmountColorHelper.GetAmountBrush(System.Object,System.Object)">
+            <summary>
+            根据支付渠道和支付状态获取金额颜色。
+            channel 可以传 PaymentChannel、int 或 string；status 可以传枚举、int 或 string。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.PaymentAmountColorHelper.ClearCache">
+            <summary>
+            清空 Brush 缓存。设置颜色变更后调用，确保界面能使用新颜色。
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.WeChatListenerConsoleDebug">
+            <summary>
+            微信监听控制台调试输出。
+            由设置项 IsWeChatListenerConsoleOutputEnabled 控制，默认关闭。
+            只输出到控制台/VS 输出窗口，不写本地日志文件，避免客户现场长期运行产生日志文件。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.WeChatListenerConsoleDebug.WriteBlock(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            输出多行详细内容，适合查看 PayMessage JSON / 微信 Message XML。
+            注意：仍会做长度限制，避免客户现场控制台被超长内容刷爆。
+            </summary>
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin">
              <summary>
@@ -1069,6 +1142,26 @@
             <param name="endDate">结束日期</param>
             <returns>交易记录列表</returns>
         </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetRecentTransactionsByDateRangeAsync(System.DateTime,System.DateTime,System.Int32)">
+            <summary>
+            根据日期范围获取最近的交易记录。
+            用于首页加载，避免为了显示少量记录而查询当天全部订单。
+            </summary>
+            <param name="startDate">开始日期</param>
+            <param name="endDate">结束日期</param>
+            <param name="count">获取数量</param>
+            <returns>交易记录列表</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetRecentTransactionsBeforeAsync(System.DateTime,System.Int32,System.Int32)">
+            <summary>
+            获取指定游标之前的更旧交易记录。
+            用于首页向下滚动加载更多历史记录。
+            </summary>
+            <param name="beforeTime">当前已加载最后一条记录的有效时间</param>
+            <param name="beforeId">当前已加载最后一条记录的 Id</param>
+            <param name="count">获取数量</param>
+            <returns>更旧的交易记录列表</returns>
+        </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetAllTransactionsAsync">
             <summary>
             获取所有交易记录
@@ -1109,6 +1202,18 @@
             </summary>
             <param name="id">交易ID</param>
             <returns>是否成功</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetLedgerTransactionsBeforeAsync(System.DateTime,System.DateTime,System.Nullable{HRB.Payment.Core.Models.PaymentChannel},System.Nullable{HRB.Payment.Core.Models.PaymentStatus},System.String,System.Nullable{System.DateTime},System.Int32,System.Int32)">
+            <summary>
+            台账游标分页查询。
+            打开台账时 beforeTime 传 null；向下滚动时传当前游标。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetLedgerSummaryAsync(System.DateTime,System.DateTime,System.Nullable{HRB.Payment.Core.Models.PaymentChannel},System.Nullable{HRB.Payment.Core.Models.PaymentStatus},System.String)">
+            <summary>
+            根据台账筛选条件单独查询统计数据。
+            统计不依赖当前已加载的列表数据。
+            </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.IPaymentRepository.GetTotalAmountAsync(System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
             <summary>
@@ -1296,7 +1401,7 @@
             获取总金额
             </summary>
         </member>
-        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetTransactionsByUserIdAsync(System.String)">
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Repository.PaymentRepository.GetLedgerTransactionsBeforeAsync(System.DateTime,System.DateTime,System.Nullable{HRB.Payment.Core.Models.PaymentChannel},System.Nullable{HRB.Payment.Core.Models.PaymentStatus},System.String,System.Nullable{System.DateTime},System.Int32,System.Int32)">
             <summary>
             <inheritdoc/>
             </summary>
@@ -1605,13 +1710,20 @@
         </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentTransactionService.Transactions">
             <summary>
-            当前内存中的交易记录集合（最多保留最近 50 条），供 UI 绑定
+            当前内存中的交易记录集合，供 UI 绑定。
+            默认加载最近 20 条，向下滚动时可继续加载更旧记录。
             </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentTransactionService.LoadTodayTransactionsAsync">
             <summary>
             从数据库加载今日交易记录到内存集合
             </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentTransactionService.LoadMoreTransactionsAsync">
+            <summary>
+            加载更旧的交易记录，追加到首页列表底部。
+            </summary>
+            <returns>是否成功加载到新记录</returns>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IPaymentTransactionService.HandlePaymentStartedAsync(HRB.Payment.Core.Events.PaymentEventArgs)">
             <summary>
@@ -2171,6 +2283,12 @@
             清除静默取消标记
             </summary>
         </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.IsTrackedOrder(System.String)">
+            <summary>
+            判断订单是否仍处于追踪状态。
+            超时未支付后会停止追踪，避免每 3 秒重复触发超时事件。
+            </summary>
+        </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.OrderStateManager.CheckOrderStates(System.Collections.Generic.IEnumerable{HRB.Payment.Core.Models.TransactionRecord},System.DateTime)">
             <summary>
             检查订单状态（由定时器调用）
@@ -2571,6 +2689,24 @@
             停止微信连接服务
             </summary>
             <returns>停止任务</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.StartDiagnosticHeartbeat">
+            <summary>
+            启动微信监听诊断心跳。
+            作用：扫码后没有业务日志时，确认 MessageClientShell/连接服务是否仍然处于连接状态。
+            只在“微信监听控制台输出”开启时输出；关闭后 Timer 仍低频运行但不输出，避免影响业务。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.StopDiagnosticHeartbeat">
+            <summary>
+            停止微信监听诊断心跳。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.OutputDiagnosticHeartbeat">
+            <summary>
+            输出连接层状态。
+            注意：这里不能直接证明微信支付数据进来了，只用于判断“扫码没日志时，连接层是否还活着”。
+            </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.OnConnectionStatusChanged">
             <summary>

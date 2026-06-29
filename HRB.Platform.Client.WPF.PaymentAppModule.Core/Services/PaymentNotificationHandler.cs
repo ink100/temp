@@ -1,9 +1,10 @@
-using HRB.Payment.Core.Events;
+﻿using HRB.Payment.Core.Events;
 using HRB.Payment.Core.Models;
 using HRB.Payment.Core.Services;
 using HRB.Payment.Message.Core;
 using HRB.Payment.Message.Core.BusEvents;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers;
 using Newtonsoft.Json;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
@@ -45,6 +46,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// <returns>处理任务</returns>
         public async Task HandleNotificationAsync(NotificationPayMessageEto notification)
         {
+            WeChatListenerConsoleDebug.Write("RECV",
+                $"收到支付通知：PayMessageType={notification.PayMessageType}, PayMessageLength={notification.PayMessage?.Length ?? 0}");
 
             // 根据支付类型处理不同的消息
             if (notification.PayMessageType == PayMessageTypeEnum.AP) // 支付宝
@@ -68,16 +71,36 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         private Task HandleWeChatNotificationAsync(NotificationPayMessageEto notification)
         {
             // 1. 反序列化微信消息
-            var result = JsonConvert.DeserializeObject<WeChatMessageResult>(notification.PayMessage);
-            if (result == null)
+            WeChatListenerConsoleDebug.Write("WX-RECV", $"收到 VX PayMessage，Length={notification.PayMessage?.Length ?? 0}");
+            WeChatListenerConsoleDebug.WriteRaw("WX-RAW", "PayMessage摘要", notification.PayMessage);
+            WeChatListenerConsoleDebug.WriteBlock("WX-PAYMESSAGE", "PayMessage原始完整内容", notification.PayMessage);
+
+            WeChatMessageResult? result;
+            try
             {
+                result = JsonConvert.DeserializeObject<WeChatMessageResult>(notification.PayMessage);
+            }
+            catch (Exception ex)
+            {
+                WeChatListenerConsoleDebug.WriteException("JSON-ERROR", ex, notification.PayMessage);
                 return Task.CompletedTask;
             }
+
+            if (result == null)
+            {
+                WeChatListenerConsoleDebug.Write("JSON-NULL", "微信 PayMessage 反序列化结果为空");
+                return Task.CompletedTask;
+            }
+
+            WeChatListenerConsoleDebug.Write("JSON-OK",
+                $"MessageType={result.MessageType}, MessageLength={result.Message?.Length ?? 0}");
+            WeChatListenerConsoleDebug.WriteBlock("WX-MESSAGE", "WeChatMessageResult.Message原始XML", result.Message);
 
             // 2. 解析支付消息XML
             var payMsg = _messageParser.ParsePaymentMessage(result.Message);
             if (payMsg == null)
             {
+                WeChatListenerConsoleDebug.WriteRaw("XML-FAIL", "微信 XML 解析失败，Message", result.Message);
                 return Task.CompletedTask;
             }
 
@@ -85,8 +108,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             var paymentArgs = _messageConverter.ConvertToPaymentEventArgs(payMsg, PaymentChannel.WeChat);
             if (paymentArgs == null)
             {
+                WeChatListenerConsoleDebug.Write("CONVERT-FAIL",
+                    $"微信 PaymentEventArgs 转换失败/已丢弃：Status={payMsg.Status}, TransId={payMsg.TransId}, Fee={payMsg.Fee}, DisplayName={payMsg.DisplayName}, Username={payMsg.Username}, Timestamp={payMsg.Timestamp}");
                 return Task.CompletedTask;
             }
+
+            WeChatListenerConsoleDebug.Write("CONVERT-OK",
+                $"Status={payMsg.Status}, Order={paymentArgs.OrderNumber}, Amount={paymentArgs.Amount}, DisplayName={paymentArgs.DisplayName}");
 
             // 4. 根据支付状态发布对应的事件
             switch (payMsg.Status)
@@ -94,18 +122,21 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 case PaymentStatus.Scan:
                     // 支付扫描/开始
                     _eventPublisher.PublishPaymentStarted(paymentArgs);
+                    WeChatListenerConsoleDebug.Write("PUBLISH", $"PaymentStartedEvent Order={paymentArgs.OrderNumber}, Amount={paymentArgs.Amount}");
                     
                     break;
 
                 case PaymentStatus.Success:
                     // 支付成功
                     _eventPublisher.PublishPaymentSuccess(paymentArgs);
+                    WeChatListenerConsoleDebug.Write("PUBLISH", $"PaymentSuccessEvent Order={paymentArgs.OrderNumber}, Amount={paymentArgs.Amount}");
                    
                     break;
 
                 case PaymentStatus.Cancel:
                     // 支付取消
                     _eventPublisher.PublishPaymentCancelled(paymentArgs);
+                    WeChatListenerConsoleDebug.Write("PUBLISH", $"PaymentCancelledEvent Order={paymentArgs.OrderNumber}, Amount={paymentArgs.Amount}");
                    
                     break;
             }

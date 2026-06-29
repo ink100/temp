@@ -613,6 +613,12 @@
             是否启用新交易记录自动滚动到顶部
             </summary>
         </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsWeChatListenerConsoleOutputEnabled">
+            <summary>
+            是否开启微信监听控制台输出。
+            默认关闭；仅用于现场排查 VXModule.Shell / 微信收款消息链路。
+            </summary>
+        </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsAutoSyncSystemTimeEnabled">
             <summary>
             是否启用每天凌晨 1 点自动同步 Windows 系统时间
@@ -814,6 +820,19 @@
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.PaymentAmountColorHelper.ClearCache">
             <summary>
             清空 Brush 缓存。设置颜色变更后调用，确保界面能使用新颜色。
+            </summary>
+        </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.WeChatListenerConsoleDebug">
+            <summary>
+            微信监听控制台调试输出。
+            由设置项 IsWeChatListenerConsoleOutputEnabled 控制，默认关闭。
+            只输出到控制台/VS 输出窗口，不写本地日志文件，避免客户现场长期运行产生日志文件。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers.WeChatListenerConsoleDebug.WriteBlock(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            输出多行详细内容，适合查看 PayMessage JSON / 微信 Message XML。
+            注意：仍会做长度限制，避免客户现场控制台被超长内容刷爆。
             </summary>
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.Alipay.AlipayChannelPlugin">
@@ -2670,6 +2689,24 @@
             停止微信连接服务
             </summary>
             <returns>停止任务</returns>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.StartDiagnosticHeartbeat">
+            <summary>
+            启动微信监听诊断心跳。
+            作用：扫码后没有业务日志时，确认 MessageClientShell/连接服务是否仍然处于连接状态。
+            只在“微信监听控制台输出”开启时输出；关闭后 Timer 仍低频运行但不输出，避免影响业务。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.StopDiagnosticHeartbeat">
+            <summary>
+            停止微信监听诊断心跳。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.OutputDiagnosticHeartbeat">
+            <summary>
+            输出连接层状态。
+            注意：这里不能直接证明微信支付数据进来了，只用于判断“扫码没日志时，连接层是否还活着”。
+            </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService.OnConnectionStatusChanged">
             <summary>

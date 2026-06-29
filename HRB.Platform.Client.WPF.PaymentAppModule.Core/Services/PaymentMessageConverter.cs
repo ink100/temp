@@ -1,5 +1,6 @@
-using HRB.Payment.Core.Events;
+﻿using HRB.Payment.Core.Events;
 using HRB.Payment.Core.Models;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 {
@@ -19,27 +20,54 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         {
             try
             {
-                // 解析金额：Fee 通常以"分"为单位，需要转换为"元"
-                decimal amount = 0;
-                if (!string.IsNullOrEmpty(paymentMessage.Fee) && decimal.TryParse(paymentMessage.Fee, out decimal feeInCents))
+                if (paymentMessage == null)
                 {
-                    amount = feeInCents / 100m; // 转换为元
+                    WeChatListenerConsoleDebug.Write("CONVERT-DROP", "支付消息为空，已丢弃");
+                    return null;
                 }
 
-                // 解析时间戳：Unix时间戳转换为本地时间
+                // 解析金额：Fee 通常以“分”为单位，需要转换为“元”。
+                decimal amount = 0;
+                decimal feeInCents;
+                if (!string.IsNullOrWhiteSpace(paymentMessage.Fee) &&
+                    decimal.TryParse(paymentMessage.Fee.Trim(), out feeInCents))
+                {
+                    amount = feeInCents / 100m;
+                }
+
+                string invalidReason;
+                if (!IsValidPaymentMessage(paymentMessage, amount, out invalidReason))
+                {
+                    WeChatListenerConsoleDebug.Write("CONVERT-DROP",
+                        $"丢弃无效支付消息：{invalidReason}，Status={paymentMessage.Status}, TransId={paymentMessage.TransId}, Fee={paymentMessage.Fee}, Amount={amount}, DisplayName={paymentMessage.DisplayName}, Username={paymentMessage.Username}, Timestamp={paymentMessage.Timestamp}");
+                    GlobalSettings.CurrentAppContext.CurrentLogger.Error(
+                        $"丢弃无效支付消息：{invalidReason}，渠道:{paymentChannel}，订单:{paymentMessage.TransId}，用户:{paymentMessage.Username}，昵称:{paymentMessage.DisplayName}，金额:{amount}");
+                    return null;
+                }
+
+                // 解析时间戳：Unix时间戳转换为本地时间。
                 DateTime transactionTime = DateTime.Now;
-                if (!string.IsNullOrEmpty(paymentMessage.Timestamp) && long.TryParse(paymentMessage.Timestamp, out long timestamp))
+                long timestamp;
+                if (!string.IsNullOrWhiteSpace(paymentMessage.Timestamp) &&
+                    long.TryParse(paymentMessage.Timestamp.Trim(), out timestamp) &&
+                    timestamp > 0)
                 {
                     transactionTime = DateTimeOffset.FromUnixTimeSeconds(timestamp).LocalDateTime;
                 }
 
                 var userId = !string.IsNullOrWhiteSpace(paymentMessage.Username)
-     ? paymentMessage.Username.Trim()
-     : paymentMessage.DisplayName?.Trim() ?? string.Empty;
+                    ? paymentMessage.Username.Trim()
+                    : (paymentMessage.DisplayName == null ? string.Empty : paymentMessage.DisplayName.Trim());
 
                 var orderNumber = BuildOrderNumber(paymentMessage, paymentChannel, transactionTime, amount);
+                if (string.IsNullOrWhiteSpace(orderNumber))
+                {
+                    WeChatListenerConsoleDebug.Write("CONVERT-DROP",
+                        $"订单号为空，已丢弃：Status={paymentMessage.Status}, TransId={paymentMessage.TransId}, Fee={paymentMessage.Fee}, Amount={amount}, DisplayName={paymentMessage.DisplayName}, Username={paymentMessage.Username}");
+                    return null;
+                }
 
-                // 构建支付事件参数
+                // 构建支付事件参数。
                 return new PaymentEventArgs
                 {
                     UserId = userId,
@@ -49,36 +77,59 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     PaymentChannel = paymentChannel,
                     Remarks = paymentMessage.DisplayName,
                     PayTime = transactionTime,
-                    Status = PaymentStatus.Scan
+                    Status = paymentMessage.Status
                 };
             }
             catch (Exception ex)
             {
                 GlobalSettings.CurrentAppContext.CurrentLogger.Error($"创建支付事件参数失败: {ex.Message}");
+                WeChatListenerConsoleDebug.WriteException("CONVERT-ERROR", ex,
+                    paymentMessage == null ? string.Empty : $"TransId={paymentMessage.TransId}, Fee={paymentMessage.Fee}, DisplayName={paymentMessage.DisplayName}, Username={paymentMessage.Username}");
                 return null;
             }
         }
+
+        private static bool IsValidPaymentMessage(PaymentMessage paymentMessage, decimal amount, out string reason)
+        {
+            var hasOrder = !string.IsNullOrWhiteSpace(paymentMessage.TransId);
+            var hasUser = !string.IsNullOrWhiteSpace(paymentMessage.Username) ||
+                          !string.IsNullOrWhiteSpace(paymentMessage.DisplayName);
+
+            // 金额不参与空数据判断。
+            // 有些扫码/通知阶段金额可能为空或为 0，但只要有真实流水号，或有 wxid/昵称，
+            // 就不能因为金额为 0 而丢弃。
+            // 真正需要丢弃的是：没有订单号，同时没有 wxid，也没有昵称的空 paymsg。
+            if (!hasOrder && !hasUser)
+            {
+                reason = "订单、wxid、昵称均为空";
+                return false;
+            }
+
+            reason = string.Empty;
+            return true;
+        }
+
         private static string BuildOrderNumber(
-    PaymentMessage paymentMessage,
-    PaymentChannel paymentChannel,
-    DateTime transactionTime,
-    decimal amount)
+            PaymentMessage paymentMessage,
+            PaymentChannel paymentChannel,
+            DateTime transactionTime,
+            decimal amount)
         {
             // 有真实流水号时，必须优先使用真实流水号。
             if (!string.IsNullOrWhiteSpace(paymentMessage.TransId))
                 return paymentMessage.TransId.Trim();
 
             // 没有真实流水号时，只生成临时订单号，且必须带 TMP 前缀，避免和真实流水号混淆。
-            var channelPrefix = paymentChannel switch
-            {
-                PaymentChannel.WeChat => "WX",
-                PaymentChannel.Alipay => "ALI",
-                _ => paymentChannel.ToString().ToUpperInvariant()
-            };
+            var channelPrefix = GetChannelPrefix(paymentChannel);
 
             var userPart = !string.IsNullOrWhiteSpace(paymentMessage.Username)
                 ? paymentMessage.Username.Trim()
-                : paymentMessage.DisplayName?.Trim();
+                : (paymentMessage.DisplayName == null ? string.Empty : paymentMessage.DisplayName.Trim());
+
+            // 没有真实流水号时，必须至少有 wxid 或昵称，才能生成 TMP 单号。
+            // 金额不参与这个判断，避免误丢扫码阶段金额为 0 的正常消息。
+            if (string.IsNullOrWhiteSpace(userPart))
+                return string.Empty;
 
             var safeUserPart = NormalizeOrderPart(userPart, "UNKNOWN");
 
@@ -92,11 +143,23 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 : Math.Round(amount * 100m, 0).ToString("0");
 
             var hash = BuildShortHash($"{channelPrefix}|{safeUserPart}|{timePart}|{feePart}|{paymentMessage.DisplayName}");
-
             return $"TMP_{channelPrefix}_SCAN_{safeUserPart}_{timePart}_{feePart}_{hash}";
         }
 
-        private static string NormalizeOrderPart(string? value, string fallback)
+        private static string GetChannelPrefix(PaymentChannel paymentChannel)
+        {
+            switch (paymentChannel)
+            {
+                case PaymentChannel.WeChat:
+                    return "WX";
+                case PaymentChannel.Alipay:
+                    return "ALI";
+                default:
+                    return paymentChannel.ToString().ToUpperInvariant();
+            }
+        }
+
+        private static string NormalizeOrderPart(string value, string fallback)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return fallback;
@@ -107,7 +170,6 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 .ToArray();
 
             var result = new string(chars);
-
             return result.Length <= 40
                 ? result
                 : result.Substring(0, 40);
@@ -118,27 +180,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             unchecked
             {
                 var hash = 23;
-
                 foreach (var ch in value)
                     hash = hash * 31 + ch;
 
                 return Math.Abs(hash).ToString("X");
             }
         }
-
-        ///// <summary>
-        ///// 获取支付渠道名称
-        ///// </summary>
-        ///// <param name="channel">支付渠道枚举</param>
-        ///// <returns>支付渠道中文名称</returns>
-        //private string GetPaymentChannelName(PaymentChannel channel)
-        //{
-        //    return channel switch
-        //    {
-        //        PaymentChannel.WeChat => "微信",
-        //        PaymentChannel.Alipay => "支付宝",
-        //        _ => "未知"
-        //    };
-        //}
     }
 }

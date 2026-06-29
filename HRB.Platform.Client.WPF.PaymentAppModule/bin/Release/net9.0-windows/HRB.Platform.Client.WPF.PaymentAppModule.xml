@@ -113,6 +113,12 @@
             MainPageV2
             </summary>
         </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Views.V2.MainPageV2.ScheduleAutoScroll">
+            <summary>
+            合并连续新增交易产生的自动滚动请求。
+            采用“短延迟 + 最小滚动间隔”的方式，避免突发记录把 UI 线程塞满。
+            </summary>
+        </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Views.V2.MainPageV2.InitializeComponent">
             <summary>
             InitializeComponent

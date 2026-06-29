@@ -174,6 +174,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             _eventPublisher = eventPublisher;
             _alipayPlugin = alipayPlugin;
             _weChatPlugin = weChatPlugin;
+            WeChatListenerConsoleDebug.Write("EVENT-BUS", $"MainPageV2ViewModel 构造完成，注入 EventAggregator Hash={eventAggregator.GetHashCode()}，EventAggregator.Current Hash={EventAggregator.Current.GetHashCode()}");
 
             // 启动系统时间自动同步调度器。
             SystemTimeSyncService.Start(_appContext);
@@ -247,6 +248,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
 
         private void SubscribeToEvents(IEventAggregator eventAggregator)
         {
+            WeChatListenerConsoleDebug.Write("EVENT-BUS", $"MainPageV2 订阅事件：注入 EventAggregator Hash={eventAggregator.GetHashCode()}，EventAggregator.Current Hash={EventAggregator.Current.GetHashCode()}");
             eventAggregator.GetEvent<PaymentStartedEvent>().Subscribe(OnPaymentStarted, ThreadOption.UIThread);
             eventAggregator.GetEvent<PaymentCancelledEvent>().Subscribe(OnPaymentCancelled, ThreadOption.UIThread);
             eventAggregator.GetEvent<PaymentSuccessEvent>().Subscribe(OnPaymentSuccess, ThreadOption.UIThread);
@@ -258,6 +260,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
 
         private void OnNotificationMessage(NotificationPayMessageEto eto)
         {
+            WeChatListenerConsoleDebug.Write("MAIN-RECV",
+                $"MainPageV2 收到 NotificationPayMessageEvent：PayMessageType={eto.PayMessageType}, PayMessageLength={eto.PayMessage?.Length ?? 0}, EventAggregatorCurrentHash={EventAggregator.Current.GetHashCode()}");
+            WeChatListenerConsoleDebug.WriteBlock("MAIN-PAYMESSAGE", "MainPageV2收到的PayMessage原始内容", eto.PayMessage);
             _ = _notificationHandler.HandleNotificationAsync(eto);
         }
 
@@ -427,6 +432,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
 
         private void OnPluginStatusChanged(object? sender, ChannelStatusChangedEventArgs e)
         {
+            WeChatListenerConsoleDebug.Write("PLUGIN-STATUS", $"插件状态变化：Sender={sender?.GetType().FullName}, Message={e.Message}");
             Application.Current?.Dispatcher.BeginInvoke(() =>
             {
                 RefreshPluginStatus();
@@ -446,6 +452,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             IsWeChatAvailable = _weChatPlugin.IsAvailable;
             IsWeChatRunning = _weChatPlugin.IsEnabled;
             WeChatStatusMessage = _weChatPlugin.IsEnabled ? "运行中" : (_weChatPlugin.IsAvailable ? "就绪" : "未启动");
+
+            WeChatListenerConsoleDebug.Write("PLUGIN-STATUS",
+                $"刷新插件状态：WeChatAvailable={IsWeChatAvailable}, WeChatRunning={IsWeChatRunning}, WeChatStatus={WeChatStatusMessage}, AlipayAvailable={IsAlipayAvailable}, AlipayRunning={IsAlipayRunning}");
         }
 
         #endregion

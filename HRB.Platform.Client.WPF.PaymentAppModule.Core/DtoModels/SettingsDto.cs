@@ -63,6 +63,12 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
         public bool IsAutoScrollToLatestEnabled { get; set; } = false;
 
         /// <summary>
+        /// 是否开启微信监听控制台输出。
+        /// 默认关闭；仅用于现场排查 VXModule.Shell / 微信收款消息链路。
+        /// </summary>
+        public bool IsWeChatListenerConsoleOutputEnabled { get; set; } = false;
+
+        /// <summary>
         /// 是否启用每天凌晨 1 点自动同步 Windows 系统时间
         /// </summary>
         public bool IsAutoSyncSystemTimeEnabled { get; set; } = false;

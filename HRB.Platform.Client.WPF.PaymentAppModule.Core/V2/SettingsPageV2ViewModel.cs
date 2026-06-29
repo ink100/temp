@@ -148,6 +148,20 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             }
         }
 
+        // 微信监听控制台输出，仅用于现场排查 VXModule.Shell / 微信收款消息链路
+        public bool IsWeChatListenerConsoleOutputEnabled
+        {
+            get;
+            set
+            {
+                if (SetProperty(ref field, value) && !_isLoadingGeneralSettings)
+                {
+                    SaveGeneralSettings();
+                    WeChatListenerConsoleDebug.RefreshConsoleState();
+                }
+            }
+        }
+
         // 每天凌晨 1 点自动同步 Windows 系统时间
         public bool IsAutoSyncSystemTimeEnabled
         {
@@ -632,6 +646,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
                 var actualAutoStartEnabled = AutoStartupService.IsEnabled();
                 IsAutoStartEnabled = actualAutoStartEnabled;
                 IsAutoScrollToLatestEnabled = settings.IsAutoScrollToLatestEnabled;
+                IsWeChatListenerConsoleOutputEnabled = settings.IsWeChatListenerConsoleOutputEnabled;
+                WeChatListenerConsoleDebug.RefreshConsoleState();
                 IsAutoSyncSystemTimeEnabled = settings.IsAutoSyncSystemTimeEnabled;
                 LastSystemTimeSyncText = BuildLastSystemTimeSyncText(settings.LastSystemTimeSyncTime, settings.LastSystemTimeSyncResult);
 
@@ -688,6 +704,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             settings.MaintenanceContact = MaintenanceContact;
             settings.IsAutoStartEnabled = IsAutoStartEnabled;
             settings.IsAutoScrollToLatestEnabled = IsAutoScrollToLatestEnabled;
+            settings.IsWeChatListenerConsoleOutputEnabled = IsWeChatListenerConsoleOutputEnabled;
             settings.IsAutoSyncSystemTimeEnabled = IsAutoSyncSystemTimeEnabled;
             settings.IsScanNotPayVoiceEnabled = IsScanNotPayVoiceEnabled;
             settings.ScanTimeoutSeconds = Math.Clamp(ScanTimeoutSeconds, 1, 3600);
@@ -717,6 +734,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
                 settings.WeChatFailedAmountColorHex,
                 settings.AmountColorHex);
 
+            WeChatListenerConsoleDebug.RefreshConsoleState();
             PaymentDisplaySettingsChangedNotifier.NotifyChanged();
         }
 

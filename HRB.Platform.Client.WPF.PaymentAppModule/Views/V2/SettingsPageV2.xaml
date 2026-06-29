@@ -324,6 +324,9 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="20" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0"
@@ -445,6 +448,29 @@
                                       VerticalAlignment="Center"
                                       IsChecked="{Binding IsAutoSyncSystemTimeEnabled, Mode=TwoWay}"
                                       Style="{StaticResource ToggleSwitchCheckBox}" />
+                        </Grid>
+                        <!-- 微信监听控制台输出 -->
+                        <Grid Grid.Row="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock FontSize="16"
+                       FontWeight="Bold"
+                       Foreground="#333333"
+                       Text="微信监听控制台输出" />
+                                <TextBlock Margin="0,5,0,0"
+                       FontSize="12"
+                       Foreground="#999999"
+                       Text="开启后，控制台实时输出 VXModule.Shell / 微信收款监听链路数据；关闭后不输出调试信息" />
+                            </StackPanel>
+
+                            <CheckBox Grid.Column="1"
+                  VerticalAlignment="Center"
+                  IsChecked="{Binding IsWeChatListenerConsoleOutputEnabled, Mode=TwoWay}"
+                  Style="{StaticResource ToggleSwitchCheckBox}" />
                         </Grid>
                     </Grid>
                 </Border>

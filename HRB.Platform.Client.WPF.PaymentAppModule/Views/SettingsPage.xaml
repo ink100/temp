@@ -922,6 +922,14 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="15" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="15" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="15" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="15" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="15" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0"
@@ -929,6 +937,16 @@
                                    FontWeight="Bold"
                                    Foreground="#333333"
                                    Text="语音与显示设置" />
+
+                        <Button Grid.Row="0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Background="#6C757D"
+                                Content="恢复默认"
+                                Width="80"
+                                Height="30"
+                                Command="{Binding ResetVoiceDefaultsCommand}"
+                                Style="{StaticResource ButtonStyle}" />
 
                         <Grid Grid.Row="2">
                             <Grid.ColumnDefinitions>
@@ -1001,7 +1019,7 @@
                             <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="16" Foreground="#666666" Text="播报音色：" />
                             <ComboBox Grid.Column="1" Padding="8" FontSize="14" ItemsSource="{Binding TtsVoiceOptions}" SelectedItem="{Binding SelectedTtsVoiceName, Mode=TwoWay}" />
                             <TextBlock Grid.Column="3" VerticalAlignment="Center" FontSize="16" Foreground="#666666" Text="语速：" />
-                            <Slider Grid.Column="4" Minimum="-50" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Value="{Binding TtsRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Slider Grid.Column="4" Minimum="0" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Value="{Binding TtsRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <TextBlock Grid.Column="5" VerticalAlignment="Center" FontSize="14" Foreground="#666666" Text="{Binding TtsRate, StringFormat={}{0}%}" />
                         </Grid>
 
@@ -1028,6 +1046,20 @@
                             <TextBox Grid.Column="8" Padding="8" FontSize="14" Text="{Binding AmountColorHex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <Border Grid.Column="9" Width="40" Height="30" Margin="10,0" BorderBrush="#CCCCCC" BorderThickness="1" Background="{Binding AmountColorPreviewBrush}" />
                             <Button Grid.Column="10" Background="#6C757D" Command="{Binding ChooseAmountColorCommand}" Content="选择颜色" Style="{StaticResource ButtonStyle}" />
+                        </Grid>
+
+                        <!-- 在线全量TTS播报开关 -->
+                        <Grid Grid.Row="14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock FontSize="16" FontWeight="Bold" Foreground="#333333" Text="在线全量TTS播报"/>
+                                <TextBlock Margin="0,5,0,0" FontSize="12" Foreground="#999999" Text="开启后金额和提示音全部通过在线语音合成播报，关闭则仅昵称使用在线TTS"/>
+                            </StackPanel>
+                            <CheckBox Grid.Column="1" VerticalAlignment="Center"
+                                      IsChecked="{Binding IsUseOnlineTtsSpeech, Mode=TwoWay}"/>
                         </Grid>
                     </Grid>
                 </Border>

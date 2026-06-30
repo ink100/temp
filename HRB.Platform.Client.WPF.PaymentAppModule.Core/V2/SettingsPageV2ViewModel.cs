@@ -296,6 +296,16 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             }
         } = true;
 
+        public bool IsUseOnlineTtsSpeech
+        {
+            get;
+            set
+            {
+                if (SetProperty(ref field, value) && !_isLoadingGeneralSettings)
+                    SaveGeneralSettings();
+            }
+        } = false;
+
         public ObservableCollection<string> TtsVoiceOptions { get; } = new();
 
         public string SelectedTtsVoiceName
@@ -313,7 +323,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             get;
             set
             {
-                var safeValue = Math.Clamp(value, 0, 200);
+                var safeValue = Math.Clamp(value, 0, 100);
                 if (SetProperty(ref field, safeValue) && !_isLoadingGeneralSettings)
                     SaveGeneralSettings();
             }
@@ -496,6 +506,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
         public ICommand ChooseWeChatAmountColorCommand { get; }
         public ICommand ChooseWeChatFailedAmountColorCommand { get; }
 
+        public ICommand ResetVoiceDefaultsCommand { get; }
+
         public ICommand ConnectMessageCenterCommand { get; }
 
         #endregion
@@ -548,6 +560,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             ChooseAlipayFailedAmountColorCommand = new DelegateCommand(() => ChooseAmountColor(AmountColorTarget.AlipayFailedAmount));
             ChooseWeChatAmountColorCommand = new DelegateCommand(() => ChooseAmountColor(AmountColorTarget.WeChatAmount));
             ChooseWeChatFailedAmountColorCommand = new DelegateCommand(() => ChooseAmountColor(AmountColorTarget.WeChatFailedAmount));
+
+            ResetVoiceDefaultsCommand = new DelegateCommand(ResetVoiceDefaults);
 
             ConnectMessageCenterCommand = new DelegateCommand(() =>
             {
@@ -661,8 +675,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
                 IsPaymentCancelledVoiceEnabled = settings.IsPaymentCancelledVoiceEnabled;
                 PaymentCancelledVoiceRepeatCount = Math.Clamp(settings.PaymentCancelledVoiceRepeatCount, 1, 10);
                 IsPaymentSuccessVoiceEnabled = settings.IsPaymentSuccessVoiceEnabled;
+                IsUseOnlineTtsSpeech = settings.IsUseOnlineTtsSpeech;
                 SelectedTtsVoiceName = settings.TtsVoiceName;
-                TtsRate = Math.Clamp(settings.TtsRate, 0, 200);
+                TtsRate = Math.Clamp(settings.TtsRate, 0, 100);
                 TtsVolume = Math.Clamp(settings.TtsVolume, 0, 100);
                 DisplayFontSize = Math.Clamp(settings.FontSize, 24, 96);
                 AmountColorHex = NormalizeColorHex(settings.AmountColorHex, "#F01F1B");
@@ -716,8 +731,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             settings.IsPaymentCancelledVoiceEnabled = IsPaymentCancelledVoiceEnabled;
             settings.PaymentCancelledVoiceRepeatCount = Math.Clamp(PaymentCancelledVoiceRepeatCount, 1, 10);
             settings.IsPaymentSuccessVoiceEnabled = IsPaymentSuccessVoiceEnabled;
+            settings.IsUseOnlineTtsSpeech = IsUseOnlineTtsSpeech;
             settings.TtsVoiceName = SelectedTtsVoiceName ?? string.Empty;
-            settings.TtsRate = Math.Clamp(TtsRate, 0, 200);
+            settings.TtsRate = Math.Clamp(TtsRate, 0, 100);
             settings.TtsVolume = Math.Clamp(TtsVolume, 0, 100);
             settings.FontSize = Math.Clamp(DisplayFontSize, 24, 96);
             settings.AmountColorHex = NormalizeColorHex(AmountColorHex, "#F01F1B");
@@ -774,6 +790,17 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
         {
             SaveGeneralSettings();
             await _paymentVoiceService.PlayPaymentSuccessAsync(12.34m, HRB.Payment.Core.Models.PaymentChannel.Alipay, "VOICE_TEST");
+        }
+
+        private void ResetVoiceDefaults()
+        {
+            TtsRate = 50;
+            IsUseOnlineTtsSpeech = false;
+            AlipayAmountColorHex = DefaultAlipayAmountColor;
+            AlipayFailedAmountColorHex = "#F01F1B";
+            WeChatAmountColorHex = DefaultWeChatAmountColor;
+            WeChatFailedAmountColorHex = "#F01F1B";
+            AmountColorHex = "#F01F1B";
         }
 
         private void ChooseAmountColor() => ChooseAmountColor(AmountColorTarget.Legacy);

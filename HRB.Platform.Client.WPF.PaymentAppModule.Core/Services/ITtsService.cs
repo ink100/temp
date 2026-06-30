@@ -15,6 +15,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 
         void Speak(string hint);
 
+        /// <summary>
+        /// 异步播报完整文本（保留数字和标点，不做汉字过滤），用于全量在线 TTS 模式。
+        /// </summary>
+        Task SpeakFullTextAsync(string text);
+
         ///// <summary>
         ///// 播报（只保留汉字）
         ///// </summary>

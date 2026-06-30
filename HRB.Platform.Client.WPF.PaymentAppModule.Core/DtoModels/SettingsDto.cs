@@ -135,6 +135,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
         public bool IsPaymentSuccessVoiceEnabled { get; set; } = true;
 
         /// <summary>
+        /// 是否使用在线 TTS 播报全部语音（金额+提示音）。
+        /// false: 金额和提示音使用本地 MP3 拼播，仅昵称使用在线 TTS（原先方案）。
+        /// true: 所有语音均通过 Edge TTS 在线合成播报。
+        /// </summary>
+        public bool IsUseOnlineTtsSpeech { get; set; } = false;
+
+        /// <summary>
         /// TTS 音色名称。为空时使用默认中文音色。
         /// </summary>
         public string TtsVoiceName { get; set; } = string.Empty;
@@ -148,7 +155,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
 
         /// <summary>
         /// 语音播报速度。
-        /// 0 = 慢速，50 = 正常，200 = 最快。
+        /// 0 = 慢速，50 = 正常，100 = 最快。
         /// </summary>
         public int TtsRate { get; set; } = 50;
 

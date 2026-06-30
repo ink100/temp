@@ -478,7 +478,14 @@
                 <!-- 语音与金额显示设置卡片 -->
                     <Border Background="White" CornerRadius="16" Padding="24" Margin="0,0,0,20">
                         <StackPanel>
-                            <TextBlock Text="语音与金额显示设置" FontSize="18" FontWeight="SemiBold" Foreground="#212121" Margin="0,0,0,20"/>
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="语音与金额显示设置" FontSize="18" FontWeight="SemiBold" Foreground="#212121" VerticalAlignment="Center"/>
+                                <Button Grid.Column="1" Content="恢复默认" Width="80" Height="34" Command="{Binding ResetVoiceDefaultsCommand}" Style="{StaticResource ButtonStyle}"/>
+                            </Grid>
 
                             <Grid Margin="0,0,0,20">
                                 <Grid.ColumnDefinitions>
@@ -488,10 +495,10 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                     <TextBlock Text="语音播报速度" Foreground="#212121" FontSize="14" FontWeight="SemiBold"/>
-                                    <TextBlock Text="0 慢 - 200 快" Foreground="#888888" FontSize="11" Margin="0,4,0,0"/>
+                                    <TextBlock Text="0 慢 - 100 快" Foreground="#888888" FontSize="11" Margin="0,4,0,0"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="0,0,16,0">
-                                    <Slider Minimum="0" Maximum="200" TickFrequency="10" IsSnapToTickEnabled="True" Value="{Binding TtsRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <Slider Minimum="0" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Value="{Binding TtsRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                     <Grid Margin="2,2,2,0">
                                         <TextBlock Text="0" HorizontalAlignment="Left" Foreground="#888888" FontSize="11"/>
                                         <TextBlock Text="50" HorizontalAlignment="Center" Foreground="#888888" FontSize="11"/>
@@ -502,6 +509,21 @@
                                     <TextBlock Text="{Binding TtsRate, StringFormat={}{0}%}" Width="44" VerticalAlignment="Center" Foreground="#666666"/>
                                     <Button Content="测试播放" Width="72" Height="34" Command="{Binding TestVoiceCommand}" Style="{StaticResource ButtonStyle}"/>
                                 </StackPanel>
+                            </Grid>
+
+                            <!-- 在线全量TTS播报开关 -->
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="在线全量TTS播报" Foreground="#212121" FontSize="14" FontWeight="SemiBold"/>
+                                    <TextBlock Text="开启后金额和提示音全部通过在线语音合成播报，关闭则仅昵称使用在线TTS" Foreground="#888888" FontSize="11" Margin="0,4,0,0"/>
+                                </StackPanel>
+                                <CheckBox Grid.Column="1" VerticalAlignment="Center"
+                                          IsChecked="{Binding IsUseOnlineTtsSpeech, Mode=TwoWay}"
+                                          Style="{StaticResource ToggleSwitchCheckBox}"/>
                             </Grid>
 
                             <TextBlock Text="金额颜色" FontSize="14" FontWeight="SemiBold" Foreground="#212121" Margin="0,0,0,12"/>

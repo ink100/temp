@@ -24,6 +24,20 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         private readonly Dictionary<string, DateTime> _lastVoiceRequestTimes = new();
         private readonly Dictionary<string, DateTime> _completedOrderTimes = new();
 
+        /// <summary>
+        /// 本地提示音文件名 → 中文文本映射，用于在线全量 TTS 模式。
+        /// </summary>
+        private static readonly Dictionary<string, string> SoundTextMap = new()
+        {
+            { "alipay_pay", "支付宝收款" },
+            { "vx_pay", "微信收款" },
+            { "scan_not_pay", "扫码未支付" },
+            { "cancel_pay", "支付已取消" },
+            { "before_not_pay", "上次未付款" },
+            { "zfb_pay", "支付宝收款" },
+            { "wechat_pay", "微信收款" },
+        };
+
         public PaymentVoiceService(
             INumberToSpeechService speechService,
             ITtsService ttsService)
@@ -44,7 +58,10 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             return EnqueuePlaybackAsync(async () =>
             {
                 await SpeakNicknameAsync(nickname);
-                await _speechService.PlaySoundAsync(GetChannelVoice(channel));
+                if (IsOnlineSpeechEnabled())
+                    await SpeakOnlineSoundAsync(GetChannelVoice(channel));
+                else
+                    await _speechService.PlaySoundAsync(GetChannelVoice(channel));
             }, "播放支付开始语音失败");
         }
 
@@ -63,8 +80,16 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 await PlayRepeatedAsync(async () =>
                 {
                     await SpeakNicknameAsync(nickname);
-                    await _speechService.PlaySoundAsync(channelVoice);
-                    await _speechService.PlaySoundAsync("before_not_pay");
+                    if (IsOnlineSpeechEnabled())
+                    {
+                        await SpeakOnlineSoundAsync(channelVoice);
+                        await SpeakOnlineSoundAsync("before_not_pay");
+                    }
+                    else
+                    {
+                        await _speechService.PlaySoundAsync(channelVoice);
+                        await _speechService.PlaySoundAsync("before_not_pay");
+                    }
                 }, GetPriorUnpaidRepeatCount());
             }, "播放支付开始语音（带上次未付款）失败");
         }
@@ -84,7 +109,10 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 await PlayRepeatedAsync(async () =>
                 {
                     await SpeakNicknameAsync(nickname);
-                    await _speechService.PlaySoundAsync("cancel_pay");
+                    if (IsOnlineSpeechEnabled())
+                        await SpeakOnlineSoundAsync("cancel_pay");
+                    else
+                        await _speechService.PlaySoundAsync("cancel_pay");
                 }, GetPaymentCancelledRepeatCount());
             }, "播放支付取消语音失败");
         }
@@ -100,7 +128,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 return Task.CompletedTask;
 
             return EnqueuePlaybackAsync(
-                () => _speechService.PlayAmountAsync(amount, channel),
+                () => IsOnlineSpeechEnabled()
+                    ? SpeakOnlineAmountAsync(amount, channel)
+                    : _speechService.PlayAmountAsync(amount, channel),
                 "播放支付成功语音失败");
         }
 
@@ -124,7 +154,10 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     return;
                 }
 
-                await _speechService.PlaySoundAsync("scan_not_pay");
+                if (IsOnlineSpeechEnabled())
+                    await SpeakOnlineSoundAsync("scan_not_pay");
+                else
+                    await _speechService.PlaySoundAsync("scan_not_pay");
             }, "播放扫码未支付语音失败");
         }
 
@@ -148,16 +181,15 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         private void ApplySpeechSpeed()
         {
             var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
-            var rate = Math.Clamp(settings.TtsRate <= 0 ? 50 : settings.TtsRate, 0,200);
+            var rate = Math.Clamp(settings.TtsRate <= 0 ? 50 : settings.TtsRate, 0, 100);
 
          
-
             // 0 = 慢速，大约 0.6 倍速
             // 50 = 正常语速，1.0 倍速
-            // 200 = 最快，大约 2.0 倍速
+            // 100 = 最快，大约 2.0 倍速
             var speedRatio = rate <= 50
                 ? 0.6 + rate * 0.008
-                : 1.0 + (rate - 50) / 150.0;
+                : 1.0 + (rate - 50) / 50.0;
 
             _speechService.SpeedRatio = speedRatio;
         }
@@ -218,6 +250,40 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             {
                 _log.Info($"昵称 TTS 播报失败，已跳过昵称: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// 在线全量 TTS 模式下，将提示音文件名映射为中文文本并通过 Edge TTS 播报。
+        /// </summary>
+        private async Task SpeakOnlineSoundAsync(string soundName)
+        {
+            if (!SoundTextMap.TryGetValue(soundName, out var text))
+            {
+                _log.Info($"未找到在线语音映射: {soundName}");
+                return;
+            }
+
+            await _ttsService.SpeakFullTextAsync(text);
+        }
+
+        /// <summary>
+        /// 在线全量 TTS 模式下，播报收款金额。
+        /// 格式："支付宝收款12.34元" / "微信收款12.34元"
+        /// </summary>
+        private async Task SpeakOnlineAmountAsync(decimal amount, PaymentChannel channel)
+        {
+            var channelText = channel == PaymentChannel.Alipay ? "支付宝收款" : "微信收款";
+            var text = $"{channelText}{amount:0.##}元";
+            await _ttsService.SpeakFullTextAsync(text);
+        }
+
+        /// <summary>
+        /// 是否启用了在线全量 TTS 语音播报模式。
+        /// </summary>
+        private bool IsOnlineSpeechEnabled()
+        {
+            try { return GlobalSettings.CurrentAppContext.CurrentSettings.IsUseOnlineTtsSpeech; }
+            catch { return false; }
         }
 
         public void MarkOrderCompleted(string? orderNumber)

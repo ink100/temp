@@ -62,6 +62,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
         private bool _appStarted = false;
         private bool _isAlipayNicknameReminderEnabled = false;
         private bool _isWeChatNicknameReminderEnabled = false;
+        private bool _isUseOnlineTtsSpeech = false;
         private bool _isAutoStartEnabled = false;
         private bool _useNewPluginLifecycleMode = false;
         private string _notificationUrl = string.Empty;
@@ -291,6 +292,21 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
         }
 
         /// <summary>
+        /// 是否使用在线 TTS 播报全部语音（金额+提示音）
+        /// </summary>
+        public bool IsUseOnlineTtsSpeech
+        {
+            get => _isUseOnlineTtsSpeech;
+            set
+            {
+                if (SetProperty(ref _isUseOnlineTtsSpeech, value))
+                {
+                    SavePaymentSettings();
+                }
+            }
+        }
+
+        /// <summary>
         /// 是否启用开机自启动
         /// </summary>
         public bool IsAutoStartEnabled
@@ -439,6 +455,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
         /// </summary>
         public ICommand ShowNotificationConsentCommand { get; }
 
+        public ICommand ResetVoiceDefaultsCommand { get; }
 
         private readonly IPaymentChannelCoordinator _paymentChannelCoordinator;
 
@@ -498,6 +515,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
             ExitCommand = new DelegateCommand(OnExit);
             ShowDisclaimerCommand = new DelegateCommand(ShowDisclaimer);
             ShowNotificationConsentCommand = new DelegateCommand(ShowNotificationConsent);
+            ResetVoiceDefaultsCommand = new DelegateCommand(ResetVoiceDefaults);
 
             // 获取软件版本号
             AppVersion = GetAppVersion();
@@ -516,6 +534,22 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
                 _ = StartAlipayShellAsync();
             }
 
+        }
+
+        private void ResetVoiceDefaults()
+        {
+            var settings = _appContext.CurrentSettings;
+            settings.TtsRate = 50;
+            settings.IsUseOnlineTtsSpeech = false;
+            settings.AlipayAmountColorHex = "#3E86FD";
+            settings.AlipayFailedAmountColorHex = "#F01F1B";
+            settings.WeChatAmountColorHex = "#00897B";
+            settings.WeChatFailedAmountColorHex = "#F01F1B";
+            settings.AmountColorHex = "#F01F1B";
+            settings.LastUpdateDateTime = DateTime.Now;
+            _appContext.SaveCurrentSettings(settings);
+            _notificationService.ShowInfo("语音与金额显示设置已恢复默认");
+            LoadPaymentSettings();
         }
 
         /// <summary>
@@ -717,6 +751,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
                 _useNewPluginLifecycleMode = settings.UseNewPluginLifecycleMode;
                 _isAlipayNicknameReminderEnabled = settings.IsAlipayNicknameReminderEnabled;
                 _isWeChatNicknameReminderEnabled = settings.IsWeChatNicknameReminderEnabled;
+                _isUseOnlineTtsSpeech = settings.IsUseOnlineTtsSpeech;
 
                 // 加载店铺名称和维护联系方式
                 _storeName = settings.StoreName;
@@ -736,6 +771,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
                 RaisePropertyChanged(nameof(IsWeChatEnabled));
                 RaisePropertyChanged(nameof(IsAlipayNicknameReminderEnabled));
                 RaisePropertyChanged(nameof(IsWeChatNicknameReminderEnabled));
+                RaisePropertyChanged(nameof(IsUseOnlineTtsSpeech));
                 RaisePropertyChanged(nameof(IsAutoStartEnabled));
                 RaisePropertyChanged(nameof(UseNewPluginLifecycleMode));
                 RaisePropertyChanged(nameof(StoreName));
@@ -832,6 +868,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
                 settings.IsWeChatEnabled = _isWeChatEnabled;
                 settings.IsAlipayNicknameReminderEnabled = _isAlipayNicknameReminderEnabled;
                 settings.IsWeChatNicknameReminderEnabled = _isWeChatNicknameReminderEnabled;
+                settings.IsUseOnlineTtsSpeech = _isUseOnlineTtsSpeech;
                 settings.IsAutoStartEnabled = _isAutoStartEnabled;
                 settings.UseNewPluginLifecycleMode = _useNewPluginLifecycleMode;
                 settings.StoreName = _storeName;

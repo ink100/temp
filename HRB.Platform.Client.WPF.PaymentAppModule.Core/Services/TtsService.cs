@@ -28,26 +28,58 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 
         public async Task SpeakAsync(string hint)
         {
-            Edge_tts.Await = true;
-            ApplySettings(hint);
-            var play = Edge_tts.GetPlayer(_option, GetVoice());
-            await play.PlayAsync();
+            // Edge TTS PlayAsync 并非真异步，会阻塞调用线程。
+            // 用 Task.Run 丢到后台线程执行，避免卡死 WPF UI 消息泵。
+            await Task.Run(() =>
+            {
+                Edge_tts.Await = false;
+                ApplySettings(hint);
+                var play = Edge_tts.GetPlayer(_option, GetVoice());
+                play.Play();
+            });
+        }
+
+        /// <summary>
+        /// 异步播报完整文本（保留数字和标点），用于全量在线 TTS 模式。
+        /// 与 SpeakAsync 的区别：不做汉字过滤，允许数字/小数点等。
+        /// </summary>
+        public async Task SpeakFullTextAsync(string text)
+        {
+            await Task.Run(() =>
+            {
+                Edge_tts.Await = false;
+                ApplyFullSettings(text);
+                var play = Edge_tts.GetPlayer(_option, GetVoice());
+                play.Play();
+            });
         }
 
         private void ApplySettings(string hint)
         {
             var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
             _option.Text = CleanTextChineseOnly(hint);
-            var uiRate = Math.Clamp(settings.TtsRate, 0, 200);
+            var uiRate = Math.Clamp(settings.TtsRate, 0, 100);
 
-            // 界面语速是 0% - 200%，其中 50% 表示正常音速。
+            // 界面语速是 0% - 100%，其中 50% 表示正常音速。
             // Edge TTS 的 Rate 使用 -50 到 100：
             // 0%   -> -50（慢）
             // 50%  -> 0（正常）
-            // 200% -> 100（快）
+            // 100% -> 100（快）
             _option.Rate = uiRate <= 50
                 ? uiRate - 50
-                : (int)Math.Round((uiRate - 50) * 100.0 / 150.0);
+                : (int)Math.Round((uiRate - 50) * 2.0);
+            _option.Volume = (float)(Math.Clamp(settings.TtsVolume, 0, 100) / 100.0);
+        }
+
+        private void ApplyFullSettings(string text)
+        {
+            var settings = GlobalSettings.CurrentAppContext.CurrentSettings;
+            _option.Text = text; // 不过滤，保留数字和标点
+            var uiRate = Math.Clamp(settings.TtsRate, 0, 100);
+
+            _option.Rate = uiRate <= 50
+                ? uiRate - 50
+                : (int)Math.Round((uiRate - 50) * 2.0);
             _option.Volume = (float)(Math.Clamp(settings.TtsVolume, 0, 100) / 100.0);
         }
 

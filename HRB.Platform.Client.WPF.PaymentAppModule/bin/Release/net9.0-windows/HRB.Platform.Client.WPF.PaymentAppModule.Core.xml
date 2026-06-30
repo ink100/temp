@@ -684,6 +684,13 @@
             是否开启支付成功金额播报
             </summary>
         </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsUseOnlineTtsSpeech">
+            <summary>
+            是否使用在线 TTS 播报全部语音（金额+提示音）。
+            false: 金额和提示音使用本地 MP3 拼播，仅昵称使用在线 TTS（原先方案）。
+            true: 所有语音均通过 Edge TTS 在线合成播报。
+            </summary>
+        </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.TtsVoiceName">
             <summary>
             TTS 音色名称。为空时使用默认中文音色。
@@ -697,7 +704,7 @@
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.TtsRate">
             <summary>
             语音播报速度。
-            0 = 慢速，50 = 正常，200 = 最快。
+            0 = 慢速，50 = 正常，100 = 最快。
             </summary>
         </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.AmountColorHex">
@@ -1933,6 +1940,11 @@
             TTS服务
             </summary>
         </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.ITtsService.SpeakFullTextAsync(System.String)">
+            <summary>
+            异步播报完整文本（保留数字和标点，不做汉字过滤），用于全量在线 TTS 模式。
+            </summary>
+        </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatConnectionService">
             <summary>
             微信连接管理服务接口
@@ -2431,6 +2443,11 @@
             同时增加订单级去重和过期扫码提示抑制，避免用户已经付款后又听到“扫码未支付”。
             </summary>
         </member>
+        <member name="F:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.SoundTextMap">
+            <summary>
+            本地提示音文件名 → 中文文本映射，用于在线全量 TTS 模式。
+            </summary>
+        </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.PlayPaymentStartedAsync(HRB.Payment.Core.Models.PaymentChannel,System.String,System.String)">
             <summary>
             播放支付开始提示音
@@ -2455,6 +2472,22 @@
             <summary>
             播放“扫码未支付”提示音。
             如果此提示在队列里等待期间订单已经成功/取消，则会自动跳过，避免过期语音误播。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.SpeakOnlineSoundAsync(System.String)">
+            <summary>
+            在线全量 TTS 模式下，将提示音文件名映射为中文文本并通过 Edge TTS 播报。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.SpeakOnlineAmountAsync(System.Decimal,HRB.Payment.Core.Models.PaymentChannel)">
+            <summary>
+            在线全量 TTS 模式下，播报收款金额。
+            格式："支付宝收款12.34元" / "微信收款12.34元"
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.IsOnlineSpeechEnabled">
+            <summary>
+            是否启用了在线全量 TTS 语音播报模式。
             </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.PaymentVoiceService.GetChannelVoice(HRB.Payment.Core.Models.PaymentChannel)">
@@ -2648,6 +2681,12 @@
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService">
             <summary>
             TTS服务
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.TtsService.SpeakFullTextAsync(System.String)">
+            <summary>
+            异步播报完整文本（保留数字和标点），用于全量在线 TTS 模式。
+            与 SpeakAsync 的区别：不做汉字过滤，允许数字/小数点等。
             </summary>
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatConnectionService">
@@ -3279,6 +3318,11 @@
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.IsWeChatNicknameReminderEnabled">
             <summary>
             微信未支付昵称提醒播报
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.IsUseOnlineTtsSpeech">
+            <summary>
+            是否使用在线 TTS 播报全部语音（金额+提示音）
             </summary>
         </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels.SettingsPageViewModel.IsAutoStartEnabled">

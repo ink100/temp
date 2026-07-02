@@ -158,6 +158,41 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
         /// </summary>
         public bool IsWeChatAutoHideEnabled { get; set; } = true;
 
+        /// <summary>
+        /// 是否启用微信登录二维码语音提醒（检测到扫码界面时播报"请扫码登录微信"）
+        /// </summary>
+        public bool IsWeChatQrLoginVoiceEnabled { get; set; } = true;
+
+        /// <summary>
+        /// 是否启用微信监听控制台输出（调试用）
+        /// </summary>
+        public bool IsWeChatListenerConsoleOutputEnabled { get; set; } = false;
+
+        /// <summary>
+        /// 是否启用在线 TTS 语音合成
+        /// </summary>
+        public bool IsUseOnlineTtsSpeech { get; set; } = false;
+
+        /// <summary>
+        /// 支付宝金额显示颜色，十六进制格式
+        /// </summary>
+        public string AlipayAmountColorHex { get; set; } = "#F01F1B";
+
+        /// <summary>
+        /// 支付宝失败金额显示颜色，十六进制格式
+        /// </summary>
+        public string AlipayFailedAmountColorHex { get; set; } = "#999999";
+
+        /// <summary>
+        /// 微信金额显示颜色，十六进制格式
+        /// </summary>
+        public string WeChatAmountColorHex { get; set; } = "#07C160";
+
+        /// <summary>
+        /// 微信失败金额显示颜色，十六进制格式
+        /// </summary>
+        public string WeChatFailedAmountColorHex { get; set; } = "#999999";
+
     }
 
 }

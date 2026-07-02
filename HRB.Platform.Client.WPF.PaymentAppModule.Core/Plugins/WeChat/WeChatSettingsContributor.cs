@@ -21,6 +21,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
             public const string NicknameReminder = "wechat_nickname_reminder";
             public const string AutoLogin = "wechat_auto_login";
             public const string AutoHide = "wechat_auto_hide";
+            public const string QrLoginVoice = "wechat_qr_login_voice";
         }
 
         private readonly WeChatChannelPlugin _plugin;
@@ -80,6 +81,16 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                     IsEnabled = settings.IsWeChatEnabled,
                     DisabledHint = settings.IsWeChatEnabled ? null : "请先启用微信收款播报",
                     Order = 23
+                },
+                new ChannelSettingItem
+                {
+                    Key = Keys.QrLoginVoice,
+                    Label = "扫码登录语音提醒（请扫码登录微信）",
+                    Type = SettingType.Toggle,
+                    CurrentValue = settings.IsWeChatQrLoginVoiceEnabled,
+                    IsEnabled = settings.IsWeChatEnabled,
+                    DisabledHint = settings.IsWeChatEnabled ? null : "请先启用微信收款播报",
+                    Order = 24
                 }
             ];
         }
@@ -121,6 +132,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                     s3.IsWeChatAutoHideEnabled = boolValue;
                     s3.LastUpdateDateTime = DateTime.Now;
                     _appContext.SaveCurrentSettings(s3);
+                    break;
+
+                case Keys.QrLoginVoice:
+                    var s4 = _appContext.CurrentSettings;
+                    s4.IsWeChatQrLoginVoiceEnabled = boolValue;
+                    s4.LastUpdateDateTime = DateTime.Now;
+                    _appContext.SaveCurrentSettings(s4);
                     break;
             }
         }

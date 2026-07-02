@@ -20,6 +20,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// </summary>
         Task SpeakFullTextAsync(string text);
 
+        /// <summary>
+        /// 生成语音文件到本地磁盘，返回是否成功。
+        /// </summary>
+        /// <param name="text">要合成的文本</param>
+        /// <param name="filePath">保存路径（含 .mp3 扩展名）</param>
+        Task<bool> SaveToFileAsync(string text, string filePath);
+
         ///// <summary>
         ///// 播报（只保留汉字）
         ///// </summary>

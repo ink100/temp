@@ -3,6 +3,7 @@ using HRB.Payment.Message.Core.BusEvents;
 using HRB.Platform.Client.Core.Interfaces;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Extensions;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Services;
+using System.Diagnostics;
 using System.Windows;
 using Application = System.Windows.Application;
 
@@ -46,8 +47,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
         // 自动隐藏
         private bool _autoHideDone;
 
-        // 上次登录状态（用于检测微信意外退出）
-        private bool _wasLoggedIn;
+        // 二维码语音提醒
+        private const int QrVoiceIntervalCycles = 8;      // 每8个周期(≈16s)提醒一次
+        private int _qrVoiceCycleCount;
 
         // 心跳检测：插件报告"工作中"不代表消息还在流动，定期发查询验证
         private const int HeartbeatIntervalCycles = 30;   // 每30周期(≈60s)发一次心跳
@@ -111,8 +113,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
             _autoLoginRetryCount = 0;
             _autoLoginCooldown = 0;
             _autoHideDone = false;
-            _wasLoggedIn = false;
             _heartbeatCycleCount = 0;
+            _qrVoiceCycleCount = 0;
             HeartbeatPending = false;
         }
 
@@ -157,9 +159,16 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                     Stop();
                     ResetPluginState();
 
+                    // ① 尝试关闭"确定"弹窗（登录过期/二维码重登对话框）
+                    await _weChatService.TryDismissReLoginDialogAsync();
+
+                    // ② 强制杀掉微信残留进程
+                    await _weChatService.KillAllWeChatProcessesAsync();
+
+                    // ③ 清理注入插件进程
                     await _pluginProcessService.CleanupExistingProcessesAsync();
 
-                    // 语音播报"请重新登录微信"
+                    // ④ 语音播报
                     try
                     {
                         await _ttsService.SpeakAsync("请重新登录微信");
@@ -169,12 +178,19 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                         // 语音播报失败不影响后续流程
                     }
 
+                    // ⑤ 重启 HRB 客户端
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        _dialogService.ShowError("微信已退出，请重新登录微信", callback: (result) =>
+                        var exePath = Environment.ProcessPath;
+                        if (!string.IsNullOrEmpty(exePath))
                         {
-                            Application.Current.Shutdown();
-                        });
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = exePath,
+                                UseShellExecute = true
+                            });
+                        }
+                        Application.Current.Shutdown();
                     });
 
                     return;
@@ -197,14 +213,45 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                 _autoLoginRetryCount = 0;
                 _autoLoginCooldown = 0;
                 _autoHideDone = false;
-                _wasLoggedIn = false;
                 _heartbeatCycleCount = 0;
+                _qrVoiceCycleCount = 0;
             }
 
             // 3. 检查微信是否已登录
             if (!processInfo.IsLoggedIn)
             {
-                _wasLoggedIn = false;
+                // ★ 先判断是否为"已退出微信"重登场景（非首次扫码）
+                if (await _weChatService.IsWeChatReLoginAsync(_weChatProcessId))
+                {
+                    _log.Info("[WeChatMonitor] 检测到重登场景（已退出微信），走退出流程");
+
+                    Stop();
+                    ResetPluginState();
+
+                    await _weChatService.TryDismissReLoginDialogAsync();
+                    await _weChatService.KillAllWeChatProcessesAsync();
+                    await _pluginProcessService.CleanupExistingProcessesAsync();
+
+                    try { await _ttsService.SpeakAsync("请重新登录微信"); } catch { }
+
+                    // 重启 HRB 客户端
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        var exePath = Environment.ProcessPath;
+                        if (!string.IsNullOrEmpty(exePath))
+                        {
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = exePath,
+                                UseShellExecute = true
+                            });
+                        }
+                        Application.Current.Shutdown();
+                    });
+
+                    return;
+                }
+
                 StateChanged?.Invoke(WeChatMonitorState.WaitingForLogin);
 
                 // —— 自动登录逻辑 ——
@@ -228,11 +275,25 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                     }
                 }
 
+                // —— 二维码语音提醒 ——
+                _qrVoiceCycleCount++;
+                if (_qrVoiceCycleCount >= QrVoiceIntervalCycles)
+                {
+                    _qrVoiceCycleCount = 0;
+                    try
+                    {
+                        await _ttsService.SpeakAsync("请扫码登录微信");
+                    }
+                    catch
+                    {
+                        // 语音播报失败不影响后续流程
+                    }
+                }
+
                 return;
             }
 
             // —— 已登录 ——
-            _wasLoggedIn = true;
 
             // —— 自动隐藏逻辑 ——
             if (!_autoHideDone)

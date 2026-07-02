@@ -589,5 +589,177 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         }
 
         #endregion
+
+        #region 重新登录对话框关闭
+
+        /// <inheritdoc />
+        public Task<bool> TryDismissReLoginDialogAsync()
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
+                    // 枚举所有顶层窗口，找 WeChat 进程的可见弹窗
+                    var weChatPids = new HashSet<int>();
+                    var processes = Array.Empty<Process>();
+                    try
+                    {
+                        processes = Process.GetProcessesByName(WECHAT_PROCESS_NAME);
+                        foreach (var p in processes)
+                            weChatPids.Add(p.Id);
+                    }
+                    finally
+                    {
+                        foreach (var p in processes)
+                            p.Dispose();
+                    }
+
+                    if (weChatPids.Count == 0)
+                    {
+                        // 微信已退，可能会有残留弹窗；也搜一次 MessageBox 类窗口
+                    }
+
+                    bool dismissed = false;
+
+                    EnumWindows((hWnd, lParam) =>
+                    {
+                        GetWindowThreadProcessId(hWnd, out var pid);
+
+                        // 只处理 WeChat 进程 OR MessageBox(#32770) 弹窗
+                        bool isWeChatWindow = weChatPids.Contains((int)pid);
+                        bool isMessageBox = false;
+                        var clsBuilder = new StringBuilder(256);
+                        GetClassName(hWnd, clsBuilder, clsBuilder.Capacity);
+                        if (clsBuilder.ToString() == "#32770")
+                            isMessageBox = true;
+
+                        if (!isWeChatWindow && !isMessageBox)
+                            return true;
+
+                        if (!IsWindowVisible(hWnd))
+                            return true;
+
+                        // 枚举子控件，找"确定"按钮
+                        IntPtr confirmButton = IntPtr.Zero;
+
+                        EnumChildWindows(hWnd, (child, _) =>
+                        {
+                            if (!IsWindowVisible(child) || !IsWindowEnabled(child))
+                                return true;
+
+                            var btnText = new StringBuilder(256);
+                            GetWindowText(child, btnText, btnText.Capacity);
+                            var text = btnText.ToString();
+
+                            if (text.Contains("确定") || text.Contains("確定") ||
+                                text.Contains("是") || text.Contains("确认"))
+                            {
+                                confirmButton = child;
+                                return false;
+                            }
+                            return true;
+                        }, IntPtr.Zero);
+
+                        if (confirmButton == IntPtr.Zero)
+                            return true;
+
+                        // 模拟点击
+                        SetForegroundWindow(hWnd);
+                        GetWindowRect(confirmButton, out var rect);
+                        int x = (rect.Left + rect.Right) / 2;
+                        int y = (rect.Top + rect.Bottom) / 2;
+                        IntPtr lParamClick = (IntPtr)((y << 16) | (x & 0xFFFF));
+
+                        PostMessage(confirmButton, WM_LBUTTONDOWN, IntPtr.Zero, lParamClick);
+                        Sleep(50);
+                        PostMessage(confirmButton, WM_LBUTTONUP, IntPtr.Zero, lParamClick);
+
+                        dismissed = true;
+                        return false; // 找到一个就够了，停止枚举
+                    }, IntPtr.Zero);
+
+                    return dismissed;
+                }
+                catch
+                {
+                    return false;
+                }
+            });
+        }
+
+        #endregion
+
+        #region 重登检测
+
+        /// <inheritdoc />
+        public Task<bool> IsWeChatReLoginAsync(int processId)
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
+                    bool isReLogin = false;
+
+                    EnumWindows((hWnd, lParam) =>
+                    {
+                        GetWindowThreadProcessId(hWnd, out var pid);
+                        if ((int)pid != processId)
+                            return true;
+
+                        var clsBuilder = new StringBuilder(256);
+                        GetClassName(hWnd, clsBuilder, clsBuilder.Capacity);
+                        if (!clsBuilder.ToString().Contains("WeChatLoginWndForPC"))
+                            return true;
+
+                        // 检查窗口标题
+                        var titleBuilder = new StringBuilder(256);
+                        GetWindowText(hWnd, titleBuilder, titleBuilder.Capacity);
+                        var title = titleBuilder.ToString();
+
+                        if (ContainsReLoginKeyword(title))
+                        {
+                            isReLogin = true;
+                            return false;
+                        }
+
+                        // 枚举子控件文字
+                        EnumChildWindows(hWnd, (child, _) =>
+                        {
+                            var childText = new StringBuilder(256);
+                            GetWindowText(child, childText, childText.Capacity);
+                            if (ContainsReLoginKeyword(childText.ToString()))
+                            {
+                                isReLogin = true;
+                                return false;
+                            }
+                            return true;
+                        }, IntPtr.Zero);
+
+                        return !isReLogin; // 找到就停止
+                    }, IntPtr.Zero);
+
+                    return isReLogin;
+                }
+                catch
+                {
+                    return false;
+                }
+            });
+        }
+
+        private static bool ContainsReLoginKeyword(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+
+            return text.Contains("已退出")
+                || text.Contains("登录过期")
+                || text.Contains("登录已过期")
+                || text.Contains("重新登录")
+                || text.Contains("在其他设备登录")
+                || text.Contains("账号在别处");
+        }
+
+        #endregion
     }
 }

@@ -54,6 +54,34 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             });
         }
 
+        /// <inheritdoc />
+        
+
+      
+
+        // TtsService.cs
+        public async Task<bool> SaveToFileAsync(string text, string filePath)
+        {
+            Edge_tts.Await = true;      // 阻塞等待 WebSocket 返回
+            try
+            {
+                await Task.Run(() =>     // 丢线程池，不阻塞调用方线程
+                {
+                    var option = new PlayOption
+                    {
+                        Text = CleanTextChineseOnly(text),
+                        Rate = 0,
+                        Volume = 1,
+                        SavePath = filePath   // ← 库的 OnClose 回调写入这里
+                    };
+                    Edge_tts.SaveAudio(option, GetVoice());
+                });
+                return true;             // 文件已写入
+            }
+            catch { return false; }     // 网络/WebSocket 异常 → false
+        }
+
+
         private void ApplySettings(string hint)
         {
             var settings = GlobalSettings.CurrentAppContext.CurrentSettings;

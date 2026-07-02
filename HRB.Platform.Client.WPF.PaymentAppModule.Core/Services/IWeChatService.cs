@@ -82,6 +82,21 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// <param name="processId">微信进程 PID</param>
         Task HideWeChatWindowsAsync(int processId);
 
+        /// <summary>
+        /// 检测并关闭微信重新登录提示对话框（如"登录过期"等含"确定"按钮的弹窗）。
+        /// 枚举所有顶层窗口，按进程名 WeChat 归属 + 可见 + 有"确定"/"確定"按钮 => 模拟点击。
+        /// </summary>
+        /// <returns>true: 找到并关闭了对话框</returns>
+        Task<bool> TryDismissReLoginDialogAsync();
+
+        /// <summary>
+        /// 检测微信登录窗口是否为"已退出微信"重登场景。
+        /// 检查 WeChatLoginWndForPC 的窗口标题和子控件文字是否包含"已退出"/"登录过期"等关键词。
+        /// </summary>
+        /// <param name="processId">微信进程 PID</param>
+        /// <returns>true: 是重登场景（微信已退出，需要杀进程重启）</returns>
+        Task<bool> IsWeChatReLoginAsync(int processId);
+
     }
 
     /// <summary>

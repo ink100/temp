@@ -937,7 +937,7 @@
                                 <TextBlock Margin="0,5,0,0"
                                            FontSize="12"
                                            Foreground="#999999"
-                                           Text="扫码后在微信登录窗口自动点击"登录"按钮" />
+                                           Text='扫码后在微信登录窗口自动点击"登录"按钮' />
                             </StackPanel>
 
                             <CheckBox Grid.Column="1" VerticalAlignment="Center"

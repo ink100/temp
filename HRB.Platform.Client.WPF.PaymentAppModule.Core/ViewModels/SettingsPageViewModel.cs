@@ -64,6 +64,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
         private bool _isWeChatNicknameReminderEnabled = false;
         private bool _isWeChatAutoLoginEnabled = true;
         private bool _isWeChatAutoHideEnabled = true;
+        private bool _isWeChatQrLoginVoiceEnabled = true;
         private bool _isAutoStartEnabled = false;
         private bool _useNewPluginLifecycleMode = false;
         private string _notificationUrl = string.Empty;
@@ -316,6 +317,21 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
             set
             {
                 if (SetProperty(ref _isWeChatAutoHideEnabled, value))
+                {
+                    SavePaymentSettings();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 是否启用微信登录二维码语音提醒（检测到扫码界面时播报"请扫码登录微信"）
+        /// </summary>
+        public bool IsWeChatQrLoginVoiceEnabled
+        {
+            get => _isWeChatQrLoginVoiceEnabled;
+            set
+            {
+                if (SetProperty(ref _isWeChatQrLoginVoiceEnabled, value))
                 {
                     SavePaymentSettings();
                 }
@@ -753,6 +769,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
                 // 加载微信自动登录/自动隐藏设置
                 _isWeChatAutoLoginEnabled = settings.IsWeChatAutoLoginEnabled;
                 _isWeChatAutoHideEnabled = settings.IsWeChatAutoHideEnabled;
+                _isWeChatQrLoginVoiceEnabled = settings.IsWeChatQrLoginVoiceEnabled;
 
                 // 加载店铺名称和维护联系方式
                 _storeName = settings.StoreName;
@@ -774,6 +791,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
                 RaisePropertyChanged(nameof(IsWeChatNicknameReminderEnabled));
                 RaisePropertyChanged(nameof(IsWeChatAutoLoginEnabled));
                 RaisePropertyChanged(nameof(IsWeChatAutoHideEnabled));
+                RaisePropertyChanged(nameof(IsWeChatQrLoginVoiceEnabled));
                 RaisePropertyChanged(nameof(IsAutoStartEnabled));
                 RaisePropertyChanged(nameof(UseNewPluginLifecycleMode));
                 RaisePropertyChanged(nameof(StoreName));
@@ -872,6 +890,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
                 settings.IsWeChatNicknameReminderEnabled = _isWeChatNicknameReminderEnabled;
                 settings.IsWeChatAutoLoginEnabled = _isWeChatAutoLoginEnabled;
                 settings.IsWeChatAutoHideEnabled = _isWeChatAutoHideEnabled;
+                settings.IsWeChatQrLoginVoiceEnabled = _isWeChatQrLoginVoiceEnabled;
                 settings.IsAutoStartEnabled = _isAutoStartEnabled;
                 settings.UseNewPluginLifecycleMode = _useNewPluginLifecycleMode;
                 settings.StoreName = _storeName;

@@ -899,6 +899,129 @@
                 </Border>
 
 
+                <!--  微信辅助设置卡片  -->
+                <Border Margin="0,0,0,30"
+                        Padding="30"
+                        Background="#F5F5F5"
+                        BorderBrush="#E0E0E0"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="15" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!--  标题  -->
+                        <TextBlock Grid.Row="0"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="#333333"
+                                   Text="微信辅助设置" />
+
+                        <!--  微信自动登录开关  -->
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="#333333"
+                                           Text="自动登录微信" />
+                                <TextBlock Margin="0,5,0,0"
+                                           FontSize="12"
+                                           Foreground="#999999"
+                                           Text="扫码后在微信登录窗口自动点击"登录"按钮" />
+                            </StackPanel>
+
+                            <CheckBox Grid.Column="1" VerticalAlignment="Center"
+                                      IsChecked="{Binding IsWeChatAutoLoginEnabled, Mode=TwoWay}">
+                                <CheckBox.Style>
+                                    <Style TargetType="CheckBox">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="CheckBox">
+                                                    <Grid Width="60" Height="30">
+                                                        <Border x:Name="SwitchBorder" Background="#CCCCCC" CornerRadius="15" />
+                                                        <Ellipse x:Name="SwitchThumb"
+                                                                 Width="24"
+                                                                 Height="24"
+                                                                 Margin="3,0,0,0"
+                                                                 HorizontalAlignment="Left"
+                                                                 Fill="White" />
+                                                    </Grid>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter TargetName="SwitchBorder" Property="Background" Value="#4CAF50" />
+                                                            <Setter TargetName="SwitchThumb" Property="HorizontalAlignment" Value="Right" />
+                                                            <Setter TargetName="SwitchThumb" Property="Margin" Value="0,0,3,0" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </CheckBox.Style>
+                            </CheckBox>
+                        </Grid>
+
+                        <!--  微信自动隐藏开关  -->
+                        <Grid Grid.Row="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="#333333"
+                                           Text="登录后自动隐藏微信" />
+                                <TextBlock Margin="0,5,0,0"
+                                           FontSize="12"
+                                           Foreground="#999999"
+                                           Text="微信登录成功后自动隐藏微信窗口到后台" />
+                            </StackPanel>
+
+                            <CheckBox Grid.Column="1" VerticalAlignment="Center"
+                                      IsChecked="{Binding IsWeChatAutoHideEnabled, Mode=TwoWay}">
+                                <CheckBox.Style>
+                                    <Style TargetType="CheckBox">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="CheckBox">
+                                                    <Grid Width="60" Height="30">
+                                                        <Border x:Name="SwitchBorder" Background="#CCCCCC" CornerRadius="15" />
+                                                        <Ellipse x:Name="SwitchThumb"
+                                                                 Width="24"
+                                                                 Height="24"
+                                                                 Margin="3,0,0,0"
+                                                                 HorizontalAlignment="Left"
+                                                                 Fill="White" />
+                                                    </Grid>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked" Value="True">
+                                                            <Setter TargetName="SwitchBorder" Property="Background" Value="#4CAF50" />
+                                                            <Setter TargetName="SwitchThumb" Property="HorizontalAlignment" Value="Right" />
+                                                            <Setter TargetName="SwitchThumb" Property="Margin" Value="0,0,3,0" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </CheckBox.Style>
+                            </CheckBox>
+                        </Grid>
+                    </Grid>
+                </Border>
+
                 <!--  语音与显示设置卡片  -->
                 <Border Margin="0,0,0,30"
                         Padding="30"
@@ -922,14 +1045,6 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="15" />
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="15" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="15" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="15" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="15" />
-                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0"
@@ -937,16 +1052,6 @@
                                    FontWeight="Bold"
                                    Foreground="#333333"
                                    Text="语音与显示设置" />
-
-                        <Button Grid.Row="0"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Center"
-                                Background="#6C757D"
-                                Content="恢复默认"
-                                Width="80"
-                                Height="30"
-                                Command="{Binding ResetVoiceDefaultsCommand}"
-                                Style="{StaticResource ButtonStyle}" />
 
                         <Grid Grid.Row="2">
                             <Grid.ColumnDefinitions>
@@ -1019,7 +1124,7 @@
                             <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="16" Foreground="#666666" Text="播报音色：" />
                             <ComboBox Grid.Column="1" Padding="8" FontSize="14" ItemsSource="{Binding TtsVoiceOptions}" SelectedItem="{Binding SelectedTtsVoiceName, Mode=TwoWay}" />
                             <TextBlock Grid.Column="3" VerticalAlignment="Center" FontSize="16" Foreground="#666666" Text="语速：" />
-                            <Slider Grid.Column="4" Minimum="0" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Value="{Binding TtsRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Slider Grid.Column="4" Minimum="-50" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Value="{Binding TtsRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <TextBlock Grid.Column="5" VerticalAlignment="Center" FontSize="14" Foreground="#666666" Text="{Binding TtsRate, StringFormat={}{0}%}" />
                         </Grid>
 
@@ -1046,20 +1151,6 @@
                             <TextBox Grid.Column="8" Padding="8" FontSize="14" Text="{Binding AmountColorHex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <Border Grid.Column="9" Width="40" Height="30" Margin="10,0" BorderBrush="#CCCCCC" BorderThickness="1" Background="{Binding AmountColorPreviewBrush}" />
                             <Button Grid.Column="10" Background="#6C757D" Command="{Binding ChooseAmountColorCommand}" Content="选择颜色" Style="{StaticResource ButtonStyle}" />
-                        </Grid>
-
-                        <!-- 在线全量TTS播报开关 -->
-                        <Grid Grid.Row="14">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock FontSize="16" FontWeight="Bold" Foreground="#333333" Text="在线全量TTS播报"/>
-                                <TextBlock Margin="0,5,0,0" FontSize="12" Foreground="#999999" Text="开启后金额和提示音全部通过在线语音合成播报，关闭则仅昵称使用在线TTS"/>
-                            </StackPanel>
-                            <CheckBox Grid.Column="1" VerticalAlignment="Center"
-                                      IsChecked="{Binding IsUseOnlineTtsSpeech, Mode=TwoWay}"/>
                         </Grid>
                     </Grid>
                 </Border>

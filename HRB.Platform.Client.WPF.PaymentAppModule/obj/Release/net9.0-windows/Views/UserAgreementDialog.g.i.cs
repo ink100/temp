@@ -9,6 +9,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using HRB.Platform.Client.WPF.Core.Models;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.Converters;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels;
 using Markdig.Wpf;
 using Prism.Dialogs;

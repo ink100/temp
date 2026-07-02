@@ -1,4 +1,4 @@
-﻿using HRB.Platform.Client.Core.Enums;
+using HRB.Platform.Client.Core.Enums;
 using HRB.Platform.Client.Core.Interfaces;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
@@ -61,12 +61,6 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
         /// 是否启用新交易记录自动滚动到顶部
         /// </summary>
         public bool IsAutoScrollToLatestEnabled { get; set; } = false;
-
-        /// <summary>
-        /// 是否开启微信监听控制台输出。
-        /// 默认关闭；仅用于现场排查 VXModule.Shell / 微信收款消息链路。
-        /// </summary>
-        public bool IsWeChatListenerConsoleOutputEnabled { get; set; } = false;
 
         /// <summary>
         /// 是否启用每天凌晨 1 点自动同步 Windows 系统时间
@@ -135,18 +129,14 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
         public bool IsPaymentSuccessVoiceEnabled { get; set; } = true;
 
         /// <summary>
-        /// 是否使用在线 TTS 播报全部语音（金额+提示音）。
-        /// false: 金额和提示音使用本地 MP3 拼播，仅昵称使用在线 TTS（原先方案）。
-        /// true: 所有语音均通过 Edge TTS 在线合成播报。
-        /// </summary>
-        public bool IsUseOnlineTtsSpeech { get; set; } = false;
-
-        /// <summary>
         /// TTS 音色名称。为空时使用默认中文音色。
         /// </summary>
         public string TtsVoiceName { get; set; } = string.Empty;
 
-       
+        /// <summary>
+        /// TTS 语速百分比，0 为正常，负数变慢，正数变快。
+        /// </summary>
+        public int TtsRate { get; set; } = 0;
 
         /// <summary>
         /// TTS 音量百分比，默认 100。
@@ -154,35 +144,19 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
         public int TtsVolume { get; set; } = 100;
 
         /// <summary>
-        /// 语音播报速度。
-        /// 0 = 慢速，50 = 正常，100 = 最快。
-        /// </summary>
-        public int TtsRate { get; set; } = 50;
-
-        /// <summary>
-        /// 旧版金额显示颜色，保留兼容旧配置。
+        /// 金额显示颜色，十六进制格式，例如 #F01F1B。
         /// </summary>
         public string AmountColorHex { get; set; } = "#F01F1B";
 
         /// <summary>
-        /// 支付宝收款金额颜色，默认蓝色。
+        /// 是否启用微信自动登录（扫码后自动点击"登录"按钮）
         /// </summary>
-        public string AlipayAmountColorHex { get; set; } = "#3E86FD";
+        public bool IsWeChatAutoLoginEnabled { get; set; } = true;
 
         /// <summary>
-        /// 支付宝失败金额颜色，默认红色。
+        /// 是否启用微信登录后自动隐藏窗口
         /// </summary>
-        public string AlipayFailedAmountColorHex { get; set; } = "#F01F1B";
-
-        /// <summary>
-        /// 微信收款金额颜色，默认绿色。
-        /// </summary>
-        public string WeChatAmountColorHex { get; set; } = "#00897B";
-
-        /// <summary>
-        /// 微信失败金额颜色，默认红色。
-        /// </summary>
-        public string WeChatFailedAmountColorHex { get; set; } = "#F01F1B";
+        public bool IsWeChatAutoHideEnabled { get; set; } = true;
 
     }
 

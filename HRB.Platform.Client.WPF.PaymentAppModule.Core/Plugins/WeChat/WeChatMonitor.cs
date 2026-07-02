@@ -13,9 +13,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
     /// 2秒轮询循环，职责：
     ///   1. 检测 WeChat.exe 是否运行
     ///   2. 检测微信是否已登录
-    ///   3. 检测 VXModule.Shell 是否运行
-    ///   4. 条件满足时发送 StartVXModuleEvent 注入微信进程
-    ///   5. 通过 GetVXStatusRequestEvent 查询插件工作状态
+    ///   3. 自动登录（扫码后点"登录"按钮）+ 自动隐藏窗口
+    ///   4. 检测 VXModule.Shell 是否运行
+    ///   5. 条件满足时发送 StartVXModuleEvent 注入微信进程
+    ///   6. 通过 GetVXStatusRequestEvent 查询插件工作状态
+    ///   7. 微信意外退出时语音播报
     ///
     /// 不启动/杀任何进程 — 进程管理完全由看门狗负责。
     /// </summary>
@@ -28,10 +30,29 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
 
         private readonly IDialogService _dialogService;
         private readonly IPluginProcessService _pluginProcessService;
+        private readonly PaymentAppContext _appContext;
+        private readonly ITtsService _ttsService;
 
         private CancellationTokenSource? _cts;
         private volatile bool _isRunning;
         private int _weChatProcessId = -1;
+
+        // 自动登录
+        private const int AutoLoginCooldownCycles = 3;    // 每3个周期(≈6s)执行一次
+        private const int MaxAutoLoginRetries = 30;        // 最多重试30次(≈60s)
+        private int _autoLoginRetryCount;
+        private int _autoLoginCooldown;
+
+        // 自动隐藏
+        private bool _autoHideDone;
+
+        // 上次登录状态（用于检测微信意外退出）
+        private bool _wasLoggedIn;
+
+        // 心跳检测：插件报告"工作中"不代表消息还在流动，定期发查询验证
+        private const int HeartbeatIntervalCycles = 30;   // 每30周期(≈60s)发一次心跳
+        private int _heartbeatCycleCount;
+        internal volatile bool HeartbeatPending;           // 心跳等待中；OnVXStatusAnswer 应答后清零
 
         /// <summary>
         /// VXModule 插件是否已确认工作（由外部通过 SetPluginWorking 更新）
@@ -46,13 +67,19 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
         internal WeChatMonitor(
             IEventAggregator eventAggregator,
             IPluginRuntimeStatusService statusService,
-            IWeChatService weChatService, IDialogService dialogService, IPluginProcessService pluginProcessService)
+            IWeChatService weChatService,
+            IDialogService dialogService,
+            IPluginProcessService pluginProcessService,
+            PaymentAppContext appContext,
+            ITtsService ttsService)
         {
             _eventAggregator = eventAggregator;
             _statusService = statusService;
             _weChatService = weChatService;
             _dialogService = dialogService;
             _pluginProcessService = pluginProcessService;
+            _appContext = appContext;
+            _ttsService = ttsService;
             _log = GlobalSettings.CurrentAppContext.CurrentLogger;
         }
 
@@ -81,6 +108,12 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
         {
             PluginIsWorking = false;
             _weChatProcessId = -1;
+            _autoLoginRetryCount = 0;
+            _autoLoginCooldown = 0;
+            _autoHideDone = false;
+            _wasLoggedIn = false;
+            _heartbeatCycleCount = 0;
+            HeartbeatPending = false;
         }
 
         private async Task MonitorLoopAsync(CancellationToken token)
@@ -117,21 +150,37 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
 
             if (processInfo == null)
             {
+                // WeChat 进程不存在
                 if (_weChatProcessId != -1)
                 {
+                    // 微信之前在运行，现在突然消失 → 意外退出
                     Stop();
+                    ResetPluginState();
+
                     await _pluginProcessService.CleanupExistingProcessesAsync();
+
+                    // 语音播报"请重新登录微信"
+                    try
+                    {
+                        await _ttsService.SpeakAsync("请重新登录微信");
+                    }
+                    catch
+                    {
+                        // 语音播报失败不影响后续流程
+                    }
+
                     Application.Current.Dispatcher.Invoke(() =>
-                   {
-                       _dialogService.ShowError("微信进程消失，请重启软件", callback: (result) =>
-                       {
-                           Application.Current.Shutdown();
-                       });
-                   });
+                    {
+                        _dialogService.ShowError("微信已退出，请重新登录微信", callback: (result) =>
+                        {
+                            Application.Current.Shutdown();
+                        });
+                    });
 
                     return;
                 }
 
+                // 微信从未运行过，尝试启动
                 PluginIsWorking = false;
                 StateChanged?.Invoke(WeChatMonitorState.WeChatNotRunning);
 
@@ -140,23 +189,90 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                 return;
             }
 
-            // 2. 检查是否新进程
+            // 2. 检查是否新进程（PID 变化）
             if (_weChatProcessId != processInfo.ProcessId)
             {
                 _weChatProcessId = processInfo.ProcessId;
                 PluginIsWorking = false;
+                _autoLoginRetryCount = 0;
+                _autoLoginCooldown = 0;
+                _autoHideDone = false;
+                _wasLoggedIn = false;
+                _heartbeatCycleCount = 0;
             }
 
-            // 3. 检查微信是否登录
+            // 3. 检查微信是否已登录
             if (!processInfo.IsLoggedIn)
             {
+                _wasLoggedIn = false;
                 StateChanged?.Invoke(WeChatMonitorState.WaitingForLogin);
+
+                // —— 自动登录逻辑 ——
+                var settings = _appContext.CurrentSettings;
+                if (settings.IsWeChatEnabled && settings.IsWeChatAutoLoginEnabled
+                    && _autoLoginRetryCount < MaxAutoLoginRetries)
+                {
+                    _autoLoginCooldown++;
+
+                    if (_autoLoginCooldown >= AutoLoginCooldownCycles)
+                    {
+                        _autoLoginCooldown = 0;
+                        _autoLoginRetryCount++;
+
+                        var clicked = await _weChatService.TryAutoLoginAsync(_weChatProcessId);
+                        if (clicked)
+                        {
+                            _autoLoginRetryCount = MaxAutoLoginRetries; // 成功，停止重试
+                            _log.Info("[WeChatMonitor] 自动登录：点击登录按钮成功");
+                        }
+                    }
+                }
+
                 return;
             }
 
-            // 4. 如果插件已工作，无需操作
+            // —— 已登录 ——
+            _wasLoggedIn = true;
+
+            // —— 自动隐藏逻辑 ——
+            if (!_autoHideDone)
+            {
+                var settings = _appContext.CurrentSettings;
+                if (settings.IsWeChatAutoHideEnabled)
+                {
+                    await _weChatService.HideWeChatWindowsAsync(_weChatProcessId);
+                    _log.Info("[WeChatMonitor] 自动隐藏：微信窗口已隐藏");
+                }
+                _autoHideDone = true;
+            }
+
+            // 4. 心跳检测：插件报告"工作中"不代表消息还在流动
+            //    每 HeartbeatIntervalCycles(≈60s) 发一次查询，确认 Hook 仍在工作
             if (PluginIsWorking)
+            {
+                _heartbeatCycleCount++;
+
+                if (_heartbeatCycleCount >= HeartbeatIntervalCycles)
+                {
+                    _heartbeatCycleCount = 0;
+
+                    // 发查询；用 HeartbeatPending 标记，不碰 PluginIsWorking
+                    // 如果插件正常应答 → OnVXStatusAnswer 在 WeChatChannelPlugin 中清零 HeartbeatPending
+                    // 如果超时无应答 → Hook 已失活，设 PluginIsWorking=false 触发下轮重注入
+                    HeartbeatPending = true;
+                    _eventAggregator.GetEvent<GetVXStatusRequestEvent>().Publish();
+                    await Task.Delay(2000, token);
+
+                    if (HeartbeatPending)
+                    {
+                        HeartbeatPending = false;
+                        PluginIsWorking = false;
+                        _log.Info("[WeChatMonitor] 心跳检测：插件超时无应答，Hook 可能已失活，下一轮自动重新注入");
+                    }
+                }
+
                 return;
+            }
 
             // 5. 检查 VXModule.Shell 是否运行
             if (!_statusService.IsWeChatPluginRunning)

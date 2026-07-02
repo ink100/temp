@@ -66,6 +66,22 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         /// <returns></returns>
         Task<bool> StartWeChatAsync();
 
+        /// <summary>
+        /// 尝试自动点击微信登录窗口的"登录"按钮。
+        /// 先在顶层窗口中找到 WeChatLoginWndForPC，用 GetWindowText 做标题预检，
+        /// 再 EnumChildWindows 查找文本包含"登录"/"登錄"的可见且启用的按钮，模拟点击。
+        /// 注意：仅对微信 3.9.12.54 (x86) 有效，其他版本按钮文本可能不同。
+        /// </summary>
+        /// <param name="processId">微信进程 PID</param>
+        /// <returns>true: 找到按钮并成功发送点击消息；false: 未找到窗口/按钮或标题预检不通过</returns>
+        Task<bool> TryAutoLoginAsync(int processId);
+
+        /// <summary>
+        /// 隐藏指定微信进程的所有可见顶层窗口（先最小化，再隐藏）。
+        /// </summary>
+        /// <param name="processId">微信进程 PID</param>
+        Task HideWeChatWindowsAsync(int processId);
+
     }
 
     /// <summary>

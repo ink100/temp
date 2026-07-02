@@ -10,6 +10,14 @@
 //------------------------------------------------------------------------------
 
 using HRB.Platform.Client.WPF.Core.Models;
+using HRB.Platform.Client.WPF.PaymentAppModule;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.ControlExtensions;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.Controls;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.Converters;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels;
+using HRB.Platform.Client.WPF.PaymentAppModule.Resources;
+using Markdig.Wpf;
 using Prism.Dialogs;
 using Prism.DryIoc;
 using Prism.Interactivity;

@@ -29,6 +29,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
         private readonly INotificationService _log;
         private readonly IDialogService _dialogService;
         private readonly IPluginProcessService _pluginProcessService;
+        private readonly ITtsService _ttsService;
 
 
         private WeChatMonitor? _monitor;
@@ -56,7 +57,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
             IWeChatService weChatService,
             PaymentAppContext appContext,
             INotificationService log,
-            IDialogService dialogService, IPluginProcessService pluginProcessService)
+            IDialogService dialogService,
+            IPluginProcessService pluginProcessService,
+            ITtsService ttsService)
         {
             _eventAggregator = eventAggregator;
             _statusService = statusService;
@@ -65,6 +68,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
             _log = log;
             _dialogService = dialogService;
             _pluginProcessService = pluginProcessService;
+            _ttsService = ttsService;
 
             // _log = GlobalSettings.CurrentAppContext.CurrentLogger;
         }
@@ -135,6 +139,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
             if (_monitor == null)
                 return;
 
+            // 任何应答都清零心跳等待标志（不管 IsWork 是 true 还是 false）
+            _monitor.HeartbeatPending = false;
+
             if (eto.IsWork)
             {
                 _monitor.PluginIsWorking = true;
@@ -198,7 +205,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
         {
             if (_monitor == null)
             {
-                _monitor = new WeChatMonitor(_eventAggregator, _statusService, _weChatService, _dialogService, _pluginProcessService);
+                _monitor = new WeChatMonitor(_eventAggregator, _statusService, _weChatService,
+                    _dialogService, _pluginProcessService, _appContext, _ttsService);
                 _monitor.StateChanged = OnMonitorStateChanged;
             }
 

@@ -425,9 +425,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         #region Win32 API 导入
 
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+        private delegate bool EnumChildWindowsProc(IntPtr hWnd, IntPtr lParam);
 
         [DllImport("user32.dll")]
         private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumChildWindows(IntPtr hWndParent, EnumChildWindowsProc lpEnumFunc, IntPtr lParam);
 
         [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
@@ -440,6 +444,149 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 
         [DllImport("user32.dll")]
         private static extern bool IsWindowVisible(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsWindowEnabled(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("kernel32.dll")]
+        private static extern void Sleep(uint dwMilliseconds);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
+        private const uint WM_LBUTTONDOWN = 0x0201;
+        private const uint WM_LBUTTONUP = 0x0202;
+        private const int SW_HIDE = 0;
+        private const int SW_MINIMIZE = 6;
+
+        #endregion
+
+        #region 自动登录 / 自动隐藏
+
+        /// <inheritdoc />
+        public Task<bool> TryAutoLoginAsync(int processId)
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
+                    IntPtr loginWindow = IntPtr.Zero;
+                    bool foundLoginWindow = false;
+
+                    // 1. EnumWindows → 找到 WeChatLoginWndForPC 窗口
+                    EnumWindows((hWnd, lParam) =>
+                    {
+                        GetWindowThreadProcessId(hWnd, out var pid);
+                        if ((int)pid != processId) return true;
+
+                        var classNameBuilder = new StringBuilder(256);
+                        GetClassName(hWnd, classNameBuilder, classNameBuilder.Capacity);
+                        if (classNameBuilder.ToString().Contains("WeChatLoginWndForPC"))
+                        {
+                            loginWindow = hWnd;
+                            foundLoginWindow = true;
+                            return false; // 停止枚举
+                        }
+                        return true;
+                    }, IntPtr.Zero);
+
+                    if (!foundLoginWindow || loginWindow == IntPtr.Zero)
+                        return false;
+
+                    // 2. GetWindowText 预检 — 标题为"微信"说明还没扫码，跳过昂贵枚举
+                    var titleBuilder = new StringBuilder(256);
+                    GetWindowText(loginWindow, titleBuilder, titleBuilder.Capacity);
+                    if (titleBuilder.ToString() == "微信")
+                        return false;
+
+                    // 3. EnumChildWindows → 查找"登录"按钮
+                    IntPtr loginButton = IntPtr.Zero;
+
+                    EnumChildWindows(loginWindow, (hWnd, lParam) =>
+                    {
+                        if (!IsWindowVisible(hWnd) || !IsWindowEnabled(hWnd))
+                            return true;
+
+                        var btnTextBuilder = new StringBuilder(256);
+                        GetWindowText(hWnd, btnTextBuilder, btnTextBuilder.Capacity);
+                        var btnText = btnTextBuilder.ToString();
+
+                        if (btnText.Contains("登录") || btnText.Contains("登錄"))
+                        {
+                            loginButton = hWnd;
+                            return false; // 停止枚举
+                        }
+                        return true;
+                    }, IntPtr.Zero);
+
+                    if (loginButton == IntPtr.Zero)
+                        return false;
+
+                    // 4. 模拟点击
+                    SetForegroundWindow(loginWindow);
+                    GetWindowRect(loginButton, out var rect);
+                    int x = (rect.Left + rect.Right) / 2;
+                    int y = (rect.Top + rect.Bottom) / 2;
+                    IntPtr lParamClick = (IntPtr)((y << 16) | (x & 0xFFFF));
+
+                    PostMessage(loginButton, WM_LBUTTONDOWN, IntPtr.Zero, lParamClick);
+                    Sleep(50);
+                    PostMessage(loginButton, WM_LBUTTONUP, IntPtr.Zero, lParamClick);
+
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            });
+        }
+
+        /// <inheritdoc />
+        public Task HideWeChatWindowsAsync(int processId)
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
+                    EnumWindows((hWnd, lParam) =>
+                    {
+                        GetWindowThreadProcessId(hWnd, out var pid);
+                        if ((int)pid != processId) return true;
+
+                        if (IsWindowVisible(hWnd))
+                        {
+                            ShowWindow(hWnd, SW_MINIMIZE);
+                            Sleep(100);
+                            ShowWindow(hWnd, SW_HIDE);
+                        }
+                        return true;
+                    }, IntPtr.Zero);
+                }
+                catch
+                {
+                    // 隐藏窗口是尽力而为的操作，忽略异常
+                }
+            });
+        }
 
         #endregion
     }

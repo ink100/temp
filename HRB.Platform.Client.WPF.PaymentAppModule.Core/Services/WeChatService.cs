@@ -452,7 +452,16 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
         [DllImport("user32.dll")]
+        private static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr WindowFromPoint(POINT point);
 
         [DllImport("user32.dll")]
         private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
@@ -513,12 +522,21 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             public int Bottom;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        private struct POINT
+        {
+            public int X;
+            public int Y;
+        }
+
         private const uint WM_LBUTTONDOWN = 0x0201;
         private const uint WM_LBUTTONUP = 0x0202;
+        private const int MK_LBUTTON = 0x0001;
         private const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
         private const uint MOUSEEVENTF_LEFTUP = 0x0004;
         private const int SW_HIDE = 0;
         private const int SW_MINIMIZE = 6;
+        private const int SW_RESTORE = 9;
         private const int GWL_STYLE = -16;
         private const long WS_VISIBLE = 0x10000000L;
 
@@ -556,6 +574,18 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     if (!foundLoginWindow || loginWindow == IntPtr.Zero)
                         return false;
 
+                    // 登录窗口可能被最小化或被主程序遮挡。像素检测读取的是屏幕像素，
+                    // 必须先恢复并前置窗口，否则即使“进入微信”按钮存在也会检测不到。
+                    ShowWindow(loginWindow, SW_RESTORE);
+                    Sleep(100);
+                    SetForegroundWindow(loginWindow);
+                    Sleep(200);
+
+                    var foregroundWindow = GetForegroundWindow();
+                    GetWindowThreadProcessId(foregroundWindow, out var foregroundPid);
+                    if ((int)foregroundPid != processId)
+                        return false;
+
                     // 2. 优先尝试标准子控件按钮（某些环境可枚举到）
                     IntPtr loginButton = IntPtr.Zero;
 
@@ -578,16 +608,18 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 
                     if (loginButton != IntPtr.Zero)
                     {
-                        SetForegroundWindow(loginWindow);
-                        GetWindowRect(loginButton, out var buttonRect);
-                        int buttonX = (buttonRect.Left + buttonRect.Right) / 2;
-                        int buttonY = (buttonRect.Top + buttonRect.Bottom) / 2;
-                        IntPtr lParamClick = (IntPtr)((buttonY << 16) | (buttonX & 0xFFFF));
+                        if (!GetClientRect(loginButton, out var buttonRect))
+                            return false;
 
-                        PostMessage(loginButton, WM_LBUTTONDOWN, IntPtr.Zero, lParamClick);
+                        int buttonX = (buttonRect.Right - buttonRect.Left) / 2;
+                        int buttonY = (buttonRect.Bottom - buttonRect.Top) / 2;
+
+                        // 标准子控件使用客户区坐标定向投递，不移动物理鼠标。
+                        var lParamClick = (IntPtr)((buttonY << 16) | (buttonX & 0xFFFF));
+                        var downSent = PostMessage(loginButton, WM_LBUTTONDOWN, (IntPtr)MK_LBUTTON, lParamClick);
                         Sleep(50);
-                        PostMessage(loginButton, WM_LBUTTONUP, IntPtr.Zero, lParamClick);
-                        return true;
+                        var upSent = PostMessage(loginButton, WM_LBUTTONUP, IntPtr.Zero, lParamClick);
+                        return downSent && upSent;
                     }
 
                     // 3. 微信 3.9.x 登录窗口是 DirectUI，自绘按钮通常枚举不到。
@@ -595,22 +627,13 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     // 这里改为检测窗口下半部是否存在微信绿色大按钮：
                     // - 有绿色按钮：说明是“进入微信”页，坐标点击按钮中心；
                     // - 没有绿色按钮：说明大概率是二维码页，只让上层播报“请扫码登录微信”。
-                    SetForegroundWindow(loginWindow);
-                    Sleep(100);
-
                     if (!GetWindowRect(loginWindow, out var rect))
                         return false;
 
                     if (!TryFindGreenLoginButtonCenter(rect, out var x, out var y))
                         return false;
 
-                    SetCursorPos(x, y);
-                    Sleep(50);
-                    mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)x, (uint)y, 0, UIntPtr.Zero);
-                    Sleep(80);
-                    mouse_event(MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, UIntPtr.Zero);
-
-                    return true;
+                    return TryClickScreenPointForProcess(loginWindow, processId, x, y);
                 }
                 catch
                 {
@@ -686,6 +709,49 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             }
         }
 
+        /// <summary>
+        /// 对 DirectUI 自绘按钮执行物理点击。点击前后都复核坐标下窗口属于目标进程，
+        /// 避免前台切换、窗口移动或用户操作时误点其他程序。
+        /// </summary>
+        private static bool TryClickScreenPointForProcess(IntPtr loginWindow, int processId, int x, int y)
+        {
+            if (!SetCursorPos(x, y))
+                return false;
+
+            Sleep(30);
+
+            // 在鼠标按下的最后时刻重新验证前台窗口和坐标目标，缩小焦点切换竞态窗口。
+            if (GetForegroundWindow() != loginWindow)
+                return false;
+
+            var pointWindow = WindowFromPoint(new POINT { X = x, Y = y });
+            GetWindowThreadProcessId(pointWindow, out var pointPid);
+            if ((int)pointPid != processId)
+                return false;
+
+            var mouseDownSent = false;
+            var cursorRestored = false;
+            try
+            {
+                mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)x, (uint)y, 0, UIntPtr.Zero);
+                mouseDownSent = true;
+                Sleep(80);
+            }
+            finally
+            {
+                // 只要发出了按下事件，就保证发送抬起，避免异常路径留下按下状态。
+                if (mouseDownSent)
+                {
+                    cursorRestored = SetCursorPos(x, y);
+                    mouse_event(MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, UIntPtr.Zero);
+                }
+            }
+
+            pointWindow = WindowFromPoint(new POINT { X = x, Y = y });
+            GetWindowThreadProcessId(pointWindow, out pointPid);
+            return mouseDownSent && cursorRestored && (int)pointPid == processId;
+        }
+
         /// <inheritdoc />
         public Task<bool> HideWeChatWindowsAsync(int processId)
         {
@@ -693,9 +759,10 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             {
                 try
                 {
-                    var hidden = false;
+                    var foundMainWindow = false;
+                    var allHidden = true;
 
-                    EnumWindows((hWnd, lParam) =>
+                    var enumerationSucceeded = EnumWindows((hWnd, lParam) =>
                     {
                         GetWindowThreadProcessId(hWnd, out var pid);
                         if ((int)pid != processId) return true;
@@ -708,6 +775,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                         if (!className.Contains("WeChatMainWndForPC"))
                             return true;
 
+                        foundMainWindow = true;
+
                         ShowWindow(hWnd, SW_MINIMIZE);
                         Sleep(150);
                         ShowWindow(hWnd, SW_HIDE);
@@ -717,11 +786,14 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                         var newStyle = new IntPtr(style.ToInt64() & ~WS_VISIBLE);
                         SetWindowLongPtr(hWnd, GWL_STYLE, newStyle);
 
-                        hidden = true;
+                        // 不以“调用过 API”作为成功依据，回读窗口状态；失败时让监控器下一轮重试。
+                        var finalStyle = GetWindowLongPtr(hWnd, GWL_STYLE).ToInt64();
+                        var windowHidden = !IsWindowVisible(hWnd) && (finalStyle & WS_VISIBLE) == 0;
+                        allHidden &= windowHidden;
                         return true;
                     }, IntPtr.Zero);
 
-                    return hidden;
+                    return enumerationSucceeded && foundMainWindow && allHidden;
                 }
                 catch
                 {

@@ -67,20 +67,21 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         Task<bool> StartWeChatAsync();
 
         /// <summary>
-        /// 尝试自动点击微信登录窗口的"登录"按钮。
-        /// 先在顶层窗口中找到 WeChatLoginWndForPC，用 GetWindowText 做标题预检，
-        /// 再 EnumChildWindows 查找文本包含"登录"/"登錄"的可见且启用的按钮，模拟点击。
-        /// 注意：仅对微信 3.9.12.54 (x86) 有效，其他版本按钮文本可能不同。
+        /// 尝试自动点击微信登录窗口的“进入微信/登录”按钮。
+        /// 微信 3.9.x 登录页是 DirectUI 自绘，很多环境枚举不到标准按钮；
+        /// 因此会先尝试子控件按钮，失败后检测窗口下半部是否存在微信绿色大按钮，存在才坐标点击。
+        /// 二维码页没有绿色“进入微信”按钮，会返回 false，由上层播报“请扫码登录微信”。
         /// </summary>
         /// <param name="processId">微信进程 PID</param>
-        /// <returns>true: 找到按钮并成功发送点击消息；false: 未找到窗口/按钮或标题预检不通过</returns>
+        /// <returns>true: 确认是“进入微信/登录”页并已点击；false: 未找到登录窗口、仍是二维码页或点击失败</returns>
         Task<bool> TryAutoLoginAsync(int processId);
 
         /// <summary>
-        /// 隐藏指定微信进程的所有可见顶层窗口（先最小化，再隐藏）。
+        /// 隐藏指定微信进程的微信主窗口（先最小化，再隐藏）。
         /// </summary>
         /// <param name="processId">微信进程 PID</param>
-        Task HideWeChatWindowsAsync(int processId);
+        /// <returns>true: 找到并隐藏了微信主窗口；false: 主窗口尚未就绪或隐藏失败</returns>
+        Task<bool> HideWeChatWindowsAsync(int processId);
 
         /// <summary>
         /// 检测并关闭微信重新登录提示对话框（如"登录过期"等含"确定"按钮的弹窗）。

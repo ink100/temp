@@ -148,7 +148,12 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                 _log.ShowSuccess("[WeChatPlugin] 插件已确认工作");
                 UpdateStatus(ChannelStatus.Running);
             }
-            // IsWork=false 时不做特殊处理，WeChatMonitor 下一轮会重试注入
+            else
+            {
+                _monitor.PluginIsWorking = false;
+                _log.ShowWarning("[WeChatPlugin] 插件状态异常，等待重新注入");
+                UpdateStatus(ChannelStatus.Enabling, "微信插件状态异常，正在重新注入");
+            }
         }
 
         /// <summary>

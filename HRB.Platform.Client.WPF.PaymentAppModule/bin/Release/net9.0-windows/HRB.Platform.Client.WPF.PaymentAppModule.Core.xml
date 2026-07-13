@@ -1044,6 +1044,17 @@
             重置插件工作状态（进程消失/PID变化时调用）
             </summary>
         </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitor.RecoverWeChatModuleAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            微信模块自恢复：只清理 VXModule.Shell.exe 并重新注入，不杀微信、不重启主程序。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitor.EnsureAndPlayLocalVoiceAsync(System.String,System.String)">
+            <summary>
+            确保本地有固定语音 MP3，没有则 TTS 生成，再用 MediaPlayer 本地播放。
+            不阻塞监控循环。
+            </summary>
+        </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitorState">
             <summary>
             监控器观测到的状态
@@ -2092,19 +2103,20 @@
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService.TryAutoLoginAsync(System.Int32)">
             <summary>
-            尝试自动点击微信登录窗口的"登录"按钮。
-            先在顶层窗口中找到 WeChatLoginWndForPC，用 GetWindowText 做标题预检，
-            再 EnumChildWindows 查找文本包含"登录"/"登錄"的可见且启用的按钮，模拟点击。
-            注意：仅对微信 3.9.12.54 (x86) 有效，其他版本按钮文本可能不同。
+            尝试自动点击微信登录窗口的“进入微信/登录”按钮。
+            微信 3.9.x 登录页是 DirectUI 自绘，很多环境枚举不到标准按钮；
+            因此会先尝试子控件按钮，失败后检测窗口下半部是否存在微信绿色大按钮，存在才坐标点击。
+            二维码页没有绿色“进入微信”按钮，会返回 false，由上层播报“请扫码登录微信”。
             </summary>
             <param name="processId">微信进程 PID</param>
-            <returns>true: 找到按钮并成功发送点击消息；false: 未找到窗口/按钮或标题预检不通过</returns>
+            <returns>true: 确认是“进入微信/登录”页并已点击；false: 未找到登录窗口、仍是二维码页或点击失败</returns>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService.HideWeChatWindowsAsync(System.Int32)">
             <summary>
-            隐藏指定微信进程的所有可见顶层窗口（先最小化，再隐藏）。
+            隐藏指定微信进程的微信主窗口（先最小化，再隐藏）。
             </summary>
             <param name="processId">微信进程 PID</param>
+            <returns>true: 找到并隐藏了微信主窗口；false: 主窗口尚未就绪或隐藏失败</returns>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.IWeChatService.TryDismissReLoginDialogAsync">
             <summary>
@@ -2894,6 +2906,12 @@
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.TryAutoLoginAsync(System.Int32)">
             <inheritdoc />
         </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.TryFindGreenLoginButtonCenter(HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.RECT,System.Int32@,System.Int32@)">
+            <summary>
+            在登录窗口中检测“进入微信”绿色按钮，并返回按钮中心坐标。
+            二维码页没有这个绿色大按钮，因此不会误点二维码页。
+            </summary>
+        </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.HideWeChatWindowsAsync(System.Int32)">
             <inheritdoc />
         </member>
@@ -2902,6 +2920,13 @@
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.IsWeChatReLoginAsync(System.Int32)">
             <inheritdoc />
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.TryDetectReLoginOverlayByPixels(System.IntPtr)">
+            <summary>
+            DirectUI 自绘重登弹层兜底检测。
+            截图中的“你已退出微信”弹层文字无法通过 GetWindowText 读取，
+            但中部会出现一块浅灰色“确定”按钮；普通二维码页/进入微信页在该区域没有这块灰按钮。
+            </summary>
         </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.V2.MainPageV2ViewModel">
              <summary>

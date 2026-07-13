@@ -1,10 +1,13 @@
 using HRB.Payment.Message.Client.BusEvents;
 using HRB.Payment.Message.Core.BusEvents;
 using HRB.Platform.Client.Core.Interfaces;
+using HRB.Platform.Client.WPF.PaymentAppModule.Core.Configuration;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Extensions;
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Services;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
+using System.Windows.Media;
 using Application = System.Windows.Application;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
@@ -45,16 +48,24 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
         private int _autoLoginCooldown;
 
         // 自动隐藏
+        private const int AutoHideDelayCycles = 2;        // 登录后等2个周期(≈4s)，等待主窗口渲染完成
         private bool _autoHideDone;
+        private int _autoHideDelayCycleCount;
 
         // 二维码语音提醒
         private const int QrVoiceIntervalCycles = 8;      // 每8个周期(≈16s)提醒一次
         private int _qrVoiceCycleCount;
 
-        // 心跳检测：插件报告"工作中"不代表消息还在流动，定期发查询验证
+        // 心跳检测：插件报告"工作中"后，仍定期查询 VXModule.Shell 是否有应答
         private const int HeartbeatIntervalCycles = 30;   // 每30周期(≈60s)发一次心跳
         private int _heartbeatCycleCount;
         internal volatile bool HeartbeatPending;           // 心跳等待中；OnVXStatusAnswer 应答后清零
+
+        // 微信模块自恢复：仅在 VXModule.Shell 心跳无响应 / IsWork=false 后恢复。
+        // 不能按"多久没有收款消息"恢复，因为店铺无订单是正常业务状态。
+        private const int ModuleRecoveryCooldownCycles = 90;   // 恢复动作后至少≈3分钟内不重复恢复
+        private int _moduleRecoveryCooldownCycles;
+        private volatile bool _isRecoveringWeChatModule;
 
         /// <summary>
         /// VXModule 插件是否已确认工作（由外部通过 SetPluginWorking 更新）
@@ -113,8 +124,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
             _autoLoginRetryCount = 0;
             _autoLoginCooldown = 0;
             _autoHideDone = false;
+            _autoHideDelayCycleCount = 0;
             _heartbeatCycleCount = 0;
             _qrVoiceCycleCount = 0;
+            _moduleRecoveryCooldownCycles = 0;
+            _isRecoveringWeChatModule = false;
             HeartbeatPending = false;
         }
 
@@ -171,7 +185,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                     // ④ 语音播报
                     try
                     {
-                        await _ttsService.SpeakAsync("请重新登录微信");
+                        await EnsureAndPlayLocalVoiceAsync("请重新登录微信", "relogin_reminder.mp3");
                     }
                     catch
                     {
@@ -213,8 +227,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                 _autoLoginRetryCount = 0;
                 _autoLoginCooldown = 0;
                 _autoHideDone = false;
+                _autoHideDelayCycleCount = 0;
                 _heartbeatCycleCount = 0;
                 _qrVoiceCycleCount = 0;
+                _moduleRecoveryCooldownCycles = 0;
+                HeartbeatPending = false;
             }
 
             // 3. 检查微信是否已登录
@@ -232,7 +249,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                     await _weChatService.KillAllWeChatProcessesAsync();
                     await _pluginProcessService.CleanupExistingProcessesAsync();
 
-                    try { await _ttsService.SpeakAsync("请重新登录微信"); } catch { }
+                    try { await EnsureAndPlayLocalVoiceAsync("请重新登录微信", "relogin_reminder.mp3"); } catch { }
 
                     // 重启 HRB 客户端
                     Application.Current.Dispatcher.Invoke(() =>
@@ -280,14 +297,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                 if (_qrVoiceCycleCount >= QrVoiceIntervalCycles)
                 {
                     _qrVoiceCycleCount = 0;
-                    try
-                    {
-                        await _ttsService.SpeakAsync("请扫码登录微信");
-                    }
-                    catch
-                    {
-                        // 语音播报失败不影响后续流程
-                    }
+                    var _ = EnsureAndPlayLocalVoiceAsync("请扫码登录微信", "qr_login_reminder.mp3");
                 }
 
                 return;
@@ -301,16 +311,37 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                 var settings = _appContext.CurrentSettings;
                 if (settings.IsWeChatAutoHideEnabled)
                 {
-                    await _weChatService.HideWeChatWindowsAsync(_weChatProcessId);
-                    _log.Info("[WeChatMonitor] 自动隐藏：微信窗口已隐藏");
+                    _autoHideDelayCycleCount++;
+                    if (_autoHideDelayCycleCount < AutoHideDelayCycles)
+                    {
+                        _log.Info($"[WeChatMonitor] 自动隐藏：等待微信主窗口就绪({_autoHideDelayCycleCount}/{AutoHideDelayCycles})");
+                        return;
+                    }
+
+                    var hidden = await _weChatService.HideWeChatWindowsAsync(_weChatProcessId);
+                    if (hidden)
+                    {
+                        _autoHideDone = true;
+                        _log.Info("[WeChatMonitor] 自动隐藏：微信主窗口已隐藏");
+                    }
+                    else
+                    {
+                        _log.Info("[WeChatMonitor] 自动隐藏：未找到微信主窗口，下一轮重试");
+                    }
                 }
-                _autoHideDone = true;
+                else
+                {
+                    _autoHideDone = true;
+                }
             }
 
-            // 4. 心跳检测：插件报告"工作中"不代表消息还在流动
-            //    每 HeartbeatIntervalCycles(≈60s) 发一次查询，确认 Hook 仍在工作
+            // 4. 心跳检测：插件报告"工作中"后，仍需定期确认 VXModule.Shell 是否有应答。
+            //    注意：不能按"多久没有收款消息"触发恢复，因为店铺长时间无订单是正常业务状态。
             if (PluginIsWorking)
             {
+                if (_moduleRecoveryCooldownCycles > 0)
+                    _moduleRecoveryCooldownCycles--;
+
                 _heartbeatCycleCount++;
 
                 if (_heartbeatCycleCount >= HeartbeatIntervalCycles)
@@ -319,16 +350,14 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
 
                     // 发查询；用 HeartbeatPending 标记，不碰 PluginIsWorking
                     // 如果插件正常应答 → OnVXStatusAnswer 在 WeChatChannelPlugin 中清零 HeartbeatPending
-                    // 如果超时无应答 → Hook 已失活，设 PluginIsWorking=false 触发下轮重注入
+                    // 如果超时无应答 → 清理 VXModule.Shell 并重新注入，避免界面显示已注入但模块实际失活
                     HeartbeatPending = true;
                     _eventAggregator.GetEvent<GetVXStatusRequestEvent>().Publish();
                     await Task.Delay(2000, token);
 
                     if (HeartbeatPending)
                     {
-                        HeartbeatPending = false;
-                        PluginIsWorking = false;
-                        _log.Info("[WeChatMonitor] 心跳检测：插件超时无应答，Hook 可能已失活，下一轮自动重新注入");
+                        await RecoverWeChatModuleAsync("心跳检测超时无应答，Hook 或通信可能已失活", token);
                     }
                 }
 
@@ -354,6 +383,99 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
             {
                 _log.Info($"[WeChatMonitor] 发送注入命令, PID={_weChatProcessId}");
                 _eventAggregator.GetEvent<StartVXModuleEvent>().Publish(_weChatProcessId);
+            }
+        }
+
+        /// <summary>
+        /// 微信模块自恢复：只清理 VXModule.Shell.exe 并重新注入，不杀微信、不重启主程序。
+        /// </summary>
+        private async Task RecoverWeChatModuleAsync(string reason, CancellationToken token)
+        {
+            if (_isRecoveringWeChatModule || _moduleRecoveryCooldownCycles > 0)
+                return;
+
+            _isRecoveringWeChatModule = true;
+            try
+            {
+                _log.Info($"[WeChatMonitor] 微信模块自恢复：{reason}");
+
+                HeartbeatPending = false;
+                PluginIsWorking = false;
+                _heartbeatCycleCount = 0;
+                _moduleRecoveryCooldownCycles = ModuleRecoveryCooldownCycles;
+
+                // 关键：只清理微信模块进程，避免 CleanupExistingProcessesAsync 误杀 WeChat.exe / 总服务 / 支付宝模块。
+                await _pluginProcessService.StopProcessAsync(PluginSettings.WeChatShellExe, "微信模块自恢复：停止 VXModule.Shell");
+                await Task.Delay(1000, token);
+
+                await _pluginProcessService.StartWeChatShellAsync();
+                await Task.Delay(1000, token);
+
+                if (_weChatProcessId > 0)
+                {
+                    _log.Info($"[WeChatMonitor] 微信模块自恢复：重新发送注入命令, PID={_weChatProcessId}");
+                    _eventAggregator.GetEvent<StartVXModuleEvent>().Publish(_weChatProcessId);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _log.Info($"[WeChatMonitor] 微信模块自恢复异常: {ex.Message}");
+            }
+            finally
+            {
+                _isRecoveringWeChatModule = false;
+            }
+        }
+
+        /// <summary>
+        /// 确保本地有固定语音 MP3，没有则 TTS 生成，再用 MediaPlayer 本地播放。
+        /// 不阻塞监控循环。
+        /// </summary>
+        private async Task EnsureAndPlayLocalVoiceAsync(string text, string fileName)
+        {
+            try
+            {
+                var dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Sounds");
+                Directory.CreateDirectory(dir);
+                var filePath = Path.Combine(dir, fileName);
+
+                // ① 本地文件不存在 → TTS 生成到本地
+                if (!File.Exists(filePath))
+                {
+                    var ok = await _ttsService.SaveToFileAsync(text, filePath);
+                    if (!ok) return; // 生成失败，跳过
+                }
+
+                // ② UI 线程播放本地 MP3
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    var player = new MediaPlayer();
+                    var tcs = new TaskCompletionSource<bool>();
+
+                    player.MediaEnded += (_, _) =>
+                    {
+                        player.Close();
+                        tcs.TrySetResult(true);
+                    };
+                    player.MediaFailed += (_, _) =>
+                    {
+                        player.Close();
+                        tcs.TrySetResult(false);
+                    };
+
+                    player.Open(new Uri(filePath));
+                    player.Play();
+
+                    return tcs.Task;
+                });
+            }
+            catch
+            {
+                // 语音播放失败不影响监控
             }
         }
     }

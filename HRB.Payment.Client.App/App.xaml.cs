@@ -26,6 +26,7 @@ namespace HRB.Payment.Client.App
     {
         private static Mutex _mutex = null;
         private const string MutexName = "HRBPaymentClientSingleInstanceMutex";
+        private LogCleanupService? _logCleanupService;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -56,6 +57,10 @@ namespace HRB.Payment.Client.App
                 RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
             }
 
+            // 启动日志清理：首次打开软件立即检查一次，之后每隔 15 天清理一次 15 天前日志。
+            _logCleanupService = new LogCleanupService(AppDomain.CurrentDomain.BaseDirectory);
+            _logCleanupService.Start();
+
 
             // 继续正常启动流程
             base.OnStartup(e);
@@ -72,6 +77,9 @@ namespace HRB.Payment.Client.App
 
         protected override void OnExit(ExitEventArgs e)
         {
+            _logCleanupService?.Dispose();
+            _logCleanupService = null;
+
             // 释放 Mutex
             _mutex?.ReleaseMutex();
             _mutex?.Dispose();

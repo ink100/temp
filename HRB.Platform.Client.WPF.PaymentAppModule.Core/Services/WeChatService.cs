@@ -458,7 +458,48 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
+        private static extern bool SetCursorPos(int X, int Y);
+
+        [DllImport("user32.dll")]
+        private static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, UIntPtr dwExtraInfo);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetDC(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+
+        [DllImport("gdi32.dll")]
+        private static extern uint GetPixel(IntPtr hdc, int nXPos, int nYPos);
+
+        [DllImport("user32.dll")]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
+        private static extern int GetWindowLong32(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLong")]
+        private static extern int SetWindowLong32(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr")]
+        private static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
+        private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+        private static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
+        {
+            return IntPtr.Size == 8
+                ? GetWindowLongPtr64(hWnd, nIndex)
+                : new IntPtr(GetWindowLong32(hWnd, nIndex));
+        }
+
+        private static IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+        {
+            return IntPtr.Size == 8
+                ? SetWindowLongPtr64(hWnd, nIndex, dwNewLong)
+                : new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
+        }
 
         [DllImport("kernel32.dll")]
         private static extern void Sleep(uint dwMilliseconds);
@@ -474,8 +515,12 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 
         private const uint WM_LBUTTONDOWN = 0x0201;
         private const uint WM_LBUTTONUP = 0x0202;
+        private const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
+        private const uint MOUSEEVENTF_LEFTUP = 0x0004;
         private const int SW_HIDE = 0;
         private const int SW_MINIMIZE = 6;
+        private const int GWL_STYLE = -16;
+        private const long WS_VISIBLE = 0x10000000L;
 
         #endregion
 
@@ -511,13 +556,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     if (!foundLoginWindow || loginWindow == IntPtr.Zero)
                         return false;
 
-                    // 2. GetWindowText 预检 — 标题为"微信"说明还没扫码，跳过昂贵枚举
-                    var titleBuilder = new StringBuilder(256);
-                    GetWindowText(loginWindow, titleBuilder, titleBuilder.Capacity);
-                    if (titleBuilder.ToString() == "微信")
-                        return false;
-
-                    // 3. EnumChildWindows → 查找"登录"按钮
+                    // 2. 优先尝试标准子控件按钮（某些环境可枚举到）
                     IntPtr loginButton = IntPtr.Zero;
 
                     EnumChildWindows(loginWindow, (hWnd, lParam) =>
@@ -529,7 +568,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                         GetWindowText(hWnd, btnTextBuilder, btnTextBuilder.Capacity);
                         var btnText = btnTextBuilder.ToString();
 
-                        if (btnText.Contains("登录") || btnText.Contains("登錄"))
+                        if (btnText.Contains("登录") || btnText.Contains("登錄") || btnText.Contains("进入微信"))
                         {
                             loginButton = hWnd;
                             return false; // 停止枚举
@@ -537,19 +576,39 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                         return true;
                     }, IntPtr.Zero);
 
-                    if (loginButton == IntPtr.Zero)
+                    if (loginButton != IntPtr.Zero)
+                    {
+                        SetForegroundWindow(loginWindow);
+                        GetWindowRect(loginButton, out var buttonRect);
+                        int buttonX = (buttonRect.Left + buttonRect.Right) / 2;
+                        int buttonY = (buttonRect.Top + buttonRect.Bottom) / 2;
+                        IntPtr lParamClick = (IntPtr)((buttonY << 16) | (buttonX & 0xFFFF));
+
+                        PostMessage(loginButton, WM_LBUTTONDOWN, IntPtr.Zero, lParamClick);
+                        Sleep(50);
+                        PostMessage(loginButton, WM_LBUTTONUP, IntPtr.Zero, lParamClick);
+                        return true;
+                    }
+
+                    // 3. 微信 3.9.x 登录窗口是 DirectUI，自绘按钮通常枚举不到。
+                    // 不能再用窗口标题“微信”判断二维码页，因为“进入微信”确认页标题也叫“微信”。
+                    // 这里改为检测窗口下半部是否存在微信绿色大按钮：
+                    // - 有绿色按钮：说明是“进入微信”页，坐标点击按钮中心；
+                    // - 没有绿色按钮：说明大概率是二维码页，只让上层播报“请扫码登录微信”。
+                    SetForegroundWindow(loginWindow);
+                    Sleep(100);
+
+                    if (!GetWindowRect(loginWindow, out var rect))
                         return false;
 
-                    // 4. 模拟点击
-                    SetForegroundWindow(loginWindow);
-                    GetWindowRect(loginButton, out var rect);
-                    int x = (rect.Left + rect.Right) / 2;
-                    int y = (rect.Top + rect.Bottom) / 2;
-                    IntPtr lParamClick = (IntPtr)((y << 16) | (x & 0xFFFF));
+                    if (!TryFindGreenLoginButtonCenter(rect, out var x, out var y))
+                        return false;
 
-                    PostMessage(loginButton, WM_LBUTTONDOWN, IntPtr.Zero, lParamClick);
+                    SetCursorPos(x, y);
                     Sleep(50);
-                    PostMessage(loginButton, WM_LBUTTONUP, IntPtr.Zero, lParamClick);
+                    mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)x, (uint)y, 0, UIntPtr.Zero);
+                    Sleep(80);
+                    mouse_event(MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, UIntPtr.Zero);
 
                     return true;
                 }
@@ -560,30 +619,114 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             });
         }
 
+        /// <summary>
+        /// 在登录窗口中检测“进入微信”绿色按钮，并返回按钮中心坐标。
+        /// 二维码页没有这个绿色大按钮，因此不会误点二维码页。
+        /// </summary>
+        private static bool TryFindGreenLoginButtonCenter(RECT rect, out int centerX, out int centerY)
+        {
+            centerX = 0;
+            centerY = 0;
+
+            var width = rect.Right - rect.Left;
+            var height = rect.Bottom - rect.Top;
+            if (width <= 120 || height <= 180)
+                return false;
+
+            // “进入微信”按钮通常在窗口下半部，中间横向区域。
+            var startX = rect.Left + (int)(width * 0.18);
+            var endX = rect.Left + (int)(width * 0.82);
+            var startY = rect.Top + (int)(height * 0.58);
+            var endY = rect.Top + (int)(height * 0.82);
+
+            var hdc = GetDC(IntPtr.Zero);
+            if (hdc == IntPtr.Zero)
+                return false;
+
+            try
+            {
+                long sumX = 0;
+                long sumY = 0;
+                int greenCount = 0;
+
+                // 低频采样，避免低配机器上过重；微信按钮绿色面积较大，步长 4 足够识别。
+                for (var y = startY; y <= endY; y += 4)
+                {
+                    for (var x = startX; x <= endX; x += 4)
+                    {
+                        var color = GetPixel(hdc, x, y);
+                        if (color == 0xFFFFFFFF)
+                            continue;
+
+                        var r = (int)(color & 0xFF);
+                        var g = (int)((color >> 8) & 0xFF);
+                        var b = (int)((color >> 16) & 0xFF);
+
+                        // WeChat 绿色按钮常见色接近 #07C160，允许抗锯齿/主题差异。
+                        if (g >= 140 && r <= 80 && b <= 120 && g - r >= 70 && g - b >= 40)
+                        {
+                            greenCount++;
+                            sumX += x;
+                            sumY += y;
+                        }
+                    }
+                }
+
+                // 二维码页可能有少量绿色装饰/图标，要求足够面积才认为是按钮。
+                if (greenCount < 80)
+                    return false;
+
+                centerX = (int)(sumX / greenCount);
+                centerY = (int)(sumY / greenCount);
+                return true;
+            }
+            finally
+            {
+                ReleaseDC(IntPtr.Zero, hdc);
+            }
+        }
+
         /// <inheritdoc />
-        public Task HideWeChatWindowsAsync(int processId)
+        public Task<bool> HideWeChatWindowsAsync(int processId)
         {
             return Task.Run(() =>
             {
                 try
                 {
+                    var hidden = false;
+
                     EnumWindows((hWnd, lParam) =>
                     {
                         GetWindowThreadProcessId(hWnd, out var pid);
                         if ((int)pid != processId) return true;
 
-                        if (IsWindowVisible(hWnd))
-                        {
-                            ShowWindow(hWnd, SW_MINIMIZE);
-                            Sleep(100);
-                            ShowWindow(hWnd, SW_HIDE);
-                        }
+                        var classNameBuilder = new StringBuilder(256);
+                        GetClassName(hWnd, classNameBuilder, classNameBuilder.Capacity);
+                        var className = classNameBuilder.ToString();
+
+                        // 只隐藏微信主窗口，避免误处理登录/弹窗窗口
+                        if (!className.Contains("WeChatMainWndForPC"))
+                            return true;
+
+                        ShowWindow(hWnd, SW_MINIMIZE);
+                        Sleep(150);
+                        ShowWindow(hWnd, SW_HIDE);
+
+                        // 移除 WS_VISIBLE，防止微信登录后短时间内把窗口重新显示出来
+                        var style = GetWindowLongPtr(hWnd, GWL_STYLE);
+                        var newStyle = new IntPtr(style.ToInt64() & ~WS_VISIBLE);
+                        SetWindowLongPtr(hWnd, GWL_STYLE, newStyle);
+
+                        hidden = true;
                         return true;
                     }, IntPtr.Zero);
+
+                    return hidden;
                 }
                 catch
                 {
-                    // 隐藏窗口是尽力而为的操作，忽略异常
+                    // 隐藏窗口是尽力而为的操作
+                    return false;
                 }
             });
         }
@@ -722,7 +865,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                             return false;
                         }
 
-                        // 枚举子控件文字
+                        // 枚举子控件文字。注意：微信登录页多数是 DirectUI，自绘文字可能枚举不到。
                         EnumChildWindows(hWnd, (child, _) =>
                         {
                             var childText = new StringBuilder(256);
@@ -735,7 +878,17 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                             return true;
                         }, IntPtr.Zero);
 
-                        return !isReLogin; // 找到就停止
+                        if (isReLogin)
+                            return false;
+
+                        // DirectUI 自绘弹层兜底：如截图中的“你已退出微信 + 确定”灰色按钮，文字读不到，改用像素特征判断。
+                        if (TryDetectReLoginOverlayByPixels(hWnd))
+                        {
+                            isReLogin = true;
+                            return false;
+                        }
+
+                        return true;
                     }, IntPtr.Zero);
 
                     return isReLogin;
@@ -758,6 +911,83 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 || text.Contains("重新登录")
                 || text.Contains("在其他设备登录")
                 || text.Contains("账号在别处");
+        }
+
+        /// <summary>
+        /// DirectUI 自绘重登弹层兜底检测。
+        /// 截图中的“你已退出微信”弹层文字无法通过 GetWindowText 读取，
+        /// 但中部会出现一块浅灰色“确定”按钮；普通二维码页/进入微信页在该区域没有这块灰按钮。
+        /// </summary>
+        private static bool TryDetectReLoginOverlayByPixels(IntPtr loginWindow)
+        {
+            try
+            {
+                SetForegroundWindow(loginWindow);
+                Sleep(80);
+
+                if (!GetWindowRect(loginWindow, out var rect))
+                    return false;
+
+                var width = rect.Right - rect.Left;
+                var height = rect.Bottom - rect.Top;
+                if (width <= 120 || height <= 180)
+                    return false;
+
+                // “确定”灰按钮大致位于登录窗口中部偏下，横向居中。
+                var startX = rect.Left + (int)(width * 0.32);
+                var endX = rect.Left + (int)(width * 0.68);
+                var startY = rect.Top + (int)(height * 0.50);
+                var endY = rect.Top + (int)(height * 0.68);
+
+                var hdc = GetDC(IntPtr.Zero);
+                if (hdc == IntPtr.Zero)
+                    return false;
+
+                try
+                {
+                    var grayCount = 0;
+                    var greenTextCount = 0;
+
+                    for (var y = startY; y <= endY; y += 3)
+                    {
+                        for (var x = startX; x <= endX; x += 3)
+                        {
+                            var color = GetPixel(hdc, x, y);
+                            if (color == 0xFFFFFFFF)
+                                continue;
+
+                            var r = (int)(color & 0xFF);
+                            var g = (int)((color >> 8) & 0xFF);
+                            var b = (int)((color >> 16) & 0xFF);
+
+                            // 确定按钮背景为浅灰，允许抗锯齿和显示缩放差异。
+                            var max = Math.Max(r, Math.Max(g, b));
+                            var min = Math.Min(r, Math.Min(g, b));
+                            if (r >= 215 && g >= 215 && b >= 215 && r <= 250 && g <= 250 && b <= 250 && max - min <= 18)
+                            {
+                                grayCount++;
+                            }
+
+                            // 按钮文字通常是微信绿色，作为辅助特征，不强制要求。
+                            if (g >= 120 && r <= 120 && b <= 140 && g - r >= 35 && g - b >= 15)
+                            {
+                                greenTextCount++;
+                            }
+                        }
+                    }
+
+                    // 普通“进入微信”页在这个区域通常是白底/头像/昵称，不会有大量浅灰按钮块。
+                    return grayCount >= 180 || (grayCount >= 100 && greenTextCount >= 3);
+                }
+                finally
+                {
+                    ReleaseDC(IntPtr.Zero, hdc);
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         #endregion

@@ -22,5 +22,17 @@
             Application Entry Point.
             </summary>
         </member>
+        <member name="T:HRB.Payment.Client.App.LogCleanupService">
+            <summary>
+            启动后定期清理旧日志。
+            规则：每隔 15 天执行一次清理，删除 15 天前的日志文件，并记录每次清理时间和结果。
+            </summary>
+        </member>
+        <member name="M:HRB.Payment.Client.App.LogCleanupService.Start">
+            <summary>
+            启动定时检查。首次启动立即检查一次，后续每 12 小时检查一次；
+            只有距离上次清理满 15 天才真正删除旧日志。
+            </summary>
+        </member>
     </members>
 </doc>

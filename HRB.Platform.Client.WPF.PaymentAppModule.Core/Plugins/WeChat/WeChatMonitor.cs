@@ -42,11 +42,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
         private int _weChatProcessId = -1;
 
         // 自动登录
-        private const int AutoLoginCooldownCycles = 3;    // 每3个周期(≈6s)执行一次
-        private const int AutoLoginTransitionWaitCycles = 2; // 点击后约6s再重试：等待2个周期，下一周期重新检测
-        private const int MaxAutoLoginRetries = 30;        // 最多重试30次(每次间隔≈6s，总计≈3分钟)
         private int _autoLoginRetryCount;
-        private int _autoLoginCooldown;
+        private int _autoLoginCooldown = -1;
         private int _autoLoginTransitionWaitCycles;
 
         // 自动隐藏
@@ -55,8 +52,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
         private int _autoHideDelayCycleCount;
 
         // 二维码语音提醒
-        private const int QrVoiceIntervalCycles = 8;      // 每8个周期(≈16s)提醒一次
-        private int _qrVoiceCycleCount;
+        private int _qrVoiceCycleCount = -1;
+        private const int MonitorIntervalSeconds = 2;
 
         // 心跳检测：插件报告"工作中"后，仍定期查询 VXModule.Shell 是否有应答
         private const int HeartbeatIntervalCycles = 30;   // 每30周期(≈60s)发一次心跳
@@ -124,12 +121,12 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
             PluginIsWorking = false;
             _weChatProcessId = -1;
             _autoLoginRetryCount = 0;
-            _autoLoginCooldown = 0;
+            _autoLoginCooldown = -1;
             _autoLoginTransitionWaitCycles = 0;
             _autoHideDone = false;
             _autoHideDelayCycleCount = 0;
             _heartbeatCycleCount = 0;
-            _qrVoiceCycleCount = 0;
+            _qrVoiceCycleCount = -1;
             _moduleRecoveryCooldownCycles = 0;
             _isRecoveringWeChatModule = false;
             HeartbeatPending = false;
@@ -144,7 +141,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                 try
                 {
                     await CheckCycleAsync(token);
-                    await Task.Delay(2000, token);
+                    await Task.Delay(TimeSpan.FromSeconds(MonitorIntervalSeconds), token);
                 }
                 catch (TaskCanceledException)
                 {
@@ -228,12 +225,12 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                 _weChatProcessId = processInfo.ProcessId;
                 PluginIsWorking = false;
                 _autoLoginRetryCount = 0;
-                _autoLoginCooldown = 0;
+                _autoLoginCooldown = -1;
                 _autoLoginTransitionWaitCycles = 0;
                 _autoHideDone = false;
                 _autoHideDelayCycleCount = 0;
                 _heartbeatCycleCount = 0;
-                _qrVoiceCycleCount = 0;
+                _qrVoiceCycleCount = -1;
                 _moduleRecoveryCooldownCycles = 0;
                 HeartbeatPending = false;
             }
@@ -277,8 +274,17 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
 
                 // —— 自动登录逻辑 ——
                 var settings = _appContext.CurrentSettings;
+                var configuredAutoLoginIntervalSeconds = settings.WeChatAutoLoginRetryIntervalSeconds <= 0
+                    ? 6
+                    : settings.WeChatAutoLoginRetryIntervalSeconds;
+                var configuredMaxAutoLoginRetries = settings.WeChatAutoLoginMaxRetries <= 0
+                    ? 30
+                    : settings.WeChatAutoLoginMaxRetries;
+                var autoLoginIntervalCycles = SecondsToMonitorCycles(
+                    Math.Clamp(configuredAutoLoginIntervalSeconds, 2, 300));
+                var maxAutoLoginRetries = Math.Clamp(configuredMaxAutoLoginRetries, 1, 300);
                 if (settings.IsWeChatEnabled && settings.IsWeChatAutoLoginEnabled
-                    && _autoLoginRetryCount < MaxAutoLoginRetries)
+                    && _autoLoginRetryCount < maxAutoLoginRetries)
                 {
                     if (_autoLoginTransitionWaitCycles > 0)
                     {
@@ -288,7 +294,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                     {
                         _autoLoginCooldown++;
 
-                        if (_autoLoginCooldown >= AutoLoginCooldownCycles)
+                        if (_autoLoginCooldown >= autoLoginIntervalCycles)
                         {
                             _autoLoginCooldown = 0;
                             _autoLoginRetryCount++;
@@ -298,20 +304,39 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
                             {
                                 // 点击动作成功不等于微信已完成登录；先等待状态转换，
                                 // 超时后仍未登录才重新检测并点击，避免转换期间连续抢焦点。
-                                _autoLoginTransitionWaitCycles = AutoLoginTransitionWaitCycles;
-                                _autoLoginCooldown = AutoLoginCooldownCycles;
+                                _autoLoginTransitionWaitCycles = Math.Max(0, autoLoginIntervalCycles - 1);
+                                _autoLoginCooldown = autoLoginIntervalCycles;
                                 _log.Info("[WeChatMonitor] 自动登录：已点击登录按钮，等待微信登录状态确认");
                             }
                         }
                     }
                 }
+                else if (!settings.IsWeChatAutoLoginEnabled)
+                {
+                    // 再次启用时重新等待完整配置间隔，避免立刻点击。
+                    _autoLoginCooldown = -1;
+                    _autoLoginTransitionWaitCycles = 0;
+                }
 
                 // —— 二维码语音提醒 ——
-                _qrVoiceCycleCount++;
-                if (_qrVoiceCycleCount >= QrVoiceIntervalCycles)
+                if (settings.IsWeChatQrLoginVoiceEnabled)
                 {
-                    _qrVoiceCycleCount = 0;
-                    var _ = EnsureAndPlayLocalVoiceAsync("请扫码登录微信", "qr_login_reminder.mp3");
+                    var configuredQrVoiceIntervalSeconds = settings.WeChatQrLoginVoiceIntervalSeconds <= 0
+                        ? 16
+                        : settings.WeChatQrLoginVoiceIntervalSeconds;
+                    var qrVoiceIntervalCycles = SecondsToMonitorCycles(
+                        Math.Clamp(configuredQrVoiceIntervalSeconds, 5, 3600));
+                    _qrVoiceCycleCount++;
+                    if (_qrVoiceCycleCount >= qrVoiceIntervalCycles)
+                    {
+                        _qrVoiceCycleCount = 0;
+                        var _ = EnsureAndPlayLocalVoiceAsync("请扫码登录微信", "qr_login_reminder.mp3");
+                    }
+                }
+                else
+                {
+                    // 再次启用时重新等待完整配置间隔，避免立刻播报。
+                    _qrVoiceCycleCount = -1;
                 }
 
                 return;
@@ -320,8 +345,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
             // —— 已登录 ——
             // 同一 PID 后续若重新回到未登录状态，必须从全新重试窗口开始。
             _autoLoginRetryCount = 0;
-            _autoLoginCooldown = 0;
+            _autoLoginCooldown = -1;
             _autoLoginTransitionWaitCycles = 0;
+            _qrVoiceCycleCount = -1;
 
             // —— 自动隐藏逻辑 ——
             if (!_autoHideDone)
@@ -447,6 +473,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
             {
                 _isRecoveringWeChatModule = false;
             }
+        }
+
+        private static int SecondsToMonitorCycles(int seconds)
+        {
+            return Math.Max(1, (int)Math.Ceiling(seconds / (double)MonitorIntervalSeconds));
         }
 
         /// <summary>

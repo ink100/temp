@@ -162,6 +162,39 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             }
         }
 
+        public int WeChatAutoLoginRetryIntervalSeconds
+        {
+            get;
+            set
+            {
+                var safeValue = Math.Clamp(value, 2, 300);
+                if (SetProperty(ref field, safeValue) && !_isLoadingGeneralSettings)
+                    SaveGeneralSettings();
+            }
+        } = 6;
+
+        public int WeChatAutoLoginMaxRetries
+        {
+            get;
+            set
+            {
+                var safeValue = Math.Clamp(value, 1, 300);
+                if (SetProperty(ref field, safeValue) && !_isLoadingGeneralSettings)
+                    SaveGeneralSettings();
+            }
+        } = 30;
+
+        public int WeChatQrLoginVoiceIntervalSeconds
+        {
+            get;
+            set
+            {
+                var safeValue = Math.Clamp(value, 5, 3600);
+                if (SetProperty(ref field, safeValue) && !_isLoadingGeneralSettings)
+                    SaveGeneralSettings();
+            }
+        } = 16;
+
         // 每天凌晨 1 点自动同步 Windows 系统时间
         public bool IsAutoSyncSystemTimeEnabled
         {
@@ -661,6 +694,12 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
                 IsAutoStartEnabled = actualAutoStartEnabled;
                 IsAutoScrollToLatestEnabled = settings.IsAutoScrollToLatestEnabled;
                 IsWeChatListenerConsoleOutputEnabled = settings.IsWeChatListenerConsoleOutputEnabled;
+                WeChatAutoLoginRetryIntervalSeconds = Math.Clamp(
+                    settings.WeChatAutoLoginRetryIntervalSeconds <= 0 ? 6 : settings.WeChatAutoLoginRetryIntervalSeconds, 2, 300);
+                WeChatAutoLoginMaxRetries = Math.Clamp(
+                    settings.WeChatAutoLoginMaxRetries <= 0 ? 30 : settings.WeChatAutoLoginMaxRetries, 1, 300);
+                WeChatQrLoginVoiceIntervalSeconds = Math.Clamp(
+                    settings.WeChatQrLoginVoiceIntervalSeconds <= 0 ? 16 : settings.WeChatQrLoginVoiceIntervalSeconds, 5, 3600);
                 WeChatListenerConsoleDebug.RefreshConsoleState();
                 IsAutoSyncSystemTimeEnabled = settings.IsAutoSyncSystemTimeEnabled;
                 LastSystemTimeSyncText = BuildLastSystemTimeSyncText(settings.LastSystemTimeSyncTime, settings.LastSystemTimeSyncResult);
@@ -720,6 +759,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.V2
             settings.IsAutoStartEnabled = IsAutoStartEnabled;
             settings.IsAutoScrollToLatestEnabled = IsAutoScrollToLatestEnabled;
             settings.IsWeChatListenerConsoleOutputEnabled = IsWeChatListenerConsoleOutputEnabled;
+            settings.WeChatAutoLoginRetryIntervalSeconds = Math.Clamp(WeChatAutoLoginRetryIntervalSeconds, 2, 300);
+            settings.WeChatAutoLoginMaxRetries = Math.Clamp(WeChatAutoLoginMaxRetries, 1, 300);
+            settings.WeChatQrLoginVoiceIntervalSeconds = Math.Clamp(WeChatQrLoginVoiceIntervalSeconds, 5, 3600);
             settings.IsAutoSyncSystemTimeEnabled = IsAutoSyncSystemTimeEnabled;
             settings.IsScanNotPayVoiceEnabled = IsScanNotPayVoiceEnabled;
             settings.ScanTimeoutSeconds = Math.Clamp(ScanTimeoutSeconds, 1, 3600);

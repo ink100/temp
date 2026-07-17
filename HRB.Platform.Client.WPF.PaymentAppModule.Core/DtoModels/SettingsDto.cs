@@ -154,6 +154,16 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
         public bool IsWeChatAutoLoginEnabled { get; set; } = true;
 
         /// <summary>
+        /// 微信自动登录点击重试间隔秒数，范围 2-300 秒。
+        /// </summary>
+        public int WeChatAutoLoginRetryIntervalSeconds { get; set; } = 6;
+
+        /// <summary>
+        /// 微信自动登录最大重试次数，范围 1-300 次。
+        /// </summary>
+        public int WeChatAutoLoginMaxRetries { get; set; } = 30;
+
+        /// <summary>
         /// 是否启用微信登录后自动隐藏窗口
         /// </summary>
         public bool IsWeChatAutoHideEnabled { get; set; } = true;
@@ -162,6 +172,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels
         /// 是否启用微信登录二维码语音提醒（检测到扫码界面时播报"请扫码登录微信"）
         /// </summary>
         public bool IsWeChatQrLoginVoiceEnabled { get; set; } = true;
+
+        /// <summary>
+        /// 微信未登录二维码语音提醒间隔秒数，范围 5-3600 秒。
+        /// </summary>
+        public int WeChatQrLoginVoiceIntervalSeconds { get; set; } = 16;
 
         /// <summary>
         /// 是否启用微信监听控制台输出（调试用）

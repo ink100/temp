@@ -913,6 +913,10 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="15" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="15" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="15" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <!--  标题  -->
@@ -1018,6 +1022,47 @@
                                     </Style>
                                 </CheckBox.Style>
                             </CheckBox>
+                        </Grid>
+
+                        <Grid Grid.Row="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock FontSize="16" FontWeight="Bold" Foreground="#333333" Text="扫码登录语音提醒" />
+                                <TextBlock Margin="0,5,0,0" FontSize="12" Foreground="#999999" Text="微信未登录时周期播报“请扫码登录微信”" />
+                            </StackPanel>
+                            <CheckBox Grid.Column="1"
+                                      VerticalAlignment="Center"
+                                      Content="启用"
+                                      FontSize="14"
+                                      IsChecked="{Binding IsWeChatQrLoginVoiceEnabled, Mode=TwoWay}" />
+                        </Grid>
+
+                        <Grid Grid.Row="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock FontSize="14" FontWeight="Bold" Foreground="#333333" Text="自动登录重试间隔（秒）" />
+                                <TextBlock Margin="0,3,0,6" FontSize="11" Foreground="#999999" Text="范围 2-300，默认 6" />
+                                <TextBox Padding="8" FontSize="14" Text="{Binding WeChatAutoLoginRetryIntervalSeconds, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock FontSize="14" FontWeight="Bold" Foreground="#333333" Text="自动登录最大重试次数" />
+                                <TextBlock Margin="0,3,0,6" FontSize="11" Foreground="#999999" Text="范围 1-300，默认 30" />
+                                <TextBox Padding="8" FontSize="14" Text="{Binding WeChatAutoLoginMaxRetries, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <TextBlock FontSize="14" FontWeight="Bold" Foreground="#333333" Text="未登录语音提醒间隔（秒）" />
+                                <TextBlock Margin="0,3,0,6" FontSize="11" Foreground="#999999" Text="范围 5-3600，默认 16" />
+                                <TextBox Padding="8" FontSize="14" Text="{Binding WeChatQrLoginVoiceIntervalSeconds, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            </StackPanel>
                         </Grid>
                     </Grid>
                 </Border>

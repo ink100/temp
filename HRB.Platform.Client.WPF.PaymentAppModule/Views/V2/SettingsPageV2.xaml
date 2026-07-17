@@ -301,6 +301,35 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+
+                        <Border Height="1" Margin="0,5,0,18" Background="#E0E0E0" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock FontSize="14" FontWeight="Bold" Foreground="#333333" Text="自动登录重试间隔（秒）" />
+                                <TextBlock Margin="0,3,0,6" FontSize="11" Foreground="#999999" Text="范围 2-300，默认 6" />
+                                <TextBox Padding="8" FontSize="14" Text="{Binding WeChatAutoLoginRetryIntervalSeconds, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock FontSize="14" FontWeight="Bold" Foreground="#333333" Text="自动登录最大重试次数" />
+                                <TextBlock Margin="0,3,0,6" FontSize="11" Foreground="#999999" Text="范围 1-300，默认 30" />
+                                <TextBox Padding="8" FontSize="14" Text="{Binding WeChatAutoLoginMaxRetries, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4">
+                                <TextBlock FontSize="14" FontWeight="Bold" Foreground="#333333" Text="未登录语音提醒间隔（秒）" />
+                                <TextBlock Margin="0,3,0,6" FontSize="11" Foreground="#999999" Text="范围 5-3600，默认 16" />
+                                <TextBox Padding="8" FontSize="14" Text="{Binding WeChatQrLoginVoiceIntervalSeconds, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Border>
 

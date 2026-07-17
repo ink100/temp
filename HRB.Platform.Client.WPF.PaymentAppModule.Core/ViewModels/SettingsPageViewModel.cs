@@ -65,6 +65,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
         private bool _isWeChatAutoLoginEnabled = true;
         private bool _isWeChatAutoHideEnabled = true;
         private bool _isWeChatQrLoginVoiceEnabled = true;
+        private int _weChatAutoLoginRetryIntervalSeconds = 6;
+        private int _weChatAutoLoginMaxRetries = 30;
+        private int _weChatQrLoginVoiceIntervalSeconds = 16;
         private bool _isAutoStartEnabled = false;
         private bool _useNewPluginLifecycleMode = false;
         private string _notificationUrl = string.Empty;
@@ -335,6 +338,39 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
                 {
                     SavePaymentSettings();
                 }
+            }
+        }
+
+        public int WeChatAutoLoginRetryIntervalSeconds
+        {
+            get => _weChatAutoLoginRetryIntervalSeconds;
+            set
+            {
+                var safeValue = Math.Clamp(value, 2, 300);
+                if (SetProperty(ref _weChatAutoLoginRetryIntervalSeconds, safeValue))
+                    SavePaymentSettings();
+            }
+        }
+
+        public int WeChatAutoLoginMaxRetries
+        {
+            get => _weChatAutoLoginMaxRetries;
+            set
+            {
+                var safeValue = Math.Clamp(value, 1, 300);
+                if (SetProperty(ref _weChatAutoLoginMaxRetries, safeValue))
+                    SavePaymentSettings();
+            }
+        }
+
+        public int WeChatQrLoginVoiceIntervalSeconds
+        {
+            get => _weChatQrLoginVoiceIntervalSeconds;
+            set
+            {
+                var safeValue = Math.Clamp(value, 5, 3600);
+                if (SetProperty(ref _weChatQrLoginVoiceIntervalSeconds, safeValue))
+                    SavePaymentSettings();
             }
         }
 
@@ -770,6 +806,12 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
                 _isWeChatAutoLoginEnabled = settings.IsWeChatAutoLoginEnabled;
                 _isWeChatAutoHideEnabled = settings.IsWeChatAutoHideEnabled;
                 _isWeChatQrLoginVoiceEnabled = settings.IsWeChatQrLoginVoiceEnabled;
+                _weChatAutoLoginRetryIntervalSeconds = Math.Clamp(
+                    settings.WeChatAutoLoginRetryIntervalSeconds <= 0 ? 6 : settings.WeChatAutoLoginRetryIntervalSeconds, 2, 300);
+                _weChatAutoLoginMaxRetries = Math.Clamp(
+                    settings.WeChatAutoLoginMaxRetries <= 0 ? 30 : settings.WeChatAutoLoginMaxRetries, 1, 300);
+                _weChatQrLoginVoiceIntervalSeconds = Math.Clamp(
+                    settings.WeChatQrLoginVoiceIntervalSeconds <= 0 ? 16 : settings.WeChatQrLoginVoiceIntervalSeconds, 5, 3600);
 
                 // 加载店铺名称和维护联系方式
                 _storeName = settings.StoreName;
@@ -792,6 +834,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
                 RaisePropertyChanged(nameof(IsWeChatAutoLoginEnabled));
                 RaisePropertyChanged(nameof(IsWeChatAutoHideEnabled));
                 RaisePropertyChanged(nameof(IsWeChatQrLoginVoiceEnabled));
+                RaisePropertyChanged(nameof(WeChatAutoLoginRetryIntervalSeconds));
+                RaisePropertyChanged(nameof(WeChatAutoLoginMaxRetries));
+                RaisePropertyChanged(nameof(WeChatQrLoginVoiceIntervalSeconds));
                 RaisePropertyChanged(nameof(IsAutoStartEnabled));
                 RaisePropertyChanged(nameof(UseNewPluginLifecycleMode));
                 RaisePropertyChanged(nameof(StoreName));
@@ -891,6 +936,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.ViewModels
                 settings.IsWeChatAutoLoginEnabled = _isWeChatAutoLoginEnabled;
                 settings.IsWeChatAutoHideEnabled = _isWeChatAutoHideEnabled;
                 settings.IsWeChatQrLoginVoiceEnabled = _isWeChatQrLoginVoiceEnabled;
+                settings.WeChatAutoLoginRetryIntervalSeconds = Math.Clamp(_weChatAutoLoginRetryIntervalSeconds, 2, 300);
+                settings.WeChatAutoLoginMaxRetries = Math.Clamp(_weChatAutoLoginMaxRetries, 1, 300);
+                settings.WeChatQrLoginVoiceIntervalSeconds = Math.Clamp(_weChatQrLoginVoiceIntervalSeconds, 5, 3600);
                 settings.IsAutoStartEnabled = _isAutoStartEnabled;
                 settings.UseNewPluginLifecycleMode = _useNewPluginLifecycleMode;
                 settings.StoreName = _storeName;

@@ -2912,6 +2912,12 @@
             二维码页没有这个绿色大按钮，因此不会误点二维码页。
             </summary>
         </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.TryClickScreenPointForProcess(System.IntPtr,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            对 DirectUI 自绘按钮执行物理点击。点击前后都复核坐标下窗口属于目标进程，
+            避免前台切换、窗口移动或用户操作时误点其他程序。
+            </summary>
+        </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.HideWeChatWindowsAsync(System.Int32)">
             <inheritdoc />
         </member>

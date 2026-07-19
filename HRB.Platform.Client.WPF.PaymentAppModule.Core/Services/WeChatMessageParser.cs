@@ -130,7 +130,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             catch (Exception ex)
             {
                 WeChatListenerConsoleDebug.WriteException("XML-ERROR", ex, xmlContent);
-                GlobalSettings.CurrentAppContext.CurrentLogger.Error($"XML 解析异常: {ex.Message}");
+                GlobalSettings.CurrentAppContext.CurrentLogger.Error(
+                    $"XML 解析异常: {ex.Message}{Environment.NewLine}" +
+                    $"===== 微信XML原始完整内容 START Length={xmlContent?.Length ?? 0} ====={Environment.NewLine}" +
+                    $"{xmlContent ?? "<null>"}{Environment.NewLine}" +
+                    "===== 微信XML原始完整内容 END =====");
                 return null;
             }
         }

@@ -2,6 +2,7 @@
 using HRB.Platform.Client.WPF.PaymentAppModule.Core.Helpers;
 using System.Diagnostics;
 using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
@@ -29,7 +30,30 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 
                 WeChatListenerConsoleDebug.Write("XML-RECV", $"MessageXmlLength={xmlContent.Length}");
                 WeChatListenerConsoleDebug.WriteBlock("XML-RAW", "微信Message XML完整内容", xmlContent);
-                var doc = XDocument.Parse(xmlContent);
+                XDocument doc;
+                var wasRecoveredFromTruncatedCData = false;
+                try
+                {
+                    doc = XDocument.Parse(xmlContent);
+                }
+                catch (XmlException ex) when (
+                    WeChatXmlRecovery.TryRepairTruncatedCData(
+                        xmlContent,
+                        out var repairedXml,
+                        out var omittedElementName))
+                {
+                    // VXModule.Shell 偶尔会在最后一个 CDATA 字段中途截断消息。
+                    // 只丢弃这个未完成字段，其余内容仍交给标准 XML 解析器和业务校验，
+                    // 避免通过字符串拼接直接构造支付对象。
+                    doc = XDocument.Parse(repairedXml);
+                    wasRecoveredFromTruncatedCData = true;
+                    WeChatListenerConsoleDebug.Write(
+                        "XML-RECOVERED",
+                        $"已恢复末尾CDATA截断消息：OmittedElement={omittedElementName}, OriginalLength={xmlContent.Length}, Error={ex.Message}");
+                    GlobalSettings.CurrentAppContext.CurrentLogger.Info(
+                        $"收到末尾CDATA截断的微信XML，已安全忽略未完成字段: {omittedElementName}");
+                }
+
                 var sysmsg = doc.Element("sysmsg");
 
                 // 验证消息类型是否为支付消息
@@ -49,9 +73,20 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 // 解析支付状态
                 var statusValue = GetElementValue(paymsg, "status");
                 PaymentStatus status = PaymentStatus.Scan; // 默认值
-                if (int.TryParse(statusValue, out int statusInt))
+                var parsedStatus = int.TryParse(statusValue, out int statusInt);
+                var hasValidStatus = parsedStatus && Enum.IsDefined(typeof(PaymentStatus), statusInt);
+                if (parsedStatus)
                 {
                     status = (PaymentStatus)statusInt;
+                }
+
+                // 缺失、非数字或未知状态不能回退为扫码事件，否则畸形消息可能触发 PaymentStarted。
+                if (!hasValidStatus)
+                {
+                    WeChatListenerConsoleDebug.Write(
+                        "XML-DROP-STATUS",
+                        $"丢弃缺少有效状态的微信支付消息：StatusRaw={statusValue}");
+                    return null;
                 }
 
                 // 构建支付消息对象
@@ -68,6 +103,15 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     Scene = GetElementValue(paymsg, "scene"),
                     Status = status
                 };
+
+                if (wasRecoveredFromTruncatedCData &&
+                    !IsSafeRecoveredPaymentMessage(message, out var recoveryRejectReason))
+                {
+                    WeChatListenerConsoleDebug.Write(
+                        "XML-DROP-RECOVERED",
+                        $"丢弃关键字段不完整的CDATA恢复消息：{recoveryRejectReason}, Status={message.Status}, TransId={message.TransId}, Fee={message.Fee}");
+                    return null;
+                }
 
                 if (IsInvalidEmptyPayMessage(message))
                 {
@@ -103,6 +147,27 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
             return element?.Value ?? string.Empty;
         }
 
+
+        private static bool IsSafeRecoveredPaymentMessage(PaymentMessage message, out string reason)
+        {
+            // 恢复消息采用比正常消息更严格的门槛，避免把关键字段已丢失的截断数据
+            // 降级为 TMP 订单或金额为 0 的支付成功事件。
+            if (string.IsNullOrWhiteSpace(message.TransId))
+            {
+                reason = "缺少完整订单号";
+                return false;
+            }
+
+            if (message.Status == PaymentStatus.Success &&
+                (!decimal.TryParse(message.Fee?.Trim(), out var feeInCents) || feeInCents <= 0))
+            {
+                reason = "支付成功消息缺少有效金额";
+                return false;
+            }
+
+            reason = string.Empty;
+            return true;
+        }
 
         private static bool IsInvalidEmptyPayMessage(PaymentMessage message)
         {

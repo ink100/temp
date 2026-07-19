@@ -163,8 +163,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat
         {
             if (!_statusService.IsWeChatPluginRunning)
             {
-                // VXModule.Shell 进程消失，重置状态
-                _monitor?.ResetPluginState();
+                // VXModule.Shell 消失只重置插件健康/注入状态。
+                // 不重置微信会话状态，否则自动登录或 PID 切换期间会清掉转换保护，误触发退出流程。
+                _monitor?.ResetPluginHealthState();
 
                 if (_status == ChannelStatus.Running || _status == ChannelStatus.Enabling)
                 {

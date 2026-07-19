@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Copyright © HR Brother 2025")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("\r\n      HRB.Platform.Client.WPF.Platform.Core\r\n    ")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("2026.07.13.1722")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("2026.07.18.0026")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d834e40f71ba05f08ae441590e301b6dd580188f")]
 [assembly: System.Reflection.AssemblyProductAttribute("HRB.Platform.Client.WPF.Platform.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HRB.Platform.Client.WPF.Platform.Core")]

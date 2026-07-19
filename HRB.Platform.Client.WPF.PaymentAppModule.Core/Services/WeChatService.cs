@@ -124,18 +124,19 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         }
 
         /// <summary>
-        /// 获取微信进程信息，如果存在多个进程，优先返回最早启动的主进程。
+        /// 获取微信进程信息。微信登录转换时可能同时存在多个 WeChat.exe，旧进程在低配机器上会残留较久；
+        /// 因此优先返回实际拥有主窗口或登录窗口的进程，仅在找不到相关窗口时才回退到最早启动的进程。
         /// </summary>
         public Task<WeChatProcessInfo?> GetWeChatProcessInfoAsync()
         {
             return Task.Run(() =>
             {
-                Process? mainProcess = null;
                 var processes = Array.Empty<Process>();
                 try
                 {
                     processes = Process.GetProcessesByName(WECHAT_PROCESS_NAME);
-                    mainProcess = processes.OrderBy(p => SafeGetStartTime(p)).FirstOrDefault();
+                    var mainProcess = SelectWindowOwningProcess(processes)
+                        ?? processes.OrderBy(p => SafeGetStartTime(p)).FirstOrDefault();
                     return mainProcess == null ? null : BuildProcessInfo(mainProcess);
                 }
                 catch
@@ -150,6 +151,53 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     }
                 }
             });
+        }
+
+        /// <summary>
+        /// 从多个 WeChat.exe 中选择实际承载界面的进程。已登录主窗口优先于登录窗口，
+        /// 避免登录切换期间因旧 PID 残留而等待几十秒甚至数分钟。
+        /// </summary>
+        private static Process? SelectWindowOwningProcess(IReadOnlyCollection<Process> processes)
+        {
+            if (processes.Count == 0)
+                return null;
+
+            var processIds = processes.Select(process => process.Id).ToHashSet();
+            var mainWindowProcessIds = new HashSet<int>();
+            var loginWindowProcessIds = new HashSet<int>();
+
+            EnumWindows((hWnd, _) =>
+            {
+                GetWindowThreadProcessId(hWnd, out var pid);
+                var processId = (int)pid;
+                if (!processIds.Contains(processId))
+                    return true;
+
+                var classNameBuilder = new StringBuilder(256);
+                if (GetClassName(hWnd, classNameBuilder, classNameBuilder.Capacity) <= 0)
+                    return true;
+
+                var className = classNameBuilder.ToString();
+                if (className.Contains("WeChatMainWndForPC"))
+                {
+                    mainWindowProcessIds.Add(processId);
+                }
+                else if (className.Contains("WeChatLoginWndForPC"))
+                {
+                    loginWindowProcessIds.Add(processId);
+                }
+
+                return true;
+            }, IntPtr.Zero);
+
+            return processes
+                       .Where(process => mainWindowProcessIds.Contains(process.Id))
+                       .OrderBy(process => SafeGetStartTime(process))
+                       .FirstOrDefault()
+                   ?? processes
+                       .Where(process => loginWindowProcessIds.Contains(process.Id))
+                       .OrderBy(process => SafeGetStartTime(process))
+                       .FirstOrDefault();
         }
 
         /// <summary>
@@ -380,7 +428,8 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         {
             try
             {
-                var isLoggedIn = false;
+                var hasLoginWindow = false;
+                var hasMainWindow = false;
 
                 bool EnumWindowCallback(IntPtr hWnd, IntPtr lParam)
                 {
@@ -398,23 +447,27 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     }
 
                     var className = classNameBuilder.ToString();
-                    if (className.Contains("WeChatLoginWndForPC"))
-                    {
-                        isLoggedIn = false;
-                        return false;
-                    }
-
                     if (className.Contains("WeChatMainWndForPC"))
                     {
-                        isLoggedIn = true;
-                        return false;
+                        hasMainWindow = true;
+                    }
+                    else if (className.Contains("WeChatLoginWndForPC"))
+                    {
+                        hasLoginWindow = true;
                     }
 
+                    // 登录转换期间主窗口和登录窗口可能短暂共存，必须枚举完并让主窗口优先。
                     return true;
                 }
 
                 EnumWindows(EnumWindowCallback, IntPtr.Zero);
-                return isLoggedIn;
+                if (hasMainWindow)
+                    return true;
+
+                if (hasLoginWindow)
+                    return false;
+
+                return false;
             }
             catch
             {
@@ -458,10 +511,10 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
+        private static extern IntPtr WindowFromPoint(POINT point);
 
         [DllImport("user32.dll")]
-        private static extern IntPtr WindowFromPoint(POINT point);
+        private static extern bool IsChild(IntPtr hWndParent, IntPtr hWnd);
 
         [DllImport("user32.dll")]
         private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
@@ -581,10 +634,9 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                     SetForegroundWindow(loginWindow);
                     Sleep(200);
 
-                    var foregroundWindow = GetForegroundWindow();
-                    GetWindowThreadProcessId(foregroundWindow, out var foregroundPid);
-                    if ((int)foregroundPid != processId)
-                        return false;
+                    // SetForegroundWindow 在被其他程序占用前台时可能被 Windows 前台锁限制而返回失败。
+                    // 只要登录窗口可见且后续点击坐标仍落在微信窗口上，就继续执行物理点击；
+                    // 否则会出现用户已扫码、按钮可见，但自动登录直接返回 false，看起来“无响应”。
 
                     // 2. 优先尝试标准子控件按钮（某些环境可枚举到）
                     IntPtr loginButton = IntPtr.Zero;
@@ -720,17 +772,18 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
 
             Sleep(30);
 
-            // 在鼠标按下的最后时刻重新验证前台窗口和坐标目标，缩小焦点切换竞态窗口。
-            if (GetForegroundWindow() != loginWindow)
+            // 点击点必须命中目标登录窗口本身或其子窗口，不能只判断“同一 WeChat PID”，
+            // 避免同进程其他微信窗口覆盖坐标时发生误点。
+            var pointWindow = WindowFromPoint(new POINT { X = x, Y = y });
+            if (pointWindow == IntPtr.Zero
+                || (pointWindow != loginWindow && !IsChild(loginWindow, pointWindow)))
                 return false;
 
-            var pointWindow = WindowFromPoint(new POINT { X = x, Y = y });
             GetWindowThreadProcessId(pointWindow, out var pointPid);
             if ((int)pointPid != processId)
                 return false;
 
             var mouseDownSent = false;
-            var cursorRestored = false;
             try
             {
                 mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)x, (uint)y, 0, UIntPtr.Zero);
@@ -742,14 +795,14 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 // 只要发出了按下事件，就保证发送抬起，避免异常路径留下按下状态。
                 if (mouseDownSent)
                 {
-                    cursorRestored = SetCursorPos(x, y);
+                    SetCursorPos(x, y);
                     mouse_event(MOUSEEVENTF_LEFTUP, (uint)x, (uint)y, 0, UIntPtr.Zero);
                 }
             }
 
-            pointWindow = WindowFromPoint(new POINT { X = x, Y = y });
-            GetWindowThreadProcessId(pointWindow, out pointPid);
-            return mouseDownSent && cursorRestored && (int)pointPid == processId;
+            // 点击后登录窗口可能立即切换/消失，不能再用 WindowFromPoint 仍属于 WeChat
+            // 作为成功条件；否则会把一次真实点击误判为失败并继续重试。
+            return mouseDownSent;
         }
 
         /// <inheritdoc />
@@ -1005,6 +1058,11 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                 if (width <= 120 || height <= 180)
                     return false;
 
+                // 正常扫码确认页会显示大块绿色“进入微信”按钮。
+                // 该页面绝不能按“已退出微信”处理，否则自动登录后会立刻杀掉微信并退出客户端。
+                if (TryFindGreenLoginButtonCenter(rect, out _, out _))
+                    return false;
+
                 // “确定”灰按钮大致位于登录窗口中部偏下，横向居中。
                 var startX = rect.Left + (int)(width * 0.32);
                 var endX = rect.Left + (int)(width * 0.68);
@@ -1040,7 +1098,7 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                                 grayCount++;
                             }
 
-                            // 按钮文字通常是微信绿色，作为辅助特征，不强制要求。
+                            // 灰色确认按钮上的微信绿色文字；与灰色按钮块组合后才判定重登。
                             if (g >= 120 && r <= 120 && b <= 140 && g - r >= 35 && g - b >= 15)
                             {
                                 greenTextCount++;
@@ -1048,8 +1106,10 @@ namespace HRB.Platform.Client.WPF.PaymentAppModule.Core.Services
                         }
                     }
 
-                    // 普通“进入微信”页在这个区域通常是白底/头像/昵称，不会有大量浅灰按钮块。
-                    return grayCount >= 180 || (grayCount >= 100 && greenTextCount >= 3);
+                    // 仅有大面积浅灰色不足以证明存在重登弹层：普通登录页背景和抗锯齿
+                    // 也可能产生大量 215-250 灰白像素。必须同时检测到灰色按钮块和其中的
+                    // 微信绿色文字，避免把正常“进入微信”页面误判后执行破坏性退出流程。
+                    return grayCount >= 100 && greenTextCount >= 3;
                 }
                 finally
                 {

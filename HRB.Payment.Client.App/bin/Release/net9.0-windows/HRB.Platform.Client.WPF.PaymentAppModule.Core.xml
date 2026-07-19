@@ -703,6 +703,16 @@
             是否启用微信自动登录（扫码后自动点击"登录"按钮）
             </summary>
         </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.WeChatAutoLoginRetryIntervalSeconds">
+            <summary>
+            微信自动登录点击重试间隔秒数，范围 2-300 秒。
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.WeChatAutoLoginMaxRetries">
+            <summary>
+            微信自动登录最大重试次数，范围 1-300 次。
+            </summary>
+        </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsWeChatAutoHideEnabled">
             <summary>
             是否启用微信登录后自动隐藏窗口
@@ -711,6 +721,11 @@
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsWeChatQrLoginVoiceEnabled">
             <summary>
             是否启用微信登录二维码语音提醒（检测到扫码界面时播报"请扫码登录微信"）
+            </summary>
+        </member>
+        <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.WeChatQrLoginVoiceIntervalSeconds">
+            <summary>
+            微信未登录二维码语音提醒间隔秒数，范围 5-3600 秒。
             </summary>
         </member>
         <member name="P:HRB.Platform.Client.WPF.PaymentAppModule.Core.DtoModels.SettingsDto.IsWeChatListenerConsoleOutputEnabled">
@@ -1042,6 +1057,12 @@
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitor.ResetPluginState">
             <summary>
             重置插件工作状态（进程消失/PID变化时调用）
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitor.ResetPluginHealthState">
+            <summary>
+            仅重置 VXModule 插件健康状态，不改动微信 PID、自动登录转换期和进程消失防抖。
+            插件壳在微信登录/PID 切换时短暂重启，不应使登录保护失效。
             </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Plugins.WeChat.WeChatMonitor.RecoverWeChatModuleAsync(System.String,System.Threading.CancellationToken)">
@@ -2869,7 +2890,14 @@
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.GetWeChatProcessInfoAsync">
             <summary>
-            获取微信进程信息，如果存在多个进程，优先返回最早启动的主进程。
+            获取微信进程信息。微信登录转换时可能同时存在多个 WeChat.exe，旧进程在低配机器上会残留较久；
+            因此优先返回实际拥有主窗口或登录窗口的进程，仅在找不到相关窗口时才回退到最早启动的进程。
+            </summary>
+        </member>
+        <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.SelectWindowOwningProcess(System.Collections.Generic.IReadOnlyCollection{System.Diagnostics.Process})">
+            <summary>
+            从多个 WeChat.exe 中选择实际承载界面的进程。已登录主窗口优先于登录窗口，
+            避免登录切换期间因旧 PID 残留而等待几十秒甚至数分钟。
             </summary>
         </member>
         <member name="M:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatService.GetCurrentWeChatVersionAsync">

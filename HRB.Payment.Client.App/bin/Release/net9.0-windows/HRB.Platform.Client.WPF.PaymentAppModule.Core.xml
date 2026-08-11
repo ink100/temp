@@ -2962,6 +2962,13 @@
             但中部会出现一块浅灰色“确定”按钮；普通二维码页/进入微信页在该区域没有这块灰按钮。
             </summary>
         </member>
+        <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.Services.WeChatXmlRecovery">
+            <summary>
+            对上游在 CDATA 中途截断的微信 paymsg XML 做保守恢复。
+            仅删除最后一个未完成字段，并补齐 paymsg/sysmsg 结束标签；
+            后续仍必须通过标准 XDocument 解析和支付字段校验。
+            </summary>
+        </member>
         <member name="T:HRB.Platform.Client.WPF.PaymentAppModule.Core.V2.MainPageV2ViewModel">
              <summary>
              2.0 主页 ViewModel — 纯 UI 壳 + 事件路由。
